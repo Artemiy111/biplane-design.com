@@ -1,0 +1,29 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
+export default defineNuxtConfig({
+  devtools: { enabled: false },
+  modules: [
+    '@nuxtjs/tailwindcss',
+    'shadcn-nuxt',
+    'nuxt-module-eslint-config',
+    '@nuxtjs/google-fonts',
+    "@nuxt/image"
+  ],
+  googleFonts: {
+    families: {
+      Inter: true,
+    },
+  },
+  eslintConfig: {
+    setup: false,
+  },
+  shadcn: {
+    componentDir: './components/ui',
+    prefix: '',
+  },
+  imports: {
+    dirs: [],
+  },
+  components: {
+    dirs: [],
+  },
+})
