@@ -6,7 +6,8 @@ export default defineNuxtConfig({
     'shadcn-nuxt',
     'nuxt-module-eslint-config',
     '@nuxtjs/google-fonts',
-    "@nuxt/image"
+    '@nuxt/image',
+    '@tresjs/nuxt',
   ],
   googleFonts: {
     families: {
