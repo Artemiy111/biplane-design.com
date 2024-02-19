@@ -3,7 +3,7 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
 </script>
 
 <template>
-  <header class="container flex-col flex">
+  <header class="container flex-col flex z-50">
     <div class="items-center flex px-8 py-4 justify-between">
       <NuxtLink to="/" class="flex gap-4 items-center">
         <img src="/logo.svg" class="h-10">
@@ -13,7 +13,7 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
         <NavigationMenuList>
           <NavigationMenuItem>
             <NuxtLink
-
+              to="/projects"
               :class="navigationMenuTriggerStyle()"
               class="cursor-pointer"
             >
@@ -22,7 +22,7 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NuxtLink
-
+              to="/about"
               :class="navigationMenuTriggerStyle()"
               class="cursor-pointer"
             >
