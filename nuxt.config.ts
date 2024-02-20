@@ -27,4 +27,9 @@ export default defineNuxtConfig({
   components: {
     dirs: [],
   },
+  runtimeConfig: {
+    supabaseUrl: '',
+    supabaseKey: '',
+    supabaseString: '',
+  },
 })
