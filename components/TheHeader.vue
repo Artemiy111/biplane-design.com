@@ -4,7 +4,7 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
 
 <template>
   <header class="container flex-col flex z-50">
-    <div class="items-center flex px-8 py-4 justify-between">
+    <div class="items-center flex px-8 py-4 justify-between z-50">
       <NuxtLink to="/" class="flex gap-4 items-center">
         <img src="/logo.svg" class="h-10">
         <span>Biplane-Design</span>
@@ -32,6 +32,6 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
         </NavigationMenuList>
       </NavigationMenu>
     </div>
-    <Separator />
+    <Separator class="z-50" />
   </header>
 </template>

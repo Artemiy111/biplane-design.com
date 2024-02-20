@@ -20,7 +20,7 @@ const images = ['preview1.jpg', 'preview2.jpg', 'preview3.jpg']
       </Button>
     </section>
     <Separator />
-    <section class="grid grid-cols-2 gap-x-[2px] gap-y-[1px]">
+    <section class="grid lg:grid-cols-1 grid-cols-2 gap-x-[2px] gap-y-[2px] ">
       <NuxtLink v-for="link in images" :key="link" to="/projects/home" class="flex flex-col hover:bg-primary-foreground transition-colors">
         <Carousel>
           <CarouselContent>
