@@ -5,7 +5,11 @@ export default defineEventHandler(async () => {
     with: {
       categories: {
         with: {
-          projects: true,
+          projects: {
+            with: {
+              images: true,
+            },
+          },
         },
       },
     },

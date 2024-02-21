@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CarouselApi } from '@/components/ui/carousel'
+import type { ProjectRec } from '~/server/db/schema'
 
-const images = ['preview1.jpg', 'preview2.jpg', 'preview3.jpg']
 const route = useRoute()
 const api = ref<CarouselApi | null>(null)
 const apiTumb = ref<CarouselApi | null>(null)
@@ -14,6 +14,9 @@ function setApi(val: CarouselApi, type: 'main' | 'tumb') {
   else if (type === 'tumb')
     apiTumb.value = val
 }
+
+const projectId = route.params.id! as string
+const { data: project, error: _error } = await useFetch<ProjectRec>(`/api/projects/${projectId}`)
 
 watch(api, (api) => {
   if (!api)
@@ -31,34 +34,19 @@ function selectImage(index: number) {
   apiTumb.value?.scrollTo(index)
   api.value?.scrollTo(index)
 }
-
-/* watch(apiTumb, () => {
-  if (!apiTumb.value)
-    return
-
-  apiTumb.value.on('select', (apiTumb) => {
-    current.value = apiTumb.selectedScrollSnap()
-  })
-} , { once: true }) */
-
-// watch(current, (current) => {
-// apiTumb.value?.scrollTo(current)
-// api.value?.scrollTo(current)
-// })
 </script>
 
 <template>
-  <main class="flex flex-col container">
+  <main v-if="project" class="flex flex-col container">
     <section class="flex justify-between px-8 py-4">
       <h1 class="text-3xl font-bold">
-        {{ route.params.projectName }}
+        {{ project.title }}
       </h1>
-      <span class="text-3xl">{{ 'строительство' }}</span>
+      <span class="text-3xl">{{ project.status }}</span>
     </section>
     <Separator />
     <div class="grid grid-cols-[300px,1fr] divide-x-2 divide-primary-foreground">
       <Carousel
-
         orientation="vertical"
         :opts="{
           axis: 'x',
@@ -68,15 +56,15 @@ function selectImage(index: number) {
       >
         <CarouselContent class="mt-0 h-fit divide-y-2">
           <CarouselItem
-            v-for="(img, index) in images"
-            :key="img"
+            v-for="(img, index) in project.images"
+            :key="img.filename"
             class="cursor-grab p-0"
 
             :class="[index === current ? 'saturate-200' : '']"
             @click="selectImage(index)"
           >
             <NuxtImg
-              :src="`/images/${img}`" class="aspect-video w-full object-cover"
+              :src="`/images/projects/${project.urlFriendly}/${img.filename}`" class="aspect-video w-full object-cover"
             />
           </CarouselItem>
         </CarouselContent>
@@ -88,8 +76,8 @@ function selectImage(index: number) {
         @init-api="setApi($event, 'main')"
       >
         <CarouselContent class="flex h-max items-center">
-          <CarouselItem v-for="img in images" :key="img" class="flex justify-center items-center">
-            <NuxtImg :src="`/images/${img}`" class="w-full aspect-video object-contain" />
+          <CarouselItem v-for="img in project.images" :key="img.filename" class="flex justify-center items-center">
+            <NuxtImg :src="`/images/projects/${project.urlFriendly}/${img.filename}`" class="w-full aspect-video object-contain" />
           </CarouselItem>
         </CarouselContent>
       </Carousel>
