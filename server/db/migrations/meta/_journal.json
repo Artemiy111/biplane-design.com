@@ -15,6 +15,34 @@
       "when": 1708509613967,
       "tag": "0001_adorable_changeling",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1708527704447,
+      "tag": "0002_calm_triathlon",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1708530493652,
+      "tag": "0003_strange_gambit",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1708530815215,
+      "tag": "0004_aromatic_changeling",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1708538018913,
+      "tag": "0005_clammy_viper",
+      "breakpoints": true
     }
   ]
 }

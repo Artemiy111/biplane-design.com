@@ -32,4 +32,7 @@ export default defineNuxtConfig({
     supabaseKey: '',
     supabaseString: '',
   },
+  build: {
+    transpile: ['trpc-nuxt'],
+  },
 })
