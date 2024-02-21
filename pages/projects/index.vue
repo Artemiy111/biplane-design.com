@@ -1,6 +1,13 @@
 <script setup lang="ts">
 const categories = ['Лучшие', 'Здания', 'Офисы', 'Общественное', 'Рестораны', 'Квартиры']
 const images = ['preview1.jpg', 'preview2.jpg', 'preview3.jpg']
+
+const { data, error } = await useFetch("/api/themes-recursive")
+
+watch(data, () => {
+  console.log(error.value)
+  console.log(data.value)
+})
 </script>
 
 <template>
