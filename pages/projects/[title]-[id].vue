@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { CarouselApi } from '@/components/ui/carousel'
-import type { ProjectRec } from '~/server/db/schema'
 
 const route = useRoute()
 const api = ref<CarouselApi | null>(null)
@@ -16,7 +15,7 @@ function setApi(val: CarouselApi, type: 'main' | 'tumb') {
 }
 
 const projectId = route.params.id! as string
-const { data: project, error: _error } = await useFetch<ProjectRec>(`/api/projects/${projectId}`)
+const { data: project, error: _error } = await useFetch(`/api/projects/${projectId}`)
 
 watch(api, (api) => {
   if (!api)
@@ -64,7 +63,8 @@ function selectImage(index: number) {
             @click="selectImage(index)"
           >
             <NuxtImg
-              :src="`/images/projects/${project.urlFriendly}/${img.filename}`" class="aspect-video w-full object-cover"
+              :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
+              class="aspect-video w-full object-cover"
             />
           </CarouselItem>
         </CarouselContent>
@@ -76,8 +76,15 @@ function selectImage(index: number) {
         @init-api="setApi($event, 'main')"
       >
         <CarouselContent class="flex h-max items-center">
-          <CarouselItem v-for="img in project.images" :key="img.filename" class="flex justify-center items-center">
-            <NuxtImg :src="`/images/projects/${project.urlFriendly}/${img.filename}`" class="w-full aspect-video object-contain" />
+          <CarouselItem
+            v-for="img in project.images"
+            :key="img.filename"
+            class="flex justify-center items-center"
+          >
+            <NuxtImg
+              :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
+              class="w-full aspect-video object-contain"
+            />
           </CarouselItem>
         </CarouselContent>
       </Carousel>

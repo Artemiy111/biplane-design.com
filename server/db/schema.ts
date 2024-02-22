@@ -27,7 +27,8 @@ export const categories = pgTable('categories', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
-export type Caterory = typeof categories.$inferSelect
+export type Category = typeof categories.$inferSelect
+export type CategoryCreate = typeof categories.$inferSelect
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   theme: one(themes, {
@@ -54,6 +55,7 @@ export const projects = pgTable('projects', {
 })
 
 export type Project = typeof projects.$inferSelect
+export type ProjectCreate = typeof projects.$inferInsert
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   category: one(categories, {
@@ -76,6 +78,7 @@ export const images = pgTable('images', {
 })
 
 export type Image = typeof images.$inferSelect
+export type ImageCreate = typeof images.$inferInsert
 
 export const imageRelations = relations(images, ({ one }) => ({
   project: one(projects, {
@@ -86,5 +89,5 @@ export const imageRelations = relations(images, ({ one }) => ({
 }))
 
 export type ThemeRec = Theme & { categories: CategoryRec[] }
-export type CategoryRec = Caterory & { projects: ProjectRec[] }
+export type CategoryRec = Category & { projects: ProjectRec[] }
 export type ProjectRec = Project & { images: Image[] }

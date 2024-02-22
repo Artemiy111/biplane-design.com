@@ -3,8 +3,8 @@ import { GLTFModel, OrbitControls } from '@tresjs/cientos'
 </script>
 
 <template>
-  <div class="font-bold">
-    <TresCanvas window-size clear-color="#fff">
+  <main class="container font-bold h-full">
+    <TresCanvas clear-color="#fff" class="w-full h-full" preset="realistic" window-size height="500" width="500">
       <OrbitControls />
       <!-- <TresMesh>
         <TresTorusGeometry :args="[1, 0.5, 16, 32]" />
@@ -19,5 +19,5 @@ import { GLTFModel, OrbitControls } from '@tresjs/cientos'
         :position="[3, 3, 3]"
       />
     </TresCanvas>
-  </div>
+  </main>
 </template>

@@ -35,4 +35,9 @@ export default defineNuxtConfig({
   build: {
     transpile: ['trpc-nuxt'],
   },
+  image: {
+    provider: 'ipx',
+    ipx: {},
+    format: ['avif', 'webp', 'png', 'jpg'],
+  },
 })

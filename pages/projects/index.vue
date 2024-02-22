@@ -4,17 +4,23 @@ import type { CategoryRec, ThemeRec } from '~/server/db/schema'
 const { data: themes, error: _error } = await useFetch<ThemeRec[]>('/api/themes')
 
 const currentTheme = ref<ThemeRec | null>(themes.value?.[0] || null)
+const currentCategory = ref<CategoryRec | null>(currentTheme.value?.categories[0] || null)
+
 function changeTheme(theme: ThemeRec) {
+  if (theme !== currentTheme.value) {
+    currentTheme.value = theme
+    currentCategory.value = currentTheme.value.categories?.[0] || null
+  }
   currentTheme.value = theme
 }
-const currentCategory = ref<CategoryRec | null>(currentTheme.value?.categories[0] || null)
+
 function changeCategory(category: CategoryRec) {
   currentCategory.value = category
 }
 </script>
 
 <template>
-  <main class="flex flex-col">
+  <main class="flex flex-col flex-grow container h-full">
     <section class="grid items-center grid-cols-2 divide-x ">
       <h2
         v-for="theme in themes" :key="theme.id"
@@ -28,22 +34,22 @@ function changeCategory(category: CategoryRec) {
       </h2>
     </section>
     <Separator />
-    <section class="grid grid-cols-[repeat(6,min-content)] items-center gap-4 mx-8 my-4 justify-between">
+    <section v-if="currentTheme?.categories.length" class="grid grid-cols-[repeat(6,min-content)] items-center gap-4 mx-8 my-4 justify-between">
       <Button
-        v-for="c in currentTheme?.categories" :key="c.id" variant="ghost" class="w-fit"
+        v-for="c in currentTheme.categories" :key="c.id" variant="ghost" class="w-fit"
         :class="[c === currentCategory ? 'bg-secondary' : '']"
         @click="changeCategory(c)"
       >
         {{ c.title }}
       </Button>
     </section>
-    <Separator />
-    <section class="grid lg:grid-cols-1 grid-cols-2 gap-x-[2px] gap-y-[2px] ">
-      <NuxtLink v-for="p in currentCategory?.projects" :key="p.id" :to="`/projects/${p.urlFriendly}-${p.id}`" class="flex flex-col hover:bg-primary-foreground transition-colors">
+    <Separator v-if="currentTheme?.categories.length" />
+    <section v-if="currentCategory?.projects.length" class="grid lg:grid-cols-1 grid-cols-2 gap-x-[2px] gap-y-[2px] ">
+      <NuxtLink v-for="p in currentCategory.projects" :key="p.id" :to="`/projects/${p.urlFriendly}-${p.id}`" class="flex flex-col hover:bg-primary-foreground transition-colors">
         <Carousel>
           <CarouselContent>
             <CarouselItem v-for="img in p.images" :key="img.id">
-              <NuxtImg :src="`/images/projects/${p.id}/${img.title}`" :alt="img.title || 'image'" class="aspect-video w-full object-cover" />
+              <NuxtImg format="avif,webp,png,jpg" :src="`/images/projects/${p.urlFriendly}/${img.filename}`" :alt="img.title || 'image'" class="aspect-video w-full object-cover" />
             </CarouselItem>
           </CarouselContent>
         </Carousel>
@@ -52,6 +58,9 @@ function changeCategory(category: CategoryRec) {
           <span class="text-slate-400">{{ p.yearStart }}</span>
         </div>
       </NuxtLink>
+    </section>
+    <section v-else class="grid flex-grow h-full justify-center items-center">
+      <span class="text-lg p-8 bg-secondary font-bold">Проектов пока нет</span>
     </section>
   </main>
 </template>
