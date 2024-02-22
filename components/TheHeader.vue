@@ -1,5 +1,15 @@
 <script setup lang="ts">
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from '~/components/ui/navigation-menu'
+
+const route = useRoute()
+
+const routes = [{
+  link: '/projects',
+  title: 'Проекты',
+}, {
+  link: '/about',
+  title: 'О нас',
+}]
 </script>
 
 <template>
@@ -10,23 +20,14 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
         <span>Biplane-Design</span>
       </NuxtLink>
       <NavigationMenu>
-        <NavigationMenuList>
-          <NavigationMenuItem>
+        <NavigationMenuList class="gap-4">
+          <NavigationMenuItem v-for="r in routes" :key="r.link">
             <NuxtLink
-              to="/projects"
-              :class="navigationMenuTriggerStyle()"
+              :to="r.link"
               class="cursor-pointer"
+              :class="[navigationMenuTriggerStyle(), r.link === route.path ? 'bg-primary-foreground' : '']"
             >
-              Проекты
-            </NuxtLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NuxtLink
-              to="/about"
-              :class="navigationMenuTriggerStyle()"
-              class="cursor-pointer"
-            >
-              О нас
+              {{ r.title }}
             </NuxtLink>
           </NavigationMenuItem>
         </NavigationMenuList>

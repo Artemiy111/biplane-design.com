@@ -5,8 +5,10 @@ import TheFooter from '~/components/TheFooter.vue'
 
 <template>
   <div class="font-normal text-base">
-    <TheHeader />
-    <NuxtPage />
+    <div class="min-h-[100dvh] flex flex-col w-full h-full ">
+      <TheHeader />
+      <NuxtPage />
+    </div>
     <TheFooter />
   </div>
 </template>

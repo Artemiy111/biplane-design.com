@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import { Buffer } from 'node:buffer'
 import { db } from '~/server/db'
 import { images } from '~/server/db/schema'
+import {} from 'bun'
 
 export default defineEventHandler(async (event) => {
   const formData = await readMultipartFormData(event)
@@ -23,6 +24,6 @@ export default defineEventHandler(async (event) => {
     }
     fs.writeFileSync(filepath, file.data)
 
-    await db.insert(images).values({ projectId: project.id, filename: file.filename! })
+    return await db.insert(images).values({ projectId: project.id, filename: file.filename! })
   })
 })
