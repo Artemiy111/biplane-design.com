@@ -28,12 +28,12 @@
           Студентам
         </h6>
         <li>
-          <NuxtLink href="/" class="underline hover:no-underline">
+          <NuxtLink href="https://coolors.co" target="_blank" class="underline hover:no-underline">
             Цветовая палитра
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink href="/" class="underline hover:no-underline">
+          <NuxtLink href="https://habr.com/ru/companies/ruvds/articles/553582" target="_blank" class="underline hover:no-underline">
             Теория цвета
           </NuxtLink>
         </li>
@@ -47,7 +47,7 @@
       </ul>
     </section>
     <section>
-      <NuxtImg src="/images/map.png" class="w-full" />
+      <NuxtImg format="avif,webp,png" src="/images/map.png" class="w-full" />
     </section>
     <section class="flex py-4 px-8">
       <span>© Биплан-Дизайн 2000 - 2024</span>
