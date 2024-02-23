@@ -6,6 +6,7 @@ import { toast } from 'vue-sonner'
 import type { ProjectCreate } from '~/server/db/schema'
 import { type ProjectCreateSchema, projectCreateSchema } from '~/server/validators'
 import { Dialog } from '~/components/ui/dialog'
+import { Form } from '~/components/ui/form'
 
 const { data: groups } = await useFetch('/api/themes')
 const { data: projects, error: projectsError, refresh: refreshProjects } = await useFetch('/api/projects')
@@ -29,7 +30,7 @@ const createProjectFormInitialValues: Partial<ProjectCreateSchema> = {
 
 const createProjectFormValidationSchema = toTypedSchema(projectCreateSchema)
 
-const dialogOpen = ref(false)
+const isDialogOpen = ref(false)
 
 async function onSubmit(values: ProjectCreateSchema) {
   try {
@@ -37,7 +38,7 @@ async function onSubmit(values: ProjectCreateSchema) {
       method: 'POST',
       body: values,
     })
-    dialogOpen.value = false
+    isDialogOpen.value = false
     toast.success('Проект создан')
   }
   catch (e) {
@@ -76,18 +77,26 @@ function uploadFile(event: Event, project: { id: number, urlFriendly: string }) 
     else toast.error(String(e))
   }
 }
+
+const formRef = ref<InstanceType<typeof Form> | null>(null)
+function handleDialogOpen(isOpen: boolean) {
+  if (formRef.value?.meta.dirty && !isOpen)
+    return
+
+  isDialogOpen.value = isOpen
+}
 </script>
 
 <template>
   <main class="container flex flex-col">
     <section class="p-8">
-      <Dialog :open="dialogOpen" @update:open="dialogOpen = $event">
+      <Dialog :open="isDialogOpen" @update:open="isDialogOpen = $event">
         <DialogTrigger as-child>
-          <Button @click="dialogOpen = true">
+          <Button @click="isDialogOpen = true">
             Создать проект
           </Button>
         </DialogTrigger>
-        <DialogContent class="max-h-[90dvh] overflow-auto">
+        <DialogContent class="max-h-[90dvh] overflow-auto" @pointer-down-outside="$event.preventDefault(), handleDialogOpen(false)">
           <DialogHeader>
             <DialogTitle>Создать проект</DialogTitle>
             <DialogDescription>
@@ -95,7 +104,7 @@ function uploadFile(event: Event, project: { id: number, urlFriendly: string }) 
             </DialogDescription>
           </DialogHeader>
           <Form
-            id="create-project-form"
+            ref="formRef"
             v-slot="{ values, errors, setFieldValue }"
             :initial-values="createProjectFormInitialValues"
             :validation-schema="createProjectFormValidationSchema"
@@ -202,7 +211,7 @@ function uploadFile(event: Event, project: { id: number, urlFriendly: string }) 
               </FormItem>
             </FormField>
             <DialogFooter>
-              <Button type="submit" for="create-project-form">
+              <Button type="submit">
                 Создать
               </Button>
             </DialogFooter>
@@ -224,8 +233,13 @@ function uploadFile(event: Event, project: { id: number, urlFriendly: string }) 
       </TableHeader>
       <TableBody>
         <TableRow v-for="p in projects" :key="p.id">
-          <TableCell>
-            <NuxtImg v-if="p.images.length" format="avif,webp,png,jpg" :src="`/images/projects/${p.urlFriendly}/${p.images[0].filename}`" :alt="p.images[0].title || 'image'" class="aspect-video h-[100px] object-cover" />
+          <TableCell class="min-w-max">
+            <NuxtImg
+              v-if="p.images.length" format="avif,webp,png,jpg"
+              :src="`/images/projects/${p.urlFriendly}/${p.images[0].filename}`"
+              :alt="p.images[0].title || 'image'"
+              class="aspect-video max-h-[100px] min-w-max w-max object-cover"
+            />
           </TableCell>
           <TableCell>
             <NuxtLink :to="`/admin/projects/${p.urlFriendly}-${p.id}`">
@@ -234,9 +248,9 @@ function uploadFile(event: Event, project: { id: number, urlFriendly: string }) 
           </TableCell>
           <TableCell>{{ p.category.theme.title }}</TableCell>
           <TableCell>{{ p.category.title }}</TableCell>
-          <TableCell>
+          <TableCell class="w-min">
             <Input
-              class="w-max"
+              class="w-min"
               type="file" multiple accept=".avif, .webp, .jpg, .jpeg, .png"
               @input="uploadFile($event, { id: p.id, urlFriendly: p.urlFriendly })"
             />
