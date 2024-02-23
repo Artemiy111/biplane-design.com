@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import type { CarouselApi } from '@/components/ui/carousel'
+import { useElementSize } from '@vueuse/core'
+import type { ComponentPublicInstance } from 'vue'
+import { Carousel, type CarouselApi } from '@/components/ui/carousel'
 
 const route = useRoute()
+const projectId = route.params.id! as string
+const { data: project, error: _error } = await useFetch(`/api/projects/${projectId}`)
+
 const api = ref<CarouselApi | null>(null)
 const apiTumb = ref<CarouselApi | null>(null)
+const mainCarouselRef = ref<ComponentPublicInstance | null>(null)
+const { height: mainCarouselHeight } = useElementSize(mainCarouselRef)
 const totalCount = ref(0)
 const current = ref(0)
 
@@ -13,9 +20,6 @@ function setApi(val: CarouselApi, type: 'main' | 'tumb') {
   else if (type === 'tumb')
     apiTumb.value = val
 }
-
-const projectId = route.params.id! as string
-const { data: project, error: _error } = await useFetch(`/api/projects/${projectId}`)
 
 watch(api, (api) => {
   if (!api)
@@ -29,7 +33,9 @@ watch(api, (api) => {
   })
 }, { once: true })
 
-function selectImage(index: number) {
+watch(current, () => scrollToImage(current.value))
+
+function scrollToImage(index: number) {
   apiTumb.value?.scrollTo(index)
   api.value?.scrollTo(index)
 }
@@ -44,23 +50,29 @@ function selectImage(index: number) {
       <span class="text-3xl">{{ project.status }}</span>
     </section>
     <Separator />
-    <div class="grid grid-cols-[300px,1fr] divide-x-2 divide-primary-foreground">
+    <div
+      class="grid items-start grid-cols-[300px,1fr] 2xl:grid-cols-[250px,1fr] xl:grid-cols-[200px,1fr] overflow-hidden h-fit divide-x-2 divide-primary-foreground"
+    >
       <Carousel
         orientation="vertical"
         :opts="{
-          axis: 'x',
           loop: true,
+          align: 'start',
+          dragFree: true,
         }"
         @init-api="setApi($event, 'tumb')"
       >
-        <CarouselContent class="mt-0 h-fit divide-y-2">
+        <CarouselContent
+          class=" divide-y-2 mt-0"
+          :style="{ maxHeight: `${mainCarouselHeight}px` }"
+        >
           <CarouselItem
             v-for="(img, index) in project.images"
             :key="img.filename"
             class="cursor-grab p-0"
 
-            :class="[index === current ? 'saturate-200' : '']"
-            @click="selectImage(index)"
+            :class="[index === current ? 'outline outline-[16px] xl:outline-8 xl:-outline-offset-8 outline-secondary -outline-offset-[16px]' : '']"
+            @click="current = index"
           >
             <NuxtImg
               :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
@@ -70,12 +82,14 @@ function selectImage(index: number) {
         </CarouselContent>
       </Carousel>
       <Carousel
+        ref="mainCarouselRef"
+        class="w-full aspect-video"
         :opts="{
           loop: true,
         }"
         @init-api="setApi($event, 'main')"
       >
-        <CarouselContent class="flex h-max items-center">
+        <CarouselContent class="flex items-center">
           <CarouselItem
             v-for="img in project.images"
             :key="img.filename"
