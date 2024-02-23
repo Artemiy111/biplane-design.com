@@ -28,12 +28,12 @@
           Студентам
         </h6>
         <li>
-          <NuxtLink href="https://coolors.co" target="_blank" class="underline hover:no-underline">
+          <NuxtLink href="https://coolors.co" external target="_blank" class="underline hover:no-underline">
             Цветовая палитра
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink href="https://habr.com/ru/companies/ruvds/articles/553582" target="_blank" class="underline hover:no-underline">
+          <NuxtLink href="https://habr.com/ru/companies/ruvds/articles/553582" external target="_blank" class="underline hover:no-underline">
             Теория цвета
           </NuxtLink>
         </li>

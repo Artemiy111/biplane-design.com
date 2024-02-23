@@ -5,6 +5,7 @@ const { data: themes, error: _error } = await useFetch<ThemeRec[]>('/api/themes'
 
 const currentTheme = ref<ThemeRec | null>(themes.value?.[0] || null)
 const currentCategory = ref<CategoryRec | null>(currentTheme.value?.categories[0] || null)
+const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
 function changeTheme(theme: ThemeRec) {
   if (theme !== currentTheme.value) {
@@ -34,7 +35,7 @@ function changeCategory(category: CategoryRec) {
       </h2>
     </section>
     <Separator />
-    <section v-if="currentTheme?.categories.length" class="grid grid-cols-[repeat(6,min-content)] items-center gap-4 mx-8 my-4 justify-between">
+    <section v-if="currentTheme?.categories.length" class="grid grid-cols-[repeat(6,min-content)]  items-center gap-4 mx-8 my-4 justify-between">
       <Button
         v-for="c in currentTheme.categories" :key="c.id" variant="ghost" class="w-fit"
         :class="[c === currentCategory ? 'bg-secondary' : '']"
@@ -44,9 +45,9 @@ function changeCategory(category: CategoryRec) {
       </Button>
     </section>
     <Separator v-if="currentTheme?.categories.length" />
-    <section v-if="currentCategory?.projects.length" class="grid lg:grid-cols-1 grid-cols-2 gap-x-[2px] gap-y-[2px] ">
-      <NuxtLink v-for="p in currentCategory.projects" :key="p.id" :to="`/projects/${p.urlFriendly}-${p.id}`" class="flex flex-col hover:bg-primary-foreground transition-colors">
-        <Carousel>
+    <section v-if="projectsWithImages?.length" class="grid lg:grid-cols-1 grid-cols-2 gap-x-[2px] gap-y-[2px] ">
+      <NuxtLink v-for="p in projectsWithImages" :key="p.id" :to="`/projects/${p.urlFriendly}-${p.id}`" class="flex flex-col hover:bg-primary-foreground transition-colors">
+        <Carousel class="w-full aspect-video">
           <CarouselContent>
             <CarouselItem v-for="img in p.images" :key="img.id">
               <NuxtImg format="avif,webp,png,jpg" :src="`/images/projects/${p.urlFriendly}/${img.filename}`" :alt="img.title || 'image'" class="aspect-video w-full object-cover" />
