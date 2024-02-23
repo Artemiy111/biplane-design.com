@@ -8,6 +8,7 @@ const props = defineProps<ToasterProps>()
   <Sonner
     class="toaster group"
     :class-names="{
+
       toast:
         'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
       description: 'group-[.toast]:text-muted-foreground',
