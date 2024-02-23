@@ -2,10 +2,10 @@
   "name": "biplane.design.com",
   "type": "module",
   "private": true,
-  "packageManager": "pnpm@8.14.0",
+  "packageManager": "^bun@1.0.0",
   "engines": {
     "node": ">=20",
-    "pnpm": ">=8"
+    "bun": ">=1"
   },
   "scripts": {
     "build": "nuxt --bun build",
