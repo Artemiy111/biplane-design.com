@@ -5,7 +5,7 @@ import { Toaster } from '~/components/ui/sonner'
 </script>
 
 <template>
-  <Toaster />
+  <Toaster :rich-colors="true" />
   <div class="font-normal text-base">
     <div class="min-h-[100dvh] flex flex-col w-full h-full ">
       <TheHeader />

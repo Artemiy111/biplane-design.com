@@ -5,9 +5,16 @@ import type * as z from 'zod'
 import { toast } from 'vue-sonner'
 import type { ProjectCreate } from '~/server/db/schema'
 import { type ProjectCreateSchema, projectCreateSchema } from '~/server/validators'
+import { Dialog } from '~/components/ui/dialog'
 
 const { data: groups } = await useFetch('/api/themes')
-const { data: projects, error: _error, refresh: refreshProjects } = await useFetch('/api/projects')
+const { data: projects, error: projectsError, refresh: refreshProjects } = await useFetch('/api/projects')
+
+watch(projectsError, () => {
+  if (!projectsError.value)
+    return
+  toast.error(projectsError.value.message)
+})
 
 const createProjectFormInitialValues: Partial<ProjectCreateSchema> = {
   title: '',
@@ -56,7 +63,7 @@ function uploadFile(event: Event, project: { id: number, urlFriendly: string }) 
   images.forEach(image => formData.append('files', image))
 
   try {
-    $fetch('/api/images', {
+    $fetch(`/api/projects/${project.id}/images`, {
       method: 'POST',
       body: formData,
     })
@@ -74,7 +81,7 @@ function uploadFile(event: Event, project: { id: number, urlFriendly: string }) 
 <template>
   <main class="container flex flex-col">
     <section class="p-8">
-      <Dialog :open="dialogOpen">
+      <Dialog :open="dialogOpen" @update:open="dialogOpen = $event">
         <DialogTrigger as-child>
           <Button @click="dialogOpen = true">
             Создать проект
@@ -212,6 +219,7 @@ function uploadFile(event: Event, project: { id: number, urlFriendly: string }) 
           <TableHead>Группа</TableHead>
           <TableHead>Категория</TableHead>
           <TableHead>Загрузить фото</TableHead>
+          <TableHead />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -219,7 +227,11 @@ function uploadFile(event: Event, project: { id: number, urlFriendly: string }) 
           <TableCell>
             <NuxtImg v-if="p.images.length" format="avif,webp,png,jpg" :src="`/images/projects/${p.urlFriendly}/${p.images[0].filename}`" :alt="p.images[0].title || 'image'" class="aspect-video h-[100px] object-cover" />
           </TableCell>
-          <TableCell>{{ p.title }}</TableCell>
+          <TableCell>
+            <NuxtLink :to="`/admin/projects/${p.urlFriendly}-${p.id}`">
+              {{ p.title }}
+            </NuxtLink>
+          </TableCell>
           <TableCell>{{ p.category.theme.title }}</TableCell>
           <TableCell>{{ p.category.title }}</TableCell>
           <TableCell>
@@ -228,6 +240,9 @@ function uploadFile(event: Event, project: { id: number, urlFriendly: string }) 
               type="file" multiple accept=".avif, .webp, .jpg, .jpeg, .png"
               @input="uploadFile($event, { id: p.id, urlFriendly: p.urlFriendly })"
             />
+          </TableCell>
+          <TableCell>
+            <Button>Изменить</Button>
           </TableCell>
         </TableRow>
       </TableBody>

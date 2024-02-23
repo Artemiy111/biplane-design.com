@@ -28,3 +28,13 @@ export const projectCreateSchema = z.object({
     message: 'Год начала должен быть меньше или равен году завершения',
   })
 export type ProjectCreateSchema = z.infer<typeof projectCreateSchema>
+
+export const imagesDeleteSchema = z.object({
+  project: z.object({
+    id: z.number(),
+    urlFriendly: z.string(),
+  }),
+  filenames: z.array(z.string()).min(1),
+})
+
+export type ImagesDeleteSchema = z.infer<typeof imagesDeleteSchema>
