@@ -5,7 +5,7 @@ import { Carousel, type CarouselApi } from '@/components/ui/carousel'
 
 const route = useRoute()
 const projectUrlFriendly = route.params.urlFriendly! as string
-const { data: project, error: _error } = await useFetch(`/api/projects/${projectUrlFriendly}`)
+const { data: project, error: _error } = await useFetch(`/api/projects/${projectUrlFriendly}/`)
 
 const api = ref<CarouselApi | null>(null)
 const apiTumb = ref<CarouselApi | null>(null)
@@ -20,6 +20,8 @@ function setApi(val: CarouselApi, type: 'main' | 'tumb') {
   else if (type === 'tumb')
     apiTumb.value = val
 }
+
+const images = (await $fetch(`/api/projects/${projectUrlFriendly}/images`)).blobs
 
 watch(api, (api) => {
   if (!api)
@@ -68,15 +70,20 @@ function scrollToImage(index: number) {
           :style="{ maxHeight: `${mainCarouselHeight}px` }"
         >
           <CarouselItem
-            v-for="(img, index) in project.images"
-            :key="img.filename"
+            v-for="(img, index) in images"
+            :key="img.pathname"
             class="cursor-grab p-0"
 
             :class="[index === current ? 'outline outline-[16px] xl:outline-8 xl:-outline-offset-8 outline-secondary -outline-offset-[16px]' : '']"
             @click="current = index"
           >
-            <NuxtImg
+            <!--    <NuxtImg
               :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
+              format="avif,webp,png,jpg"
+              class="aspect-video w-full object-cover"
+            /> -->
+            <NuxtImg
+              :src="img.url"
               format="avif,webp,png,jpg"
               class="aspect-video w-full object-cover"
             />
@@ -93,12 +100,17 @@ function scrollToImage(index: number) {
       >
         <CarouselContent class="flex items-center">
           <CarouselItem
-            v-for="img in project.images"
-            :key="img.filename"
+            v-for="img in images"
+            :key="img.pathname"
             class="flex justify-center items-center"
           >
-            <NuxtImg
+            <!-- <NuxtImg
               :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
+              format="avif,webp,png,jpg"
+              class="w-full aspect-video object-contain"
+            /> -->
+            <NuxtImg
+              :src="img.url"
               format="avif,webp,png,jpg"
               class="w-full aspect-video object-contain"
             />
