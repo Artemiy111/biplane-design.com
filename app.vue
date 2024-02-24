@@ -6,7 +6,7 @@ import { Toaster } from '~/components/ui/sonner'
 
 <template>
   <Toaster :rich-colors="true" />
-  <div class="font-normal text-base">
+  <div class="font-normal text-base md:text-sm">
     <div class="min-h-[100dvh] flex flex-col w-full h-full ">
       <TheHeader />
       <NuxtPage />

@@ -43,6 +43,13 @@
       "when": 1708538018913,
       "tag": "0005_clammy_viper",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1708718405340,
+      "tag": "0006_empty_white_queen",
+      "breakpoints": true
     }
   ]
 }
