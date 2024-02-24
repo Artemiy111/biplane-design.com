@@ -1,7 +1,7 @@
 import { db } from '~/server/db'
 
 export default defineEventHandler(async () => {
-  const themes = await db.query.themes.findMany({
+  const groups = await db.query.groups.findMany({
     with: {
       categories: {
         with: {
@@ -14,5 +14,5 @@ export default defineEventHandler(async () => {
       },
     },
   })
-  return themes
+  return groups
 })

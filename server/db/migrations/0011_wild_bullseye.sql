@@ -1,0 +1,1 @@
+ALTER TABLE "categories" DROP CONSTRAINT "categories_url_friendly_unique";
