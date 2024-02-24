@@ -31,12 +31,20 @@ export default defineNuxtConfig({
     supabaseUrl: '',
     supabaseKey: '',
     supabaseString: '',
+    public: {
+      blobReadWriteToken: '',
+    },
   },
   build: {
     transpile: ['trpc-nuxt'],
   },
   image: {
-    provider: 'ipx',
+    // provider: 'vercel',
+    dir: 'https://4anunn25btg7t3sl.public.blob.vercel-storage.com',
+    alias: { v: 'https://4anunn25btg7t3sl.public.blob.vercel-storage.com' },
+    domains: [
+      'https://4anunn25btg7t3sl.public.blob.vercel-storage.com',
+    ],
     ipx: {},
     format: ['avif', 'webp', 'png', 'jpg'],
   },
