@@ -1,5 +1,4 @@
 import { db } from '~/server/db'
-import type { Project } from '~/server/db/schema'
 import { projects } from '~/server/db/schema'
 import { projectCreateSchema } from '~/server/validators'
 

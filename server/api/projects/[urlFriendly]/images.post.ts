@@ -2,6 +2,7 @@ import process from 'node:process'
 import path from 'node:path'
 import fs from 'node:fs'
 import { Buffer } from 'node:buffer'
+import * as z from 'zod'
 import { db } from '~/server/db'
 import { images } from '~/server/db/schema'
 import { HttpErrorCode, createHttpError } from '~/server/exceptions'
@@ -38,7 +39,16 @@ export default defineEventHandler(async (event) => {
   if (!formData)
     return createHttpError(HttpErrorCode.BadRequest)
 
-  const project = JSON.parse(Buffer.from(formData[0].data).toString()) as { id: number, urlFriendly: string }
+  const fromJson = JSON.parse(Buffer.from(formData[0].data).toString())
+  const projectSchema = z.object({
+    id: z.number(),
+    urlFriendly: z.string().min(3),
+  })
+
+  const data = projectSchema.safeParse(fromJson)
+  if (!data.success)
+    return createHttpError(HttpErrorCode.BadRequest)
+  const project = data.data
   formData.shift()
 
   const folder = path.join(process.cwd(), `public/images/projects/${project.urlFriendly}`)
@@ -52,6 +62,12 @@ export default defineEventHandler(async (event) => {
     if (fileCreationError !== null)
       return createHttpError(HttpErrorCode.InternalServerError)
 
-    return await db.insert(images).values({ projectId: project.id, filename: file.filename! })
+    return await db.insert(images).values(
+      {
+        projectId: project.id,
+        projectUrlFriendly: project.urlFriendly,
+        filename: file.filename!,
+      },
+    )
   })
 })

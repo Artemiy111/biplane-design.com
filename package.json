@@ -17,7 +17,8 @@
     "lint:fix": "eslint . --fix",
     "db:generate": "drizzle-kit generate:pg",
     "db:migrate": "tsx ./server/db/migrate.ts",
-    "db:push": "drizzle-kit push:pg"
+    "db:push": "drizzle-kit push:pg",
+    "db:seed": "tsx ./server/db/seed.ts"
   },
   "dependencies": {
     "@tresjs/cientos": "^3.8.0",

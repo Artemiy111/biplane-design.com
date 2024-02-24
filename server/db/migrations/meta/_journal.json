@@ -50,6 +50,41 @@
       "when": 1708718405340,
       "tag": "0006_empty_white_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1708773764655,
+      "tag": "0007_rapid_lethal_legion",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1708774069664,
+      "tag": "0008_parallel_katie_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1708775505085,
+      "tag": "0009_mighty_loki",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1708775994824,
+      "tag": "0010_broad_raza",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1708777029451,
+      "tag": "0011_wild_bullseye",
+      "breakpoints": true
     }
   ]
 }

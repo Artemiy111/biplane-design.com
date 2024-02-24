@@ -1,4 +1,4 @@
-import { useWindowSize } from '@vueuse/core'
+import { useEventListener, useWindowSize } from '@vueuse/core'
 import { type ScreenSize, screens } from '~/tailwind.config'
 
 function getMaxScreenWidth(size: ScreenSize) {
@@ -7,7 +7,13 @@ function getMaxScreenWidth(size: ScreenSize) {
 }
 
 export function useScreenSize() {
-  const { width } = useWindowSize({ window })
+  const width = ref(Number.POSITIVE_INFINITY)
+  onMounted(() => {
+    width.value = window.innerWidth
+    useEventListener(window, 'resize', () => {
+      width.value = window.innerWidth
+    })
+  })
 
   const size = computed<ScreenSize | 'default'>(() => {
     switch (true) {
