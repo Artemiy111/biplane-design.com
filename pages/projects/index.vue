@@ -1,19 +1,40 @@
 <script setup lang="ts">
+import { useWindowSize } from '@vueuse/core'
+import { Carousel } from '~/components/ui/carousel'
 import type { CategoryRec, GroupRec } from '~/server/db/schema'
 
 const { md } = useScreenSize()
 const { data: groups, error: _error } = await useFetch<GroupRec[]>('/api/groups')
 
-const currentTheme = ref<GroupRec | null>(groups.value?.[0] || null)
-const currentCategory = ref<CategoryRec | null>(currentTheme.value?.categories[0] || null)
+const currentGroup = ref<GroupRec | null>(groups.value?.[0] || null)
+const currentCategory = ref<CategoryRec | null>(currentGroup.value?.categories[0] || null)
 const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
+const categoriesCarouselRef = ref<InstanceType<typeof Carousel> | null>(null)
+const haveHiddenCategories = ref(false)
+const { width } = useWindowSize()
+function isMinusZero(num: number) {
+  return Object.is(-0, num)
+}
+onMounted(() => {
+  if (!categoriesCarouselRef.value)
+    return
+  const progress = categoriesCarouselRef.value.carouselApi!.scrollProgress()
+  haveHiddenCategories.value = isMinusZero(progress)
+})
+watch(width, () => {
+  if (!categoriesCarouselRef.value)
+    return
+  const progress = categoriesCarouselRef.value.carouselApi!.scrollProgress()
+  haveHiddenCategories.value = isMinusZero(progress)
+})
+
 function changeTheme(group: GroupRec) {
-  if (group !== currentTheme.value) {
-    currentTheme.value = group
-    currentCategory.value = currentTheme.value.categories?.[0] || null
+  if (group !== currentGroup.value) {
+    currentGroup.value = group
+    currentCategory.value = currentGroup.value.categories?.[0] || null
   }
-  currentTheme.value = group
+  currentGroup.value = group
 }
 
 function changeCategory(category: CategoryRec) {
@@ -27,7 +48,7 @@ function changeCategory(category: CategoryRec) {
       <h2
         v-for="group in groups" :key="group.id"
         class="font-bold w-full px-8 py-4 sm:px-4 sm:py-2 hover:bg-secondary cursor-pointer transition-colors"
-        :class="[group === currentTheme ? 'bg-primary-foreground' : '']"
+        :class="[group === currentGroup ? 'bg-primary-foreground' : '']"
         tabindex="0"
         @keypress.enter.space="changeTheme(group)"
         @click="changeTheme(group)"
@@ -36,17 +57,37 @@ function changeCategory(category: CategoryRec) {
       </h2>
     </section>
     <Separator />
-    <section v-if="currentTheme?.categories.length" class="grid grid-cols-[repeat(6,min-content)]  items-center gap-4 mx-8 my-4 justify-between">
-      <Button
+    <section
+      v-if="currentGroup?.categories.length" class="mx-8 sm:mx-2 sm:gap-2 sm:my-2 my-4 "
+      :class="[haveHiddenCategories ? 'border-r-4 border-primary-foreground' : '']"
+    >
+      <Carousel ref="categoriesCarouselRef" class="w-full">
+        <CarouselContent class="">
+          <CarouselItem
+            v-for="c in currentGroup.categories" :key="c.id" class="w-fit shrink-0 basis-auto"
+          >
+            <Button
+              :size="md ? 'sm' : 'default'"
+              :class="[c === currentCategory ? 'bg-primary-foreground' : '']"
+              variant="ghost"
+              @click="changeCategory(c)"
+            >
+              {{ c.title }}
+            </Button>
+          </CarouselItem>
+        </CarouselContent>
+      </Carousel>
+
+      <!-- <Button
         v-for="c in currentTheme.categories" :key="c.id" variant="ghost" class="w-fit"
         :size="md ? 'sm' : 'default'"
-        :class="[c === currentCategory ? 'bg-secondary' : '']"
+        :class="[c === currentCategory ? 'bg-primary-foreground' : '']"
         @click="changeCategory(c)"
       >
         {{ c.title }}
-      </Button>
+      </Button> -->
     </section>
-    <Separator v-if="currentTheme?.categories.length" />
+    <Separator v-if="currentGroup?.categories.length" />
     <section v-if="projectsWithImages?.length" class="grid lg:grid-cols-1 grid-cols-2 gap-x-[2px] gap-y-[2px] ">
       <NuxtLink v-for="p in projectsWithImages" :key="p.id" :to="`/projects/${p.urlFriendly}`" class="flex flex-col hover:bg-primary-foreground transition-colors">
         <Carousel class="w-full aspect-video">
