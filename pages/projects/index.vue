@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
+import { type ListBlobResult, type ListBlobResultBlob, list } from '@vercel/blob'
 import { Carousel } from '~/components/ui/carousel'
 import type { CategoryRec, GroupRec } from '~/server/db/schema'
 
@@ -9,6 +10,30 @@ const { data: groups, error: _error } = await useFetch<GroupRec[]>('/api/groups'
 const currentGroup = ref<GroupRec | null>(groups.value?.[0] || null)
 const currentCategory = ref<CategoryRec | null>(currentGroup.value?.categories[0] || null)
 const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
+const images = ref<Record<string, ListBlobResultBlob[] >>({})
+
+const config = useRuntimeConfig()
+
+onMounted(async () => {
+  groups.value?.forEach(g => g.categories.forEach(c =>
+
+    c.projects.forEach((p) => {
+      if (!p.images.length)
+        return
+      console.log(p)
+
+      images.value[p.urlFriendly] = []
+
+      $fetch(`/api/projects/${p.urlFriendly}/images`).then((r) => {
+        console.log(r)
+        r.blobs.forEach(img => images.value[p.urlFriendly].push(img))
+      },
+
+      )
+    }),
+
+  ))
+})
 
 const categoriesCarouselRef = ref<InstanceType<typeof Carousel> | null>(null)
 const haveHiddenCategories = ref(false)
@@ -87,8 +112,9 @@ function changeCategory(category: CategoryRec) {
       <NuxtLink v-for="p in projectsWithImages" :key="p.id" :to="`/projects/${p.urlFriendly}`" class="flex flex-col hover:bg-primary-foreground transition-colors">
         <Carousel class="w-full aspect-video">
           <CarouselContent>
-            <CarouselItem v-for="img in p.images" :key="img.id">
-              <NuxtImg format="avif,webp,png,jpg" :src="`/images/projects/${p.urlFriendly}/${img.filename}`" :alt="img.title || 'image'" class="aspect-video w-full object-cover" />
+            <CarouselItem v-for="img in images[p.urlFriendly]" :key="img.url">
+              <!-- <NuxtImg format="avif,webp,png,jpg" :src="`/images/projects/${p.urlFriendly}/${img.filename}`" :alt="img.title || 'image'" class="aspect-video w-full object-cover" /> -->
+              <NuxtImg format="avif,webp,png,jpg" :src="img.url" :alt="img.pathname || 'image'" class="aspect-video w-full object-cover" />
             </CarouselItem>
           </CarouselContent>
         </Carousel>
