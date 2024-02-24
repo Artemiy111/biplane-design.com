@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CategoryRec, ThemeRec } from '~/server/db/schema'
 
+const { md } = useScreenSize()
 const { data: themes, error: _error } = await useFetch<ThemeRec[]>('/api/themes')
 
 const currentTheme = ref<ThemeRec | null>(themes.value?.[0] || null)
@@ -22,10 +23,10 @@ function changeCategory(category: CategoryRec) {
 
 <template>
   <main class="flex flex-col flex-grow container h-full">
-    <section class="grid items-center grid-cols-2 divide-x ">
+    <section class="grid items-center grid-cols-2 divide-x sm:text-base lg:text-xl md:text-lg 2xl:text-2xl text-3xl">
       <h2
         v-for="theme in themes" :key="theme.id"
-        class="text-3xl font-bold px-8 py-4 hover:bg-secondary cursor-pointer transition-colors"
+        class="font-bold w-full px-8 py-4 sm:px-4 sm:py-2 hover:bg-secondary cursor-pointer transition-colors"
         :class="[theme === currentTheme ? 'bg-primary-foreground' : '']"
         tabindex="0"
         @keypress.enter.space="changeTheme(theme)"
@@ -38,6 +39,7 @@ function changeCategory(category: CategoryRec) {
     <section v-if="currentTheme?.categories.length" class="grid grid-cols-[repeat(6,min-content)]  items-center gap-4 mx-8 my-4 justify-between">
       <Button
         v-for="c in currentTheme.categories" :key="c.id" variant="ghost" class="w-fit"
+        :size="md ? 'sm' : 'default'"
         :class="[c === currentCategory ? 'bg-secondary' : '']"
         @click="changeCategory(c)"
       >

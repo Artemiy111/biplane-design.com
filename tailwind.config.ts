@@ -3,24 +3,29 @@ import typography from '@tailwindcss/typography'
 import type { Config } from 'tailwindcss'
 import { fontFamily } from 'tailwindcss/defaultTheme'
 
-export default <Config>{
+export const screens = {
+  '2xl': { max: '1399px' },
+  'xl': { max: '1279px' },
+  'lg': { max: '1023px' },
+  'md': { max: '767px' },
+  'sm': { max: '639px' },
+  'xs': { max: '479px' },
+} as const
+
+export type ScreenSize = keyof (typeof screens)
+
+export default {
   content: [],
   darkMode: ['class'],
   safelist: ['dark'],
   theme: {
-    screens: {
-      '2xl': { max: '1399px' },
-      'xl': { max: '1279px' },
-      'lg': { max: '1023px' },
-      'md': { max: '767px' },
-      'sm': { max: '639px' },
-      'xs': { max: '479px' },
-    },
+    screens,
     container: {
       center: true,
       padding: '0rem',
     },
     fontSize: {
+      'xs': '14px',
       'sm': '16px',
       'base': '20px',
       'lg': '24px',
@@ -115,4 +120,4 @@ export default <Config>{
   },
 
   plugins: [animate, typography],
-}
+} satisfies Config

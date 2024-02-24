@@ -43,17 +43,18 @@ function scrollToImage(index: number) {
 
 <template>
   <main v-if="project" class="flex flex-col container">
-    <section class="flex justify-between px-8 py-4">
-      <h1 class="text-3xl font-bold">
+    <section class="flex justify-between px-8 py-4 sm:py-2 sm:text-base lg:text-xl md:text-lg 2xl:text-2xl text-3xl">
+      <h1 class="font-bold">
         {{ project.title }}
       </h1>
-      <span class="text-3xl">{{ project.status }}</span>
+      <span class="">{{ project.status }}</span>
     </section>
     <Separator />
-    <div
-      class="grid items-start grid-cols-[300px,1fr] 2xl:grid-cols-[250px,1fr] xl:grid-cols-[200px,1fr] overflow-hidden h-fit divide-x-2 divide-primary-foreground"
+    <section
+      class="grid items-start grid-cols-[300px,1fr] md:grid-cols-1 2xl:grid-cols-[250px,1fr] xl:grid-cols-[200px,1fr] lg:grid-cols-[150px,1fr] overflow-hidden h-fit divide-x-2 divide-primary-foreground"
     >
       <Carousel
+        class="md:hidden"
         orientation="vertical"
         :opts="{
           loop: true,
@@ -76,6 +77,7 @@ function scrollToImage(index: number) {
           >
             <NuxtImg
               :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
+              format="avif,webp,png,jpg"
               class="aspect-video w-full object-cover"
             />
           </CarouselItem>
@@ -97,11 +99,25 @@ function scrollToImage(index: number) {
           >
             <NuxtImg
               :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
+              format="avif,webp,png,jpg"
               class="w-full aspect-video object-contain"
             />
           </CarouselItem>
         </CarouselContent>
       </Carousel>
-    </div>
+    </section>
+    <Separator />
+    <section class="px-8 py-8 gap-x-16 gap-y-2 grid grid-cols-[repeat(2,max-content)]">
+      <span>Расположение</span>
+      <span>{{ project.location }}</span>
+      <template v-if="project.yearStart">
+        <span>Год начала</span>
+        <span>{{ project.yearStart }}</span>
+      </template>
+      <template v-if="project.yearEnd">
+        <span>Год завершения</span>
+        <span>{{ project.yearEnd }}</span>
+      </template>
+    </section>
   </main>
 </template>
