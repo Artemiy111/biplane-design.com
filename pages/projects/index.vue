@@ -61,7 +61,11 @@ function changeCategory(category: CategoryRec) {
       v-if="currentGroup?.categories.length" class="mx-8 sm:mx-2 sm:gap-2 sm:my-2 my-4 "
       :class="[haveHiddenCategories ? 'border-r-4 border-primary-foreground' : '']"
     >
-      <Carousel ref="categoriesCarouselRef" class="w-full">
+      <Carousel
+        ref="categoriesCarouselRef" class="w-full" :opts="{
+          dragFree: true,
+        }"
+      >
         <CarouselContent class="">
           <CarouselItem
             v-for="c in currentGroup.categories" :key="c.id" class="w-fit shrink-0 basis-auto"
@@ -77,15 +81,6 @@ function changeCategory(category: CategoryRec) {
           </CarouselItem>
         </CarouselContent>
       </Carousel>
-
-      <!-- <Button
-        v-for="c in currentTheme.categories" :key="c.id" variant="ghost" class="w-fit"
-        :size="md ? 'sm' : 'default'"
-        :class="[c === currentCategory ? 'bg-primary-foreground' : '']"
-        @click="changeCategory(c)"
-      >
-        {{ c.title }}
-      </Button> -->
     </section>
     <Separator v-if="currentGroup?.categories.length" />
     <section v-if="projectsWithImages?.length" class="grid lg:grid-cols-1 grid-cols-2 gap-x-[2px] gap-y-[2px] ">
@@ -104,7 +99,7 @@ function changeCategory(category: CategoryRec) {
       </NuxtLink>
     </section>
     <section v-else class="grid flex-grow h-full justify-center items-center">
-      <span class="text-lg p-8 bg-secondary font-bold">Проектов пока нет</span>
+      <span class="text-lg md:text-base p-8 bg-primary-foreground font-bold">Проектов пока нет</span>
     </section>
   </main>
 </template>

@@ -1,22 +1,22 @@
 <template>
   <footer class="container flex flex-col">
     <Separator />
-    <section class="flex flex-wrap px-8 py-8 gap-x-32 gap-y-8 grid-cols-[repeat(4,fit-content(100%))]">
+    <section class="flex flex-wrap px-8 py-8 gap-x-32 lg:gap-x-16 gap-y-8 md:gap-y-4 grid-cols-[repeat(4,fit-content(100%))]">
       <ul class="flex flex-col gap-1">
-        <h6 class="font-bold text-lg">
+        <h6 class="font-bold text-lg md:text-base">
           Контакты
         </h6>
         <li>Biplane-design@mail.ru</li>
         <li>(3473) 25-18-56</li>
       </ul>
       <ul class="flex flex-col gap-1">
-        <h6 class="font-bold text-lg">
+        <h6 class="font-bold text-lg md:text-base">
           Время работы
         </h6>
         <li>Пн - Пт&nbsp;&nbsp;&nbsp;&nbsp;8 - 18</li>
       </ul>
       <ul class="flex flex-col gap-1">
-        <h6 class="font-bold text-lg">
+        <h6 class="font-bold text-lg md:text-base">
           Адрес
         </h6>
         <li>
@@ -24,7 +24,7 @@
         </li>
       </ul>
       <ul class="flex flex-col gap-1">
-        <h6 class="font-bold text-lg">
+        <h6 class="font-bold text-lg md:text-base">
           Студентам
         </h6>
         <li>
