@@ -23,4 +23,5 @@ logs
 .env.*
 !.env.example
 
-/public/images/projects
+/public/images/projects/**
+!/public/images/projects/.gitkeep

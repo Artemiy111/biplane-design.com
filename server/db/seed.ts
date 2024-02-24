@@ -1,18 +1,22 @@
-import { categories, projects, themes } from './schema'
+import { categories, groups, projects } from './schema'
 import { db } from '.'
+import { toUrlFriendly } from '~/utils/toUrlFriendly'
 
-const themesBiplan = ['Архитектура', 'Графика']
-const categoriesArchitecture = ['Лучшие', 'Здания', 'Офисы', 'Общественное', 'Рестораны', 'Квартиры']
-const categoriesDesign = ['Логотипы', 'Этикетки']
+const groupsBiplane = ['Архитектура', 'Графика']
+const categoriesBiplane = [
+  ['Лучшие', 'Здания', 'Офисы', 'Общественное', 'Рестораны', 'Квартиры'],
+  ['Логотипы', 'Этикетки'],
+]
 
-// themesBiplan.forEach(async (theme) => {
-//   await db.insert(themes).values({ title: theme })
+groupsBiplane.forEach(async (group, idx) => {
+  const insertedGroup = await db.insert(groups).values({ title: group, urlFriendly: toUrlFriendly(group) }).returning()
 
-//   categoriesArchitecture.forEach((async (category) => {
-//     await db.insert(categories).values({
-//       title:
-//        category,
-//       themeId: await db.query.themes.findFirst({'where': ({themes, {eq}}) => }),
-//     })
-//   }))
-// })
+  categoriesBiplane[idx].forEach((async (category) => {
+    await db.insert(categories).values({
+      title: category,
+      urlFriendly: toUrlFriendly(category),
+      groupId: insertedGroup[0].id,
+    },
+    )
+  }))
+})

@@ -2,39 +2,45 @@
 import { integer, pgTable, serial, text, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
-export const themes = pgTable('themes', {
+export const groups = pgTable('groups', {
   id: serial('id').primaryKey(),
-  title: text('title').notNull().unique(),
-  urlFriendly: text('url_friendly').notNull().unique(),
+  title: varchar('title', { length: 128 }).notNull().unique(),
+  urlFriendly: varchar('url_friendly', { length: 128 }).notNull().unique(),
   order: serial('order').notNull().unique(),
+
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
-export type Theme = typeof themes.$inferSelect
+export type Group = typeof groups.$inferSelect
 
-export const themesRelations = relations(themes, ({ many }) => ({
+export const groupsRelations = relations(groups, ({ many }) => ({
   categories: many(categories),
 }))
 
 export const categories = pgTable('categories', {
-  themeId: integer('theme_id').notNull().references(() => themes.id),
+  groupId: integer('group_id').notNull().references(() => groups.id),
   id: serial('id').primaryKey(),
-  title: text('title').notNull().unique(),
-  urlFriendly: text('url_friendly').notNull().unique(),
+  title: varchar('title', { length: 128 }).notNull().unique(),
+  urlFriendly: varchar('url_friendly', { length: 128 }).notNull(),
   order: serial('order').notNull().unique(),
+
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (t) => {
+  return {
+    uniqueUrlFriendlyForGroupId: unique('url_friendly_for_group_id').on(t.groupId, t.urlFriendly),
+  }
 })
 
 export type Category = typeof categories.$inferSelect
 export type CategoryCreate = typeof categories.$inferSelect
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
-  theme: one(themes, {
-    fields: [categories.themeId],
-    references: [themes.id],
-    relationName: 'theme',
+  group: one(groups, {
+    fields: [categories.groupId],
+    references: [groups.id],
+    relationName: 'group',
   }),
   projects: many(projects),
 }))
@@ -42,8 +48,8 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
 export const projects = pgTable('projects', {
   categoryId: integer('category_id').notNull().references(() => categories.id),
   id: serial('id').primaryKey(),
-  title: text('title').notNull(),
-  urlFriendly: text('url_friendly').notNull().unique(),
+  title: varchar('title', { length: 200 }).notNull(),
+  urlFriendly: varchar('url_friendly', { length: 200 }).notNull().unique(),
   status: text('status').notNull(),
   yearStart: integer('year_start'),
   yearEnd: integer('year_end'),
@@ -68,16 +74,17 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
 
 export const images = pgTable('images', {
   projectId: integer('project_id').notNull().references(() => projects.id),
+  projectUrlFriendly: varchar('project_url_friendly', { length: 200 }).references(() => projects.urlFriendly).notNull(),
   id: serial('id').primaryKey(),
-  filename: text('url').notNull(),
-  title: text('title'),
+  filename: varchar('filename', { length: 200 }).notNull(),
+  title: varchar('title', { length: 200 }),
   order: serial('order').notNull(),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (t) => {
   return {
-    uniqueFilenameForProject: unique('unique_filename_for_project').on(t.projectId, t.filename),
+    uniqueFilenameForProject: unique('unique_filename_for_project').on(t.projectUrlFriendly, t.filename),
   }
 })
 
@@ -92,6 +99,6 @@ export const imageRelations = relations(images, ({ one }) => ({
   }),
 }))
 
-export type ThemeRec = Theme & { categories: CategoryRec[] }
+export type GroupRec = Group & { categories: CategoryRec[] }
 export type CategoryRec = Category & { projects: ProjectRec[] }
 export type ProjectRec = Project & { images: Image[] }

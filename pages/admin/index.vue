@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import type * as z from 'zod'
 import { toast } from 'vue-sonner'
-import type { ProjectCreate } from '~/server/db/schema'
 import { type ProjectCreateSchema, projectCreateSchema } from '~/server/validators'
 import { Dialog } from '~/components/ui/dialog'
 import { Form } from '~/components/ui/form'
 
-const { data: groups } = await useFetch('/api/themes')
+const { data: groups, error: groupsError } = await useFetch('/api/groups')
 const { data: projects, error: projectsError, refresh: refreshProjects } = await useFetch('/api/projects')
 
 watch(projectsError, () => {
@@ -54,21 +51,21 @@ const selectedGroup = computed<NonNullable<typeof groups.value>[number] | null>(
   () => groups.value?.find(g => g.id.toString() === selectedGroupId.value) || null,
 )
 
-function uploadFile(event: Event, project: { id: number, urlFriendly: string }) {
+async function uploadFile(event: Event, project: { id: number, urlFriendly: string }) {
   const formData = new FormData()
   const target = event.target as HTMLInputElement
   const images = [...target.files || []]
 
-  const jsonProject = JSON.stringify({ id: project.id, urlFriendly: project.urlFriendly })
+  const jsonProject = JSON.stringify(project)
   formData.append('project', jsonProject)
   images.forEach(image => formData.append('files', image))
 
   try {
-    $fetch(`/api/projects/${project.id}/images`, {
+    const _res = await $fetch(`/api/projects/${project.urlFriendly}/images`, {
       method: 'POST',
       body: formData,
     })
-    toast.success('Фотографии загружены')
+    toast.success(`Фотографий загружено: ${images.length}`)
     refreshProjects()
   }
   catch (e) {
@@ -79,6 +76,15 @@ function uploadFile(event: Event, project: { id: number, urlFriendly: string }) 
 }
 
 const formRef = ref<InstanceType<typeof Form> | null>(null)
+const title = computed(() => formRef.value?.values?.title as string || '')
+const urlFriendly = computed(() => toUrlFriendly(title.value))
+
+watch(title, () => {
+  if (!formRef.value)
+    return
+  formRef.value.setFieldValue('urlFriendly', urlFriendly.value)
+})
+
 function handleDialogOpen(isOpen: boolean) {
   if (formRef.value?.meta.dirty && !isOpen)
     return
@@ -169,7 +175,10 @@ function handleDialogOpen(isOpen: boolean) {
               <FormItem>
                 <FormLabel>Человекопонятная ссылка</FormLabel>
                 <FormControl>
-                  <Input :model-value="componentField.modelValue" placeholder="my-new-house" @change="handleChange" />
+                  <Input
+                    :model-value="componentField.modelValue" placeholder="my-new-house"
+                    @change="($event.target.value = toUrlFriendly($event.target.value)), handleChange($event, true)"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -242,11 +251,11 @@ function handleDialogOpen(isOpen: boolean) {
             />
           </TableCell>
           <TableCell>
-            <NuxtLink :to="`/admin/projects/${p.urlFriendly}-${p.id}`">
+            <NuxtLink :to="`/admin/projects/${p.urlFriendly}`">
               {{ p.title }}
             </NuxtLink>
           </TableCell>
-          <TableCell>{{ p.category.theme.title }}</TableCell>
+          <TableCell>{{ p.category.group.title }}</TableCell>
           <TableCell>{{ p.category.title }}</TableCell>
           <TableCell class="w-min">
             <Input

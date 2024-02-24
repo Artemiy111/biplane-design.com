@@ -27,9 +27,9 @@ const routes = [{
             <NuxtLink
               :to="r.link"
               class="cursor-pointer"
-              :class="[navigationMenuTriggerStyle(),
-                       md ? `${navigationMenuTriggerStyle({ size: 'sm' })}` : '',
-                       r.link === route.path ? 'bg-primary-foreground' : '']"
+              :class="[
+                md ? navigationMenuTriggerStyle({ size: 'sm' }) : navigationMenuTriggerStyle(),
+                r.link === route.path ? 'bg-primary-foreground' : '']"
             >
               {{ r.title }}
             </NuxtLink>

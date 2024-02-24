@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import type { CategoryRec, ThemeRec } from '~/server/db/schema'
+import type { CategoryRec, GroupRec } from '~/server/db/schema'
 
 const { md } = useScreenSize()
-const { data: themes, error: _error } = await useFetch<ThemeRec[]>('/api/themes')
+const { data: groups, error: _error } = await useFetch<GroupRec[]>('/api/groups')
 
-const currentTheme = ref<ThemeRec | null>(themes.value?.[0] || null)
+const currentTheme = ref<GroupRec | null>(groups.value?.[0] || null)
 const currentCategory = ref<CategoryRec | null>(currentTheme.value?.categories[0] || null)
 const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
-function changeTheme(theme: ThemeRec) {
-  if (theme !== currentTheme.value) {
-    currentTheme.value = theme
+function changeTheme(group: GroupRec) {
+  if (group !== currentTheme.value) {
+    currentTheme.value = group
     currentCategory.value = currentTheme.value.categories?.[0] || null
   }
-  currentTheme.value = theme
+  currentTheme.value = group
 }
 
 function changeCategory(category: CategoryRec) {
@@ -25,14 +25,14 @@ function changeCategory(category: CategoryRec) {
   <main class="flex flex-col flex-grow container h-full">
     <section class="grid items-center grid-cols-2 divide-x sm:text-base lg:text-xl md:text-lg 2xl:text-2xl text-3xl">
       <h2
-        v-for="theme in themes" :key="theme.id"
+        v-for="group in groups" :key="group.id"
         class="font-bold w-full px-8 py-4 sm:px-4 sm:py-2 hover:bg-secondary cursor-pointer transition-colors"
-        :class="[theme === currentTheme ? 'bg-primary-foreground' : '']"
+        :class="[group === currentTheme ? 'bg-primary-foreground' : '']"
         tabindex="0"
-        @keypress.enter.space="changeTheme(theme)"
-        @click="changeTheme(theme)"
+        @keypress.enter.space="changeTheme(group)"
+        @click="changeTheme(group)"
       >
-        {{ theme.title }}
+        {{ group.title }}
       </h2>
     </section>
     <Separator />
@@ -48,7 +48,7 @@ function changeCategory(category: CategoryRec) {
     </section>
     <Separator v-if="currentTheme?.categories.length" />
     <section v-if="projectsWithImages?.length" class="grid lg:grid-cols-1 grid-cols-2 gap-x-[2px] gap-y-[2px] ">
-      <NuxtLink v-for="p in projectsWithImages" :key="p.id" :to="`/projects/${p.urlFriendly}-${p.id}`" class="flex flex-col hover:bg-primary-foreground transition-colors">
+      <NuxtLink v-for="p in projectsWithImages" :key="p.id" :to="`/projects/${p.urlFriendly}`" class="flex flex-col hover:bg-primary-foreground transition-colors">
         <Carousel class="w-full aspect-video">
           <CarouselContent>
             <CarouselItem v-for="img in p.images" :key="img.id">

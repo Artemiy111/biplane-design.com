@@ -2,14 +2,14 @@
 import { toast } from 'vue-sonner'
 
 const route = useRoute()
-const projectId = route.params.id as string
-const { data: project, error: _error, refresh: refreshImages } = await useFetch(`/api/projects/${projectId}`)
+const projectUrlFriendly = route.params.urlFriendly as string
+const { data: project, error: _error, refresh: refreshImages } = await useFetch(`/api/projects/${projectUrlFriendly}`)
 
 async function deleteImages(filenames: string[]) {
   if (!project.value)
     return
   try {
-    await $fetch(`/api/projects/${projectId}/images`, {
+    await $fetch(`/api/projects/${projectUrlFriendly}/images`, {
       method: 'DELETE',
       body: {
         project: {
@@ -17,7 +17,6 @@ async function deleteImages(filenames: string[]) {
           urlFriendly: project.value.urlFriendly,
         },
         filenames,
-
       },
     })
     toast.success(`Изображений успешно удалено: ${filenames.length}`)

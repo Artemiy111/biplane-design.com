@@ -3,11 +3,22 @@ import * as z from 'zod'
 const maxYear = new Date().getUTCFullYear() + 10
 
 export const projectCreateSchema = z.object({
-  title: z.string().min(3, 'Минимум 3 символа'),
+  title: z.string().trim().min(3, 'Минимум 3 символа'),
   groupId: z.union([z.string(), z.number()]).transform(v => Number(v)),
   categoryId: z.union([z.string(), z.number()]).transform(v => Number(v)),
-  urlFriendly: z.string().min(3, 'Минимум 3 символа'),
-  status: z.string().min(3, 'Минимум 3 символа'),
+  urlFriendly: z.string().trim()
+    .min(3, 'Минимум 3 символа')
+    .refine((s) => {
+      const url = `https://g.com/${s}`
+      try {
+        z.string().url().parse(url)
+        return true
+      }
+      catch (e) {
+        return false
+      }
+    }, 'Не валидный URL'),
+  status: z.string().trim().min(3, 'Минимум 3 символа'),
   yearStart: z.number()
     .min(2000, 'Год начала не может быть меньше 2000')
     .max(maxYear, `Год начала не может быть больше ${maxYear}`)
@@ -17,7 +28,7 @@ export const projectCreateSchema = z.object({
     .max(maxYear, `Год завершения не может быть больше ${maxYear}`)
 
     .nullable(),
-  location: z.string().min(3, 'Минимум 3 символа'),
+  location: z.string().trim().min(3, 'Минимум 3 символа'),
 })
   .refine((data) => {
     if (data.yearStart !== null && data.yearEnd !== null)
@@ -32,7 +43,7 @@ export type ProjectCreateSchema = z.infer<typeof projectCreateSchema>
 export const imagesDeleteSchema = z.object({
   project: z.object({
     id: z.number(),
-    urlFriendly: z.string(),
+    urlFriendly: z.string().trim(),
   }),
   filenames: z.array(z.string()).min(1),
 })

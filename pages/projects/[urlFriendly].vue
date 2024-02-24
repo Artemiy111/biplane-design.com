@@ -4,8 +4,8 @@ import type { ComponentPublicInstance } from 'vue'
 import { Carousel, type CarouselApi } from '@/components/ui/carousel'
 
 const route = useRoute()
-const projectId = route.params.id! as string
-const { data: project, error: _error } = await useFetch(`/api/projects/${projectId}`)
+const projectUrlFriendly = route.params.urlFriendly! as string
+const { data: project, error: _error } = await useFetch(`/api/projects/${projectUrlFriendly}`)
 
 const api = ref<CarouselApi | null>(null)
 const apiTumb = ref<CarouselApi | null>(null)
