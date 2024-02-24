@@ -3,6 +3,8 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { Buffer } from 'node:buffer'
 import * as z from 'zod'
+import { list, put } from '@vercel/blob'
+
 import { db } from '~/server/db'
 import { images } from '~/server/db/schema'
 import { HttpErrorCode, createHttpError } from '~/server/exceptions'
@@ -51,16 +53,24 @@ export default defineEventHandler(async (event) => {
   const project = data.data
   formData.shift()
 
-  const folder = path.join(process.cwd(), `public/images/projects/${project.urlFriendly}`)
-  const folderCreationError = createFolderIfNotExists(folder)
-  if (folderCreationError !== null)
-    return createHttpError(HttpErrorCode.InternalServerError)
+  // const folder = path.join(process.cwd(), `public/images/projects/${project.urlFriendly}`)
+  // const folderCreationError = createFolderIfNotExists(folder)
+  // if (folderCreationError !== null)
+  //   return createHttpError(HttpErrorCode.InternalServerError)
 
+  // formData.forEach(async (file) => {
+  //   const filepath = path.join(folder, `${file.filename!}`)
+  //   const fileCreationError = createFile(filepath, file.data)
+  //   if (fileCreationError !== null)
+  //     return createHttpError(HttpErrorCode.InternalServerError)
+
+  const folder = project.urlFriendly
   formData.forEach(async (file) => {
     const filepath = path.join(folder, `${file.filename!}`)
-    const fileCreationError = createFile(filepath, file.data)
-    if (fileCreationError !== null)
-      return createHttpError(HttpErrorCode.InternalServerError)
+    const result = await put(filepath, file.data, { access: 'public', token: useRuntimeConfig().public.blobReadWriteToken })
+    console.log(result)
+    //   if (fileCreationError !== null)
+    //     return createHttpError(HttpErrorCode.InternalServerError
 
     return await db.insert(images).values(
       {
