@@ -8,7 +8,7 @@ export { default as NavigationMenuContent } from './NavigationMenuContent.vue'
 export { default as NavigationMenuLink } from './NavigationMenuLink.vue'
 
 export const navigationMenuTriggerStyle = cva(
-  'group inline-flex w-max items-center justify-center rounded-md bg-background font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50',
+  'group inline-flex w-max items-center justify-center rounded-md bg-background transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50',
   {
     variants: {
       size: {
