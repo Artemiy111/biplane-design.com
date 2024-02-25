@@ -2,11 +2,19 @@
 import { toTypedSchema } from '@vee-validate/zod'
 import { toast } from 'vue-sonner'
 import { type ProjectCreateSchema, projectCreateSchema } from '~/server/validators'
-import { Dialog } from '~/components/ui/dialog'
-import { Form } from '~/components/ui/form'
+import { Sheet } from '~/components/ui/sheet'
+import type { Form } from '~/components/ui/form'
+import CreateProjectSheet from '~/components/admin/CreateProjectSheet.vue'
+import type { GroupRec } from '~/server/db/schema'
 
 const { data: groups, error: groupsError } = await useFetch('/api/groups')
 const { data: projects, error: projectsError, refresh: refreshProjects } = await useFetch('/api/projects')
+
+watch(groupsError, () => {
+  if (!projectsError.value)
+    return
+  toast.error(projectsError.value.message)
+})
 
 watch(projectsError, () => {
   if (!projectsError.value)
@@ -14,28 +22,14 @@ watch(projectsError, () => {
   toast.error(projectsError.value.message)
 })
 
-const createProjectFormInitialValues: Partial<ProjectCreateSchema> = {
-  title: '',
-  urlFriendly: '',
-  groupId: groups.value?.[0].id.toString() as unknown as number,
-  categoryId: groups.value?.[0].categories[0].id.toString() as unknown as number,
-  status: '',
-  yearStart: null,
-  yearEnd: null,
-  location: '',
-}
-
-const createProjectFormValidationSchema = toTypedSchema(projectCreateSchema)
-
-const isDialogOpen = ref(false)
-
+const createProjectSheetRef = ref<InstanceType<typeof CreateProjectSheet> | null>(null)
 async function onSubmit(values: ProjectCreateSchema) {
   try {
     await $fetch('/api/projects', {
       method: 'POST',
       body: values,
     })
-    isDialogOpen.value = false
+    createProjectSheetRef.value?.close()
     toast.success('Проект создан')
   }
   catch (e) {
@@ -45,11 +39,6 @@ async function onSubmit(values: ProjectCreateSchema) {
   }
   refreshProjects()
 }
-
-const selectedGroupId = ref<string | null>(groups.value?.[0].id.toString() || null)
-const selectedGroup = computed<NonNullable<typeof groups.value>[number] | null>(
-  () => groups.value?.find(g => g.id.toString() === selectedGroupId.value) || null,
-)
 
 async function uploadFile(event: Event, project: { id: number, urlFriendly: string }) {
   const formData = new FormData()
@@ -74,159 +63,16 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
     else toast.error(String(e))
   }
 }
-
-const formRef = ref<InstanceType<typeof Form> | null>(null)
-const title = computed(() => formRef.value?.values?.title as string || '')
-const urlFriendly = computed(() => toUrlFriendly(title.value))
-
-watch(title, () => {
-  if (!formRef.value)
-    return
-  formRef.value.setFieldValue('urlFriendly', urlFriendly.value)
-})
-
-function handleDialogOpen(isOpen: boolean) {
-  if (formRef.value?.meta.dirty && !isOpen)
-    return
-
-  isDialogOpen.value = isOpen
-}
 </script>
 
 <template>
   <main class="container flex flex-col">
     <section class="p-8">
-      <Dialog :open="isDialogOpen" @update:open="isDialogOpen = $event">
-        <DialogTrigger as-child>
-          <Button @click="isDialogOpen = true">
-            Создать проект
-          </Button>
-        </DialogTrigger>
-        <DialogContent class="max-h-[90dvh] overflow-auto" @pointer-down-outside="$event.preventDefault(), handleDialogOpen(false)">
-          <DialogHeader>
-            <DialogTitle>Создать проект</DialogTitle>
-            <DialogDescription>
-              Заполните поля
-            </DialogDescription>
-          </DialogHeader>
-          <Form
-            ref="formRef"
-            v-slot="{ values, errors, setFieldValue }"
-            :initial-values="createProjectFormInitialValues"
-            :validation-schema="createProjectFormValidationSchema"
-            class="grid gap-4"
-            @submit="onSubmit($event as ProjectCreateSchema)"
-          >
-            {{ values }}
-            {{ errors }}
-            <FormField v-slot="{ componentField, handleChange }" name="title">
-              <FormItem>
-                <FormLabel>Название проекта</FormLabel>
-                <FormControl>
-                  <Input :model-value="componentField.modelValue" placeholder="Мой новый дом" @change="handleChange" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField } " name="groupId">
-              <FormItem>
-                <FormLabel>Группа</FormLabel>
-                <Select
-                  v-bind="componentField" @update:model-value="(v) => {
-                    selectedGroupId = v
-                    setFieldValue('categoryId', selectedGroup?.categories[0]?.id.toString(), false)
-                  }"
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите группу" />  <!-- !FIXME -->
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent v-if="groups?.length">
-                    <SelectGroup>
-                      <SelectItem v-for="group in groups" :key="group.id" :value="group.id.toString()">
-                        {{ group.title }}
-                      </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField }" name="categoryId">
-              <FormItem>
-                <FormLabel>Категория</FormLabel>
-                <Select v-bind="componentField">
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите категорию" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent v-if="selectedGroup?.categories.length">
-                    <SelectGroup>
-                      <SelectItem v-for="c in selectedGroup.categories" :key="c.id" :value="c.id.toString()">
-                        {{ c.title }}
-                      </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField, handleChange }" name="urlFriendly">
-              <FormItem>
-                <FormLabel>Человекопонятная ссылка</FormLabel>
-                <FormControl>
-                  <Input
-                    :model-value="componentField.modelValue" placeholder="my-new-house"
-                    @change="($event.target.value = toUrlFriendly($event.target.value)), handleChange($event, true)"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField, handleChange }" name="status">
-              <FormItem>
-                <FormLabel>Статус</FormLabel>
-                <FormControl>
-                  <Input :model-value="componentField.modelValue" placeholder="Завершён" @change="handleChange" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField, handleChange }" name="yearStart">
-              <FormItem>
-                <FormLabel>Год начала</FormLabel>
-                <FormControl>
-                  <Input :model-value="componentField.modelValue" type="number" placeholder="" @change="handleChange" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField, handleChange }" name="yearEnd">
-              <FormItem>
-                <FormLabel>Год завершения</FormLabel>
-                <FormControl>
-                  <Input :model-value="componentField.modelValue" type="number" placeholder="" @change="handleChange" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-            <FormField v-slot="{ componentField, handleChange }" name="location">
-              <FormItem>
-                <FormLabel>Расположение</FormLabel>
-                <FormControl>
-                  <Input :model-value="componentField.modelValue" placeholder="Уфа" @change="handleChange" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-            <DialogFooter>
-              <Button type="submit">
-                Создать
-              </Button>
-            </DialogFooter>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      <CreateProjectSheet
+        v-if="groups" ref="createProjectSheetRef"
+        :groups="(groups as unknown as GroupRec[])"
+        @submit="onSubmit"
+      />
     </section>
 
     <Table>
@@ -234,6 +80,7 @@ function handleDialogOpen(isOpen: boolean) {
         <TableRow>
           <TableHead>Превью</TableHead>
           <TableHead>Проект</TableHead>
+          <TableHead>URL Friendly</TableHead>
           <TableHead>Группа</TableHead>
           <TableHead>Категория</TableHead>
           <TableHead>Загрузить фото</TableHead>
@@ -255,11 +102,13 @@ function handleDialogOpen(isOpen: boolean) {
               {{ p.title }}
             </NuxtLink>
           </TableCell>
+          <TableCell>{{ p.urlFriendly }}</TableCell>
           <TableCell>{{ p.category.group.title }}</TableCell>
           <TableCell>{{ p.category.title }}</TableCell>
           <TableCell class="w-min">
             <Input
               class="w-min"
+
               type="file" multiple accept=".avif, .webp, .jpg, .jpeg, .png"
               @input="uploadFile($event, { id: p.id, urlFriendly: p.urlFriendly })"
             />
