@@ -12,20 +12,16 @@ const currentCategory = ref<CategoryRec | null>(currentGroup.value?.categories[0
 const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 const images = ref<Record<string, ListBlobResultBlob[] >>({})
 
-const config = useRuntimeConfig()
-
 onMounted(async () => {
   groups.value?.forEach(g => g.categories.forEach(c =>
 
     c.projects.forEach((p) => {
       if (!p.images.length)
         return
-      console.log(p)
 
       images.value[p.urlFriendly] = []
 
       $fetch(`/api/projects/${p.urlFriendly}/images`).then((r) => {
-        console.log(r)
         r.blobs.forEach(img => images.value[p.urlFriendly].push(img))
       },
 
@@ -97,7 +93,7 @@ function changeCategory(category: CategoryRec) {
           >
             <Button
               :size="md ? 'sm' : 'default'"
-              :class="[c === currentCategory ? 'bg-primary-foreground' : '']"
+              :class="[c === currentCategory ? 'bg-primary-foreground font-bold' : '']"
               variant="ghost"
               @click="changeCategory(c)"
             >
@@ -125,7 +121,7 @@ function changeCategory(category: CategoryRec) {
       </NuxtLink>
     </section>
     <section v-else class="grid flex-grow h-full justify-center items-center">
-      <span class="text-lg md:text-base p-8 bg-primary-foreground font-bold">Проектов пока нет</span>
+      <span class="text-lg md:text-base p-8 bg-primary-foreground">Проектов пока нет</span>
     </section>
   </main>
 </template>
