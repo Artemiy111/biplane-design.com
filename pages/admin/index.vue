@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
 import { toast } from 'vue-sonner'
-import { type ProjectCreateSchema, projectCreateSchema } from '~/server/validators'
-import { Sheet } from '~/components/ui/sheet'
-import type { Form } from '~/components/ui/form'
 import CreateProjectSheet from '~/components/admin/CreateProjectSheet.vue'
+import type { FormSchema } from '~/components/admin/CreateProjectSheet.vue'
 import type { GroupRec } from '~/server/db/schema'
 
 const { data: groups, error: groupsError } = await useFetch('/api/groups')
@@ -23,7 +20,7 @@ watch(projectsError, () => {
 })
 
 const createProjectSheetRef = ref<InstanceType<typeof CreateProjectSheet> | null>(null)
-async function onSubmit(values: ProjectCreateSchema) {
+async function onSubmit(values: FormSchema) {
   try {
     await $fetch('/api/projects', {
       method: 'POST',
@@ -67,12 +64,16 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
 
 <template>
   <main class="container flex flex-col">
+    <CreateProjectSheet
+      v-if="groups" ref="createProjectSheetRef"
+      :groups="(groups as unknown as GroupRec[])"
+      @submit="onSubmit"
+    />
+
     <section class="p-8">
-      <CreateProjectSheet
-        v-if="groups" ref="createProjectSheetRef"
-        :groups="(groups as unknown as GroupRec[])"
-        @submit="onSubmit"
-      />
+      <Button @click="createProjectSheetRef?.open()">
+        Создать проект
+      </Button>
     </section>
 
     <Table>
@@ -94,7 +95,7 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
               v-if="p.images.length" format="avif,webp,png,jpg"
               :src="`/images/projects/${p.urlFriendly}/${p.images[0].filename}`"
               :alt="p.images[0].title || 'image'"
-              class="aspect-video max-h-[100px] min-w-max w-max object-cover"
+              class="aspect-video max-h-[100px] w-max min-w-max object-cover"
             />
           </TableCell>
           <TableCell>
@@ -108,7 +109,6 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
           <TableCell class="w-min">
             <Input
               class="w-min"
-
               type="file" multiple accept=".avif, .webp, .jpg, .jpeg, .png"
               @input="uploadFile($event, { id: p.id, urlFriendly: p.urlFriendly })"
             />

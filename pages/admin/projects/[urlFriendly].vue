@@ -34,7 +34,7 @@ async function deleteImages(filenames: string[]) {
       {{ project.title }}
       {{ project.urlFriendly }}
     </section>
-    <section class="p-8 flex flex-col gap-4">
+    <section class="flex flex-col gap-4 p-8">
       <span>Изображений: {{ project.images.length }}</span>
       <Table>
         <TableHeader>

@@ -1,34 +1,41 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import type { GroupRec } from '~/server/db/schema'
-import { type ProjectCreateSchema, projectCreateSchema } from '~/server/validators'
+import { z } from 'zod'
+import { type GroupRec, projectInsertSchema } from '~/server/db/schema'
+
+// import { type ProjectCreateSchema, projectCreateSchema } from '~/server/validators'
 import { Form } from '~/components/ui/form'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   groups: GroupRec[]
-}>()
+  initialValues?: Partial<FormSchema>
+}>(), {
+  initialValues: p => ({
+    title: '',
+    urlFriendly: '',
+    groupId: p.groups?.[0].id.toString() as unknown as number,
+    categoryId: p.groups?.[0].categories[0].id.toString() as unknown as number,
+    status: '',
+    yearStart: null,
+    yearEnd: null,
+    location: '',
+  }),
+})
 
 const emit = defineEmits<{
-  submit: [values: ProjectCreateSchema]
+  submit: [values: FormSchema]
 }>()
 
-const groups = toRef(props, 'groups')
+const formSchema = projectInsertSchema.merge(z.object({
+  groupId: z.union([z.string(), z.number()]).transform(v => Number(v)),
+}))
 
-const createProjectFormInitialValues: Partial<ProjectCreateSchema> = {
-  title: '',
-  urlFriendly: '',
-  groupId: groups.value?.[0].id.toString() as unknown as number,
-  categoryId: groups.value?.[0].categories[0].id.toString() as unknown as number,
-  status: '',
-  yearStart: null,
-  yearEnd: null,
-  location: '',
-}
+export type FormSchema = z.infer<typeof formSchema>
 
-const createProjectFormValidationSchema = toTypedSchema(projectCreateSchema)
-const selectedGroupId = ref<string | null>(groups.value?.[0].id.toString() || null)
-const selectedGroup = computed<NonNullable<typeof groups.value>[number] | null>(
-  () => groups.value?.find(g => g.id.toString() === selectedGroupId.value) || null,
+const validationSchema = toTypedSchema(formSchema)
+const selectedGroupId = ref<string | null>(props.groups[0].id.toString() || null)
+const selectedGroup = computed<NonNullable<typeof props.groups>[number] | null>(
+  () => props.groups.find(g => g.id.toString() === selectedGroupId.value) || null,
 )
 
 const formRef = ref<InstanceType<typeof Form> | null>(null)
@@ -41,30 +48,26 @@ watch(title, () => {
   formRef.value.setFieldValue('urlFriendly', urlFriendly.value)
 })
 
-const isSheetOpen = ref(false)
-function handleSheetOpen(isOpen: boolean) {
+const isOpen = ref(false)
+function handleCloseOnDirty(open: boolean) {
   if (formRef.value?.meta.dirty && !isOpen)
     return
 
-  isSheetOpen.value = isOpen
+  isOpen.value = open
 }
-
-const close = () => isSheetOpen.value = false
+const open = () => isOpen.value = true
+const close = () => isOpen.value = false
 defineExpose({
+  open,
   close,
 })
 </script>
 
 <template>
-  <Sheet :open="isSheetOpen" @update:open="isSheetOpen = $event">
-    <SheetTrigger as-child>
-      <Button @click="isSheetOpen = true">
-        Создать проект
-      </Button>
-    </SheetTrigger>
+  <Sheet :open="isOpen" @update:open="isOpen = $event">
     <SheetContent
-      side="left" class="overflow-auto w-full max-w-3xl"
-      @pointer-down-outside="$event.preventDefault(), handleSheetOpen(false)"
+      side="left" class="w-full max-w-3xl overflow-auto"
+      @pointer-down-outside="$event.preventDefault(), handleCloseOnDirty(false)"
     >
       <SheetHeader>
         <SheetTitle>Создать проект</SheetTitle>
@@ -75,10 +78,10 @@ defineExpose({
       <Form
         ref="formRef"
         v-slot="{ setFieldValue }"
-        :initial-values="createProjectFormInitialValues"
-        :validation-schema="createProjectFormValidationSchema"
+        :initial-values="props.initialValues"
+        :validation-schema="validationSchema"
         class="grid gap-4"
-        @submit="emit('submit', $event as ProjectCreateSchema)"
+        @submit="emit('submit', $event as FormSchema)"
       >
         <FormField v-slot="{ componentField, handleChange }" name="title">
           <FormItem>
@@ -146,7 +149,7 @@ defineExpose({
         </FormField>
         <FormField v-slot="{ componentField, handleChange }" name="status">
           <FormItem>
-            <FormLabel>Статус</FormLabel>
+            <FormLabel>Статус *</FormLabel>
             <FormControl>
               <Input :model-value="componentField.modelValue" placeholder="Завершён" @change="handleChange" />
             </FormControl>

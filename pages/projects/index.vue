@@ -64,11 +64,11 @@ function changeCategory(category: CategoryRec) {
 </script>
 
 <template>
-  <main class="flex flex-col flex-grow container h-full">
-    <section class="grid items-center grid-cols-2 divide-x sm:text-base lg:text-xl md:text-lg 2xl:text-2xl text-3xl">
+  <main class="container flex h-full flex-grow flex-col">
+    <section class="grid grid-cols-2 items-center divide-x text-3xl 2xl:text-2xl lg:text-xl md:text-lg sm:text-base">
       <h2
         v-for="group in groups" :key="group.id"
-        class="font-bold w-full px-8 py-4 sm:px-4 sm:py-2 hover:bg-secondary cursor-pointer transition-colors"
+        class="w-full cursor-pointer px-8 py-4 font-bold transition-colors hover:bg-secondary sm:px-4 sm:py-2"
         :class="[group === currentGroup ? 'bg-primary-foreground' : '']"
         tabindex="0"
         @keypress.enter.space="changeTheme(group)"
@@ -79,7 +79,7 @@ function changeCategory(category: CategoryRec) {
     </section>
     <Separator />
     <section
-      v-if="currentGroup?.categories.length" class="mx-8 sm:mx-2 sm:gap-2 sm:my-2 my-4 "
+      v-if="currentGroup?.categories.length" class="mx-8 my-4 sm:mx-2 sm:my-2 sm:gap-2"
       :class="[haveHiddenCategories ? 'border-r-4 border-primary-foreground' : '']"
     >
       <Carousel
@@ -104,9 +104,9 @@ function changeCategory(category: CategoryRec) {
       </Carousel>
     </section>
     <Separator v-if="currentGroup?.categories.length" />
-    <section v-if="projectsWithImages?.length" class="grid lg:grid-cols-1 grid-cols-2 gap-x-[2px] gap-y-[2px] ">
-      <NuxtLink v-for="p in projectsWithImages" :key="p.id" :to="`/projects/${p.urlFriendly}`" class="flex flex-col hover:bg-primary-foreground transition-colors">
-        <Carousel class="w-full aspect-video">
+    <section v-if="projectsWithImages?.length" class="grid grid-cols-2 gap-x-[2px] gap-y-[2px] lg:grid-cols-1">
+      <NuxtLink v-for="p in projectsWithImages" :key="p.id" :to="`/projects/${p.urlFriendly}`" class="flex flex-col transition-colors hover:bg-primary-foreground">
+        <Carousel class="aspect-video w-full">
           <CarouselContent>
             <CarouselItem v-for="img in images[p.urlFriendly]" :key="img.url">
               <!-- <NuxtImg format="avif,webp,png,jpg" :src="`/images/projects/${p.urlFriendly}/${img.filename}`" :alt="img.title || 'image'" class="aspect-video w-full object-cover" /> -->
@@ -114,14 +114,14 @@ function changeCategory(category: CategoryRec) {
             </CarouselItem>
           </CarouselContent>
         </Carousel>
-        <div class="flex gap-8 mx-8 my-4 items-center justify-between">
+        <div class="mx-8 my-4 flex items-center justify-between gap-8">
           <h4>{{ p.title }}</h4>
           <span class="text-slate-400">{{ p.yearStart }}</span>
         </div>
       </NuxtLink>
     </section>
-    <section v-else class="grid flex-grow h-full justify-center items-center">
-      <span class="text-lg md:text-base p-8 bg-primary-foreground">Проектов пока нет</span>
+    <section v-else class="grid h-full flex-grow items-center justify-center">
+      <span class="bg-primary-foreground p-8 text-lg md:text-base">Проектов пока нет</span>
     </section>
   </main>
 </template>
