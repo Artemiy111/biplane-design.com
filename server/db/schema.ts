@@ -1,6 +1,9 @@
 /* eslint-disable ts/no-use-before-define */
 import { integer, pgTable, serial, text, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import * as z from 'zod'
+import { projectCreateSchema as val } from './../validators/index'
 
 export const groups = pgTable('groups', {
   id: serial('id').primaryKey(),
@@ -58,6 +61,37 @@ export const projects = pgTable('projects', {
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+})
+
+const MIN_YEAR = 2000
+const MAX_YEAR = 2050
+
+export const projectInsertSchema = createInsertSchema(projects, {
+  title: z.string().trim().min(3, 'Минимум 3 символа'),
+  categoryId: z.union([z.string(), z.number()]).transform(v => Number(v)),
+  urlFriendly: z.string().trim()
+    .min(3, 'Минимум 3 символа')
+    .refine((s) => {
+      const url = `https://g.com/${s}`
+      try {
+        z.string().url().parse(url)
+        return true
+      }
+      catch (e) {
+        return false
+      }
+    }, 'Не валидный URL'),
+  status: z.string().trim().min(3, 'Минимум 3 символа'),
+  yearStart: z.number()
+    .min(MIN_YEAR, `Год начала не может быть меньше ${MIN_YEAR}`)
+    .max(MAX_YEAR, `Год начала не может быть больше ${MAX_YEAR}`)
+    .nullable(),
+  yearEnd: z.number()
+    .min(MIN_YEAR, `Год завершения не может быть меньше ${MIN_YEAR}`)
+    .max(MAX_YEAR, `Год завершения не может быть больше ${MAX_YEAR}`)
+
+    .nullable(),
+  location: z.string().trim().min(3, 'Минимум 3 символа'),
 })
 
 export type Project = typeof projects.$inferSelect

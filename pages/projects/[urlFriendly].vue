@@ -44,8 +44,8 @@ function scrollToImage(index: number) {
 </script>
 
 <template>
-  <main v-if="project" class="flex flex-col container">
-    <section class="flex justify-between px-8 py-4 sm:py-2 sm:text-base lg:text-xl md:text-lg 2xl:text-2xl text-3xl">
+  <main v-if="project" class="container flex flex-col">
+    <section class="flex justify-between px-8 py-4 text-3xl 2xl:text-2xl lg:text-xl md:text-lg sm:py-2 sm:text-base">
       <h1 class="font-bold">
         {{ project.title }}
       </h1>
@@ -53,7 +53,7 @@ function scrollToImage(index: number) {
     </section>
     <Separator />
     <section
-      class="grid items-start grid-cols-[300px,1fr] md:grid-cols-1 2xl:grid-cols-[250px,1fr] xl:grid-cols-[200px,1fr] lg:grid-cols-[150px,1fr] overflow-hidden h-fit divide-x-2 divide-primary-foreground"
+      class="grid h-fit grid-cols-[300px,1fr] items-start divide-x-2 divide-primary-foreground overflow-hidden 2xl:grid-cols-[250px,1fr] xl:grid-cols-[200px,1fr] lg:grid-cols-[150px,1fr] md:grid-cols-1"
     >
       <Carousel
         class="md:hidden"
@@ -66,7 +66,7 @@ function scrollToImage(index: number) {
         @init-api="setApi($event, 'tumb')"
       >
         <CarouselContent
-          class=" divide-y-2 mt-0"
+          class="mt-0 divide-y-2"
           :style="{ maxHeight: `${mainCarouselHeight}px` }"
         >
           <CarouselItem
@@ -92,7 +92,7 @@ function scrollToImage(index: number) {
       </Carousel>
       <Carousel
         ref="mainCarouselRef"
-        class="w-full aspect-video"
+        class="aspect-video w-full"
         :opts="{
           loop: true,
         }"
@@ -102,24 +102,24 @@ function scrollToImage(index: number) {
           <CarouselItem
             v-for="img in images"
             :key="img.pathname"
-            class="flex justify-center items-center"
+            class="flex items-center justify-center"
           >
             <!-- <NuxtImg
               :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
               format="avif,webp,png,jpg"
-              class="w-full aspect-video object-contain"
+              class="aspect-video w-full object-contain"
             /> -->
             <NuxtImg
               :src="img.url"
               format="avif,webp,png,jpg"
-              class="w-full aspect-video object-contain"
+              class="aspect-video w-full object-contain"
             />
           </CarouselItem>
         </CarouselContent>
       </Carousel>
     </section>
     <Separator />
-    <section class="px-8 py-8 gap-x-16 gap-y-2 grid grid-cols-[repeat(2,max-content)]">
+    <section class="grid grid-cols-[repeat(2,max-content)] gap-x-16 gap-y-2 px-8 py-8">
       <span>Расположение</span>
       <span>{{ project.location }}</span>
       <template v-if="project.yearStart">

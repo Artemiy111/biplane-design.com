@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import '@total-typescript/ts-reset'
+
 export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: [
@@ -8,6 +10,7 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts',
     '@nuxt/image',
     '@tresjs/nuxt',
+    '@nuxtjs/partytown',
   ],
   googleFonts: {
     families: {
