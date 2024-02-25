@@ -29,7 +29,7 @@ const routes = [{
               class="cursor-pointer"
               :class="[
                 md ? navigationMenuTriggerStyle({ size: 'sm' }) : navigationMenuTriggerStyle(),
-                r.link === route.path ? 'bg-primary-foreground' : '']"
+                r.link === route.path ? 'bg-primary-foreground font-bold' : '']"
             >
               {{ r.title }}
             </NuxtLink>

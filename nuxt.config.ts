@@ -12,6 +12,7 @@ export default defineNuxtConfig({
   googleFonts: {
     families: {
       Inter: true,
+      Montserrat: true,
     },
   },
   eslintConfig: {
