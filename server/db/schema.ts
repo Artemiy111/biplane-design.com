@@ -107,7 +107,6 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
 }))
 
 export const images = pgTable('images', {
-  projectId: integer('project_id').notNull().references(() => projects.id),
   projectUrlFriendly: varchar('project_url_friendly', { length: 200 }).references(() => projects.urlFriendly).notNull(),
   id: serial('id').primaryKey(),
   filename: varchar('filename', { length: 200 }).notNull(),
@@ -127,8 +126,8 @@ export type ImageCreate = typeof images.$inferInsert
 
 export const imageRelations = relations(images, ({ one }) => ({
   project: one(projects, {
-    fields: [images.projectId],
-    references: [projects.id],
+    fields: [images.projectUrlFriendly],
+    references: [projects.urlFriendly],
     relationName: 'project',
   }),
 }))

@@ -109,7 +109,7 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
       </Button>
     </section>
 
-    <Table>
+    <Table class="">
       <TableHeader>
         <TableRow>
           <TableHead>Превью</TableHead>
@@ -117,6 +117,10 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
           <TableHead>URL Friendly</TableHead>
           <TableHead>Группа</TableHead>
           <TableHead>Категория</TableHead>
+          <TableHead>Год начала</TableHead>
+          <TableHead>Год завершения</TableHead>
+          <TableHead>Статус</TableHead>
+          <TableHead>Расположение</TableHead>
           <TableHead>Загрузить фото</TableHead>
           <TableHead />
         </TableRow>
@@ -139,15 +143,19 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
           <TableCell>{{ p.urlFriendly }}</TableCell>
           <TableCell>{{ p.category.group.title }}</TableCell>
           <TableCell>{{ p.category.title }}</TableCell>
+          <TableCell>{{ p.yearStart }}</TableCell>
+          <TableCell>{{ p.yearEnd }}</TableCell>
+          <TableCell>{{ p.status }}</TableCell>
+          <TableCell>{{ p.location }}</TableCell>
           <TableCell class="w-min">
             <Input
-              class="w-min"
+              class="w-[100px]"
               type="file" multiple accept=".avif, .webp, .jpg, .jpeg, .png"
               @input="uploadFile($event, { id: p.id, urlFriendly: p.urlFriendly })"
             />
           </TableCell>
           <TableCell>
-            <Button @click="openChangeProject(p)">
+            <Button variant="outline" @click="openChangeProject(p)">
               Изменить
             </Button>
           </TableCell>
