@@ -6,25 +6,26 @@ import { type GroupRec, projectInsertSchema } from '~/server/db/schema'
 // import { type ProjectCreateSchema, projectCreateSchema } from '~/server/validators'
 import { Form } from '~/components/ui/form'
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   groups: GroupRec[]
-  initialValues?: Partial<FormSchema>
-}>(), {
-  initialValues: p => ({
-    title: '',
-    urlFriendly: '',
-    groupId: p.groups?.[0].id.toString() as unknown as number,
-    categoryId: p.groups?.[0].categories[0].id.toString() as unknown as number,
-    status: '',
-    yearStart: null,
-    yearEnd: null,
-    location: '',
-  }),
-})
+}>()
 
 const emit = defineEmits<{
-  submit: [values: FormSchema]
+  submit: [values: FormSchema, prev: FormSchema | null ]
 }>()
+export type Mode = 'create' | 'update'
+const mode = ref<Mode>('create')
+
+const initialValues = ref<FormSchema>({
+  title: '',
+  urlFriendly: '',
+  groupId: props.groups?.[0].id.toString() as unknown as number,
+  categoryId: props.groups?.[0].categories[0].id.toString() as unknown as number,
+  status: '',
+  yearStart: null,
+  yearEnd: null,
+  location: '',
+})
 
 const formSchema = projectInsertSchema.merge(z.object({
   groupId: z.union([z.string(), z.number()]).transform(v => Number(v)),
@@ -55,8 +56,32 @@ function handleCloseOnDirty(open: boolean) {
 
   isOpen.value = open
 }
-const open = () => isOpen.value = true
-const close = () => isOpen.value = false
+
+const prev = ref<FormSchema | null>(null)
+
+async function open(initial?: FormSchema) {
+  isOpen.value = true
+  mode.value = 'update'
+  if (initial) {
+    await nextTick()
+    console.log(initial)
+    initial.groupId = initial.groupId.toString()
+    initial.categoryId = initial.categoryId.toString()
+    formRef.value?.setValues(initial, false)
+    console.log(formRef.value)
+  }
+  else {
+    await nextTick()
+    formRef.value?.resetForm()
+    mode.value = 'create'
+  }
+  prev.value = initial || null
+}
+
+function close() {
+  isOpen.value = false
+  prev.value = null
+}
 defineExpose({
   open,
   close,
@@ -66,11 +91,12 @@ defineExpose({
 <template>
   <Sheet :open="isOpen" @update:open="isOpen = $event">
     <SheetContent
-      side="left" class="w-full max-w-3xl overflow-auto"
+      :side="mode === 'create' ? 'left' : 'right'"
+      class="w-full max-w-3xl overflow-auto"
       @pointer-down-outside="$event.preventDefault(), handleCloseOnDirty(false)"
     >
       <SheetHeader>
-        <SheetTitle>Создать проект</SheetTitle>
+        <SheetTitle>{{ mode === 'create' ? 'Создать' : 'Изменить' }} проект</SheetTitle>
         <SheetDescription>
           Заполните поля
         </SheetDescription>
@@ -78,10 +104,10 @@ defineExpose({
       <Form
         ref="formRef"
         v-slot="{ setFieldValue }"
-        :initial-values="props.initialValues"
+        :initial-values="initialValues"
         :validation-schema="validationSchema"
         class="grid gap-4"
-        @submit="emit('submit', $event as FormSchema)"
+        @submit="emit('submit', $event as FormSchema, prev)"
       >
         <FormField v-slot="{ componentField, handleChange }" name="title">
           <FormItem>
@@ -185,7 +211,7 @@ defineExpose({
         </FormField>
         <SheetFooter>
           <Button type="submit">
-            Создать
+            {{ mode === 'create' ? 'Создать' : "Сохранить изменения" }}
           </Button>
         </SheetFooter>
       </Form>
