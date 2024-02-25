@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import { Buffer } from 'node:buffer'
 import * as z from 'zod'
 import { list, put } from '@vercel/blob'
-
+import '@total-typescript/ts-reset'
 import { db } from '~/server/db'
 import { images } from '~/server/db/schema'
 import { HttpErrorCode, createHttpError } from '~/server/exceptions'
@@ -63,21 +63,17 @@ export default defineEventHandler(async (event) => {
   //   const fileCreationError = createFile(filepath, file.data)
   //   if (fileCreationError !== null)
   //     return createHttpError(HttpErrorCode.InternalServerError)
-
   const folder = project.urlFriendly
-  formData.forEach(async (file) => {
-    const filepath = path.join(folder, `${file.filename!}`)
-    const result = await put(filepath, file.data, { access: 'public', token: useRuntimeConfig().public.blobReadWriteToken })
-    console.log(result)
-    //   if (fileCreationError !== null)
-    //     return createHttpError(HttpErrorCode.InternalServerError
+  const files = formData.map(file => ({
+    projectId: project.id,
+    projectUrlFriendly: project.urlFriendly,
+    filename: file.filename!,
+    path: path.join(folder, file.filename!),
+    data: file.data,
+  }))
 
-    return await db.insert(images).values(
-      {
-        projectId: project.id,
-        projectUrlFriendly: project.urlFriendly,
-        filename: file.filename!,
-      },
-    )
-  })
+  const res = await Promise.allSettled(files.map(file => put(file.path, file.data, { access: 'public', token: useRuntimeConfig().public.blobReadWriteToken })))
+  const ok = files.filter((file, idx) => res[idx].status === 'fulfilled')
+
+  return await db.insert(images).values(ok).returning()
 })
