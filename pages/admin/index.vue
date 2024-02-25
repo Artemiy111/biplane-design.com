@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
 import CreateProjectSheet from '~/components/admin/CreateProjectSheet.vue'
-import type { FormSchema } from '~/components/admin/CreateProjectSheet.vue'
-import type { GroupRec } from '~/server/db/schema'
+import type { FormSchema, Mode } from '~/components/admin/CreateProjectSheet.vue'
+import type { GroupRec, ProjectRec } from '~/server/db/schema'
 
 const { data: groups, error: groupsError } = await useFetch('/api/groups')
 const { data: projects, error: projectsError, refresh: refreshProjects } = await useFetch('/api/projects')
@@ -19,22 +19,55 @@ watch(projectsError, () => {
   toast.error(projectsError.value.message)
 })
 
-const createProjectSheetRef = ref<InstanceType<typeof CreateProjectSheet> | null>(null)
-async function onSubmit(values: FormSchema) {
+const projectSheetRef = ref<InstanceType<typeof CreateProjectSheet> | null>(null)
+async function onSubmit(values: FormSchema, prev: FormSchema | null) {
+  if (!prev) {
+    try {
+      await $fetch('/api/projects', {
+        method: 'POST',
+        body: values,
+      })
+      projectSheetRef.value?.close()
+      toast.success('Проект создан')
+    }
+    catch (e) {
+      if (e instanceof Error)
+        toast.error(e.message)
+      else toast.error(String(e))
+    }
+    return
+  }
+
   try {
-    await $fetch('/api/projects', {
-      method: 'POST',
+    await $fetch(`/api/projects/${prev.urlFriendly}`, {
+      method: 'PUT',
       body: values,
     })
-    createProjectSheetRef.value?.close()
-    toast.success('Проект создан')
+    projectSheetRef.value?.close()
+    toast.success('Проект изменён')
   }
   catch (e) {
     if (e instanceof Error)
       toast.error(e.message)
     else toast.error(String(e))
   }
+
   refreshProjects()
+}
+
+function openChangeProject(project: ProjectRec) {
+  projectSheetRef.value?.open({
+    id: project.id,
+    urlFriendly: project.urlFriendly,
+    title: project.title,
+    groupId: groups.value?.find(g => g.categories.find(c => c.id === project.categoryId))!.id as unknown as number,
+    location: project.location,
+    status: project.status,
+    yearStart: project.yearStart,
+    yearEnd: project.yearEnd,
+    categoryId: project.categoryId,
+    order: project.order,
+  })
 }
 
 async function uploadFile(event: Event, project: { id: number, urlFriendly: string }) {
@@ -65,13 +98,13 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
 <template>
   <main class="container flex flex-col">
     <CreateProjectSheet
-      v-if="groups" ref="createProjectSheetRef"
+      v-if="groups" ref="projectSheetRef"
       :groups="(groups as unknown as GroupRec[])"
       @submit="onSubmit"
     />
 
     <section class="p-8">
-      <Button @click="createProjectSheetRef?.open()">
+      <Button @click="projectSheetRef?.open()">
         Создать проект
       </Button>
     </section>
@@ -114,7 +147,9 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
             />
           </TableCell>
           <TableCell>
-            <Button>Изменить</Button>
+            <Button @click="openChangeProject(p)">
+              Изменить
+            </Button>
           </TableCell>
         </TableRow>
       </TableBody>

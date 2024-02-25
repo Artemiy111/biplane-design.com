@@ -47,7 +47,9 @@
       </ul>
     </section>
     <section>
+      <Separator />
       <iframe class="max-h-[80dvh]" src="https://yandex.ru/map-widget/v1/?um=constructor%3A3da4595a6346865d8223d34a3ff56c219a4f3852edd8bb18b888329ab0ba28fa&amp;source=constructor" width="100%" height="600" frameborder="0" />
+      <Separator />
     </section>
     <section class="flex px-8 py-4">
       <span>© Биплан-Дизайн 2000 - 2024</span>
