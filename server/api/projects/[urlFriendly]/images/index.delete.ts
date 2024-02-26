@@ -35,16 +35,17 @@ export default defineEventHandler(async (event) => {
     filenames.forEach(async (filename) => {
       return await db.delete(images).where(eq(images.filename, filename))
     })
-    // filenames.forEach((filename) => {
-    //   const deleteFileError = deleteFile(path.join(folder, filename))
-    //   if (deleteFileError !== null)
-    //     return createHttpError(HttpErrorCode.InternalServerError)
-    // })
-
+    // !FIXME транзакция неправильная
     filenames.forEach((filename) => {
-      del(folder + filename, {
-
-      })
+      const deleteFileError = deleteFile(path.join(folder, filename))
+      if (deleteFileError !== null)
+        return createHttpError(HttpErrorCode.InternalServerError)
     })
+
+    // filenames.forEach((filename) => {
+    //   del(folder + filename, {
+
+    //   })
+    // })
   })
 })

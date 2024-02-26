@@ -3,7 +3,6 @@ import { integer, pgTable, serial, text, timestamp, unique, uuid, varchar } from
 import { relations } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import * as z from 'zod'
-import { projectCreateSchema as val } from './../validators/index'
 
 export const groups = pgTable('groups', {
   id: serial('id').primaryKey(),
@@ -26,13 +25,14 @@ export const categories = pgTable('categories', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 128 }).notNull().unique(),
   urlFriendly: varchar('url_friendly', { length: 128 }).notNull(),
-  order: serial('order').notNull().unique(),
+  order: serial('order').notNull(),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (t) => {
   return {
-    uniqueUrlFriendlyForGroupId: unique('url_friendly_for_group_id').on(t.groupId, t.urlFriendly),
+    uniqueUrlFriendlyForGroup: unique('url_friendly_for_group').on(t.groupId, t.urlFriendly),
+    uniqueOrderForGroup: unique('unique_order_for_group').on(t.groupId, t.order),
   }
 })
 
@@ -57,11 +57,33 @@ export const projects = pgTable('projects', {
   yearStart: integer('year_start'),
   yearEnd: integer('year_end'),
   location: text('location'),
-  order: serial('order').notNull().unique(),
+  previewFilename: integer('preview_filename'),
+  order: serial('order').notNull(),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (t) => {
+  return {
+    uniqueOrderForCategory: unique('unique_order_for_category').on(t.categoryId, t.order),
+  }
 })
+
+export type Project = typeof projects.$inferSelect
+export type ProjectCreate = typeof projects.$inferInsert
+
+export const projectsRelations = relations(projects, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [projects.categoryId],
+    references: [categories.id],
+    relationName: 'category',
+  }),
+  images: many(images),
+  preview: one(images, {
+    fields: [projects.previewFilename],
+    references: [images.filename],
+    relationName: 'preview',
+  }),
+}))
 
 const MIN_YEAR = 2000
 const MAX_YEAR = 2050
@@ -94,18 +116,6 @@ export const projectInsertSchema = createInsertSchema(projects, {
   location: z.string().trim().min(3, 'Минимум 3 символа'),
 })
 
-export type Project = typeof projects.$inferSelect
-export type ProjectCreate = typeof projects.$inferInsert
-
-export const projectsRelations = relations(projects, ({ one, many }) => ({
-  category: one(categories, {
-    fields: [projects.categoryId],
-    references: [categories.id],
-    relationName: 'category',
-  }),
-  images: many(images),
-}))
-
 export const images = pgTable('images', {
   projectUrlFriendly: varchar('project_url_friendly', { length: 200 }).references(() => projects.urlFriendly).notNull(),
   id: serial('id').primaryKey(),
@@ -118,6 +128,7 @@ export const images = pgTable('images', {
 }, (t) => {
   return {
     uniqueFilenameForProject: unique('unique_filename_for_project').on(t.projectUrlFriendly, t.filename),
+    uniqueOrderForProject: unique('unique_order_for_project').on(t.projectUrlFriendly, t.order),
   }
 })
 
