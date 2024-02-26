@@ -44,11 +44,11 @@ export default defineNuxtConfig({
   },
   image: {
     // provider: 'vercel',
-    dir: 'https://4anunn25btg7t3sl.public.blob.vercel-storage.com',
-    alias: { v: 'https://4anunn25btg7t3sl.public.blob.vercel-storage.com' },
-    domains: [
-      'https://4anunn25btg7t3sl.public.blob.vercel-storage.com',
-    ],
+    // dir: 'https://4anunn25btg7t3sl.public.blob.vercel-storage.com',
+    // alias: { v: 'https://4anunn25btg7t3sl.public.blob.vercel-storage.com' },
+    // domains: [
+    //   'https://4anunn25btg7t3sl.public.blob.vercel-storage.com',
+    // ],
     ipx: {},
     format: ['avif', 'webp', 'png', 'jpg'],
   },

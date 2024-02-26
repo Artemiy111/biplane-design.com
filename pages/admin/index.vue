@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
+import Dropzone from '~/components/Dropzone.vue'
 import CreateProjectSheet from '~/components/admin/CreateProjectSheet.vue'
 import type { FormSchema, Mode } from '~/components/admin/CreateProjectSheet.vue'
 import type { GroupRec, ProjectRec } from '~/server/db/schema'
@@ -67,17 +68,17 @@ function openChangeProject(project: ProjectRec) {
     yearEnd: project.yearEnd,
     categoryId: project.categoryId,
     order: project.order,
+    preview: null,
   })
 }
 
-async function uploadFile(event: Event, project: { id: number, urlFriendly: string }) {
+async function uploadFiles(files: File[], project: { id: number, urlFriendly: string }) {
   const formData = new FormData()
-  const target = event.target as HTMLInputElement
-  const images = [...target.files || []]
+  const images = files
 
   const jsonProject = JSON.stringify(project)
   formData.append('project', jsonProject)
-  images.forEach(image => formData.append('files', image))
+  images.forEach((image, idx) => formData.append(`image-${idx}`, image))
 
   try {
     const _res = await $fetch(`/api/projects/${project.urlFriendly}/images`, {
@@ -109,7 +110,7 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
       </Button>
     </section>
 
-    <Table>
+    <Table class="">
       <TableHeader>
         <TableRow>
           <TableHead>Превью</TableHead>
@@ -117,6 +118,10 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
           <TableHead>URL Friendly</TableHead>
           <TableHead>Группа</TableHead>
           <TableHead>Категория</TableHead>
+          <TableHead>Год начала</TableHead>
+          <TableHead>Год завершения</TableHead>
+          <TableHead>Статус</TableHead>
+          <TableHead>Расположение</TableHead>
           <TableHead>Загрузить фото</TableHead>
           <TableHead />
         </TableRow>
@@ -139,15 +144,15 @@ async function uploadFile(event: Event, project: { id: number, urlFriendly: stri
           <TableCell>{{ p.urlFriendly }}</TableCell>
           <TableCell>{{ p.category.group.title }}</TableCell>
           <TableCell>{{ p.category.title }}</TableCell>
+          <TableCell>{{ p.yearStart }}</TableCell>
+          <TableCell>{{ p.yearEnd }}</TableCell>
+          <TableCell>{{ p.status }}</TableCell>
+          <TableCell>{{ p.location }}</TableCell>
           <TableCell class="w-min">
-            <Input
-              class="w-min"
-              type="file" multiple accept=".avif, .webp, .jpg, .jpeg, .png"
-              @input="uploadFile($event, { id: p.id, urlFriendly: p.urlFriendly })"
-            />
+            <Dropzone :multiple="true" :show-files="true" @upload="uploadFiles($event, p)" />
           </TableCell>
           <TableCell>
-            <Button @click="openChangeProject(p)">
+            <Button variant="outline" @click="openChangeProject(p as unknown as ProjectRec)">
               Изменить
             </Button>
           </TableCell>

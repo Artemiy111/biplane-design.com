@@ -2,6 +2,7 @@
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { type GroupRec, projectInsertSchema } from '~/server/db/schema'
+import Dropzone from '~/components/Dropzone.vue'
 
 // import { type ProjectCreateSchema, projectCreateSchema } from '~/server/validators'
 import { Form } from '~/components/ui/form'
@@ -25,10 +26,13 @@ const initialValues = ref<FormSchema>({
   yearStart: null,
   yearEnd: null,
   location: '',
+  preview: null,
 })
+//  !FIXME не совместимые типы превью
 
 const formSchema = projectInsertSchema.merge(z.object({
   groupId: z.union([z.string(), z.number()]).transform(v => Number(v)),
+  preview: z.instanceof(File).nullable(),
 }))
 
 export type FormSchema = z.infer<typeof formSchema>
@@ -64,11 +68,9 @@ async function open(initial?: FormSchema) {
   mode.value = 'update'
   if (initial) {
     await nextTick()
-    console.log(initial)
-    initial.groupId = initial.groupId.toString()
-    initial.categoryId = initial.categoryId.toString()
+    initial.groupId = initial.groupId.toString() as unknown as number
+    initial.categoryId = initial.categoryId.toString() as unknown as number
     formRef.value?.setValues(initial, false)
-    console.log(formRef.value)
   }
   else {
     await nextTick()
@@ -205,6 +207,15 @@ defineExpose({
             <FormLabel>Расположение *</FormLabel>
             <FormControl>
               <Input :model-value="componentField.modelValue" placeholder="Уфа" @change="handleChange" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+        <FormField v-slot="{ handleChange }" name="preview">
+          <FormItem>
+            <FormLabel>Превью</FormLabel>
+            <FormControl>
+              <Dropzone class="h-[300px]" :show-icon="true" :show-files="true" @upload="handleChange($event[0])" />
             </FormControl>
             <FormMessage />
           </FormItem>

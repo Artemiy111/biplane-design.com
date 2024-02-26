@@ -9,31 +9,23 @@ import { db } from '~/server/db'
 import { images } from '~/server/db/schema'
 import { HttpErrorCode, createHttpError } from '~/server/exceptions'
 
-function createFolderIfNotExists(folderPath: string): string | null {
+function createFolderIfNotExists(folderPath: string): Error | undefined {
   try {
     if (!fs.existsSync(folderPath))
       fs.mkdirSync(folderPath)
   }
-  catch (err) {
-    if (err instanceof Error)
-      return `Error creating folder: ${err.message}`
-    else
-      return `An unknown error occurred while creating the folder`
+  catch (e) {
+    return e as Error
   }
-  return null
 }
 
-function createFile(filepath: string, content: Buffer): string | null {
+function createFile(filepath: string, content: Buffer): Error | undefined {
   try {
     fs.writeFileSync(filepath, content)
   }
   catch (e) {
-    if (e instanceof Error)
-      return `Error creating file: ${e.message}`
-    else
-      return `An unknown error occurred while creating the file`
+    return e as Error
   }
-  return null
 }
 
 export default defineEventHandler(async (event) => {
@@ -53,17 +45,21 @@ export default defineEventHandler(async (event) => {
   const project = data.data
   formData.shift()
 
-  // const folder = path.join(process.cwd(), `public/images/projects/${project.urlFriendly}`)
-  // const folderCreationError = createFolderIfNotExists(folder)
-  // if (folderCreationError !== null)
-  //   return createHttpError(HttpErrorCode.InternalServerError)
+  if (!formData.length)
+    return createHttpError(HttpErrorCode.BadRequest)
+
+  const folder = path.join(process.cwd(), `public/images/projects/${project.urlFriendly}`)
+  const folderCreationError = createFolderIfNotExists(folder)
+  if (folderCreationError)
+    return createHttpError(HttpErrorCode.InternalServerError)
 
   // formData.forEach(async (file) => {
   //   const filepath = path.join(folder, `${file.filename!}`)
   //   const fileCreationError = createFile(filepath, file.data)
   //   if (fileCreationError !== null)
   //     return createHttpError(HttpErrorCode.InternalServerError)
-  const folder = project.urlFriendly
+
+  // const folder = project.urlFriendly
   const files = formData.map(file => ({
     projectId: project.id,
     projectUrlFriendly: project.urlFriendly,
@@ -71,9 +67,8 @@ export default defineEventHandler(async (event) => {
     path: path.join(folder, file.filename!),
     data: file.data,
   }))
-
-  const res = await Promise.allSettled(files.map(file => put(file.path, file.data, { access: 'public', token: useRuntimeConfig().public.blobReadWriteToken })))
-  const ok = files.filter((file, idx) => res[idx].status === 'fulfilled')
-
-  return await db.insert(images).values(ok).returning()
+  const createdFiles = files.map(file => createFile(file.path, file.data) === undefined ? file : undefined).filter(file => file) as typeof files
+  // const res = await Promise.allSettled(files.map(file => put(file.path, file.data, { access: 'public', token: useRuntimeConfig().public.blobReadWriteToken })))
+  // const createdFiles = files.filter((file, idx) => res[idx].status === 'fulfilled')
+  return await db.insert(images).values(createdFiles).returning()
 })
