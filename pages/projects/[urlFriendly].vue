@@ -2,10 +2,11 @@
 import { useElementSize } from '@vueuse/core'
 import type { ComponentPublicInstance } from 'vue'
 import { Carousel, type CarouselApi } from '@/components/ui/carousel'
+import type { ProjectRec } from '~/server/db/schema'
 
 const route = useRoute()
 const projectUrlFriendly = route.params.urlFriendly! as string
-const { data: project, error: _error } = await useFetch(`/api/projects/${projectUrlFriendly}/`)
+const { data: project, error: _error } = await useFetch<ProjectRec>(`/api/projects/${projectUrlFriendly}/`)
 
 const api = ref<CarouselApi | null>(null)
 const apiTumb = ref<CarouselApi | null>(null)
@@ -13,15 +14,6 @@ const mainCarouselRef = ref<ComponentPublicInstance | null>(null)
 const { height: mainCarouselHeight } = useElementSize(mainCarouselRef)
 const totalCount = ref(0)
 const current = ref(0)
-
-function setApi(val: CarouselApi, type: 'main' | 'tumb') {
-  if (type === 'main')
-    api.value = val
-  else if (type === 'tumb')
-    apiTumb.value = val
-}
-
-const images = (await $fetch(`/api/projects/${projectUrlFriendly}/images`)).blobs
 
 watch(api, (api) => {
   if (!api)
@@ -63,30 +55,30 @@ function scrollToImage(index: number) {
           align: 'start',
           dragFree: true,
         }"
-        @init-api="setApi($event, 'tumb')"
+        @init-api="apiTumb = $event"
       >
         <CarouselContent
           class="mt-0 divide-y-2"
           :style="{ maxHeight: `${mainCarouselHeight}px` }"
         >
           <CarouselItem
-            v-for="(img, index) in images"
-            :key="img.pathname"
+            v-for="(img, index) in project.images"
+            :key="img.filename"
             class="cursor-grab p-0"
 
             :class="[index === current ? 'outline outline-[16px] xl:outline-8 xl:-outline-offset-8 outline-secondary -outline-offset-[16px]' : '']"
             @click="current = index"
           >
-            <!--    <NuxtImg
+            <NuxtImg
               :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
               format="avif,webp,png,jpg"
               class="aspect-video w-full object-cover"
-            /> -->
-            <NuxtImg
+            />
+            <!--  <NuxtImg
               :src="img.url"
               format="avif,webp,png,jpg"
               class="aspect-video w-full object-cover"
-            />
+            /> -->
           </CarouselItem>
         </CarouselContent>
       </Carousel>
@@ -96,24 +88,24 @@ function scrollToImage(index: number) {
         :opts="{
           loop: true,
         }"
-        @init-api="setApi($event, 'main')"
+        @init-api="api = $event"
       >
         <CarouselContent class="flex items-center">
           <CarouselItem
-            v-for="img in images"
-            :key="img.pathname"
+            v-for="img in project.images"
+            :key="img.filename"
             class="flex items-center justify-center"
           >
-            <!-- <NuxtImg
+            <NuxtImg
               :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
               format="avif,webp,png,jpg"
               class="aspect-video w-full object-contain"
-            /> -->
-            <NuxtImg
+            />
+            <!-- <NuxtImg
               :src="img.url"
               format="avif,webp,png,jpg"
               class="aspect-video w-full object-contain"
-            />
+            /> -->
           </CarouselItem>
         </CarouselContent>
       </Carousel>
