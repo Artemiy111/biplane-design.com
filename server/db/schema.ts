@@ -117,7 +117,8 @@ export const projectInsertSchema = createInsertSchema(projects, {
 })
 
 export const images = pgTable('images', {
-  projectUrlFriendly: varchar('project_url_friendly', { length: 200 }).references(() => projects.urlFriendly).notNull(),
+  projectUrlFriendly: varchar('project_url_friendly', { length: 200 })
+    .references(() => projects.urlFriendly, { onUpdate: 'cascade', onDelete: 'cascade' }).notNull(),
   id: serial('id').primaryKey(),
   filename: varchar('filename', { length: 200 }).notNull(),
   title: varchar('title', { length: 200 }),

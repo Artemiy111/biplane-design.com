@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
-import { type ListBlobResult, type ListBlobResultBlob, list } from '@vercel/blob'
+import type { LocationQueryValue } from 'vue-router'
+import * as z from 'zod'
 import { Carousel } from '~/components/ui/carousel'
 import type { CategoryRec, GroupRec } from '~/server/db/schema'
 
+const querySchema = z.object({
+  group: z.string().min(3),
+  category: z.string().min(3),
+})
+
 const route = useRoute()
+const router = useRouter()
 const { md } = useScreenSize()
 const { data: groups, error: _error } = await useFetch<GroupRec[]>('/api/groups')
 
@@ -12,8 +19,23 @@ const currentGroup = ref<GroupRec | null>(groups.value?.[0] || null)
 const currentCategory = ref<CategoryRec | null>(currentGroup.value?.categories[0] || null)
 const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
-watch(route, () => {
-  console.log(route.query)
+watch(() => route.query, () => {
+  const query = querySchema.safeParse(route.query)
+  if (!query.success)
+    return
+
+  const queryGroup = groups.value?.find(g => g.urlFriendly === query.data.group) || null
+  const queryCategory = queryGroup?.categories.find(c => c.urlFriendly === query.data.category) || null
+
+  if (!queryGroup || !queryCategory)
+    return
+
+  currentGroup.value = queryGroup
+  currentCategory.value = queryCategory
+}, { immediate: true })
+
+watch(() => [currentGroup.value, currentCategory.value], () => {
+  router.push({ query: { ...route.query, group: currentGroup.value?.urlFriendly, category: currentCategory.value?.urlFriendly } })
 })
 
 function toUrl(projectUrlFriendly: string, filename: string) {
