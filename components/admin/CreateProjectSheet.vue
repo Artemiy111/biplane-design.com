@@ -20,13 +20,14 @@ const mode = ref<Mode>('create')
 const initialValues = ref<FormSchema>({
   title: '',
   urlFriendly: '',
-  groupId: props.groups?.[0].id.toString() as unknown as number,
-  categoryId: props.groups?.[0].categories[0].id.toString() as unknown as number,
+  groupId: props.groups?.[0].id,
+  categoryId: props.groups?.[0].categories[0].id,
   status: '',
   yearStart: null,
   yearEnd: null,
   location: '',
   preview: null,
+  previewFilename: null,
 })
 //  !FIXME не совместимые типы превью
 
@@ -38,12 +39,11 @@ const formSchema = projectInsertSchema.merge(z.object({
 export type FormSchema = z.infer<typeof formSchema>
 
 const validationSchema = toTypedSchema(formSchema)
-const selectedGroupId = ref<string | null>(props.groups[0].id.toString() || null)
+const formRef = ref<InstanceType<typeof Form> | null>(null)
 const selectedGroup = computed<NonNullable<typeof props.groups>[number] | null>(
-  () => props.groups.find(g => g.id.toString() === selectedGroupId.value) || null,
+  () => props.groups.find(g => g.id === formRef.value?.values.groupId as number) || null,
 )
 
-const formRef = ref<InstanceType<typeof Form> | null>(null)
 const title = computed(() => formRef.value?.values?.title as string || '')
 const urlFriendly = computed(() => toUrlFriendly(title.value))
 
@@ -68,8 +68,6 @@ async function open(initial?: FormSchema) {
   mode.value = 'update'
   if (initial) {
     await nextTick()
-    initial.groupId = initial.groupId.toString() as unknown as number
-    initial.categoryId = initial.categoryId.toString() as unknown as number
     formRef.value?.setValues(initial, false)
   }
   else {
@@ -105,28 +103,29 @@ defineExpose({
       </SheetHeader>
       <Form
         ref="formRef"
-        v-slot="{ setFieldValue }"
+        v-slot="{ setFieldValue, values }"
         :initial-values="initialValues"
         :validation-schema="validationSchema"
         class="grid gap-4"
         @submit="emit('submit', $event as FormSchema, prev)"
       >
-        <FormField v-slot="{ componentField, handleChange }" name="title">
+        {{ values }}
+        <FormField v-slot="{ field, handleChange }" name="title">
           <FormItem>
             <FormLabel>Название проекта *</FormLabel>
             <FormControl>
-              <Input :model-value="componentField.modelValue" placeholder="Мой новый дом" @change="handleChange" />
+              <Input :model-value="field.value" placeholder="Мой новый дом" @change="handleChange" />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField } " name="groupId">
+        <FormField v-slot="{ field } " name="groupId">
           <FormItem>
             <FormLabel>Группа *</FormLabel>
             <Select
-              v-bind="componentField" @update:model-value="(v) => {
-                selectedGroupId = v
-                setFieldValue('categoryId', selectedGroup?.categories[0]?.id.toString(), false)
+              :model-value="String(field.value)" @update:model-value="(v) => {
+                setFieldValue('groupId', props.groups.find(g => g.id === Number(v))!.id, false)
+                setFieldValue('categoryId', selectedGroup?.categories[0].id, false)
               }"
             >
               <FormControl>
@@ -144,10 +143,14 @@ defineExpose({
             </Select>
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField }" name="categoryId">
+        <FormField v-slot="{ field }" name="categoryId">
           <FormItem>
             <FormLabel>Категория *</FormLabel>
-            <Select v-bind="componentField">
+            <Select
+              :model-value="String(field.value)" @update:model-value="(v) => {
+                setFieldValue('categoryId', Number(v))
+              }"
+            >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Выберите категорию" />

@@ -11,6 +11,8 @@ const dbProjects = await db.query.projects.findMany({ with: { images: true } })
 
 const dir = `${cwd()}/public/images/projects`
 
+const isImageExt = (ext: string) => ext === 'avif' || ext === 'webp' || ext === 'png' || ext === 'jpg' || ext === 'jpg'
+
 function findNonExistingImages(dbImages: Image[]): Image[] {
 
 }
@@ -30,15 +32,16 @@ dbProjects.forEach(async (project) => {
       const ext = f.split('.')[1]
       if (!ext)
         return false
-      if (ext === 'avif' || ext === 'webp' || ext === 'png' || ext === 'jpg' || ext === 'jpg')
+      if (isImageExt(ext))
         return true
       return false
     })
 
-    project.images.forEach((image) => {
+    project.images.forEach(async (image) => {
       if (!imagesFilenames.find(img => img === image.filename)) {
         console.log(`${project.urlFriendly} / ${image.filename} Не существует в директории. Удаляю из БД`)
-        db.delete(images).where(and(
+
+        await db.delete(images).where(and(
           eq(images.projectUrlFriendly, image.projectUrlFriendly),
           eq(images.filename, image.filename),
         )).catch(_e => console.log(`${project.urlFriendly} / ${image.filename} Не удалось удалить из БД`))
@@ -49,5 +52,3 @@ dbProjects.forEach(async (project) => {
     console.error(`${project.urlFriendly} / Не существует`)
   }
 })
-
-client.end()

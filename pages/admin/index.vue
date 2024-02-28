@@ -36,6 +36,7 @@ async function onSubmit(values: FormSchema, prev: FormSchema | null) {
         toast.error(e.message)
       else toast.error(String(e))
     }
+    refreshProjects()
     return
   }
 
