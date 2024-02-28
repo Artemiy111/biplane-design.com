@@ -122,18 +122,17 @@ async function uploadFiles(files: File[], project: { id: number, urlFriendly: st
           <TableHead>Год завершения</TableHead>
           <TableHead>Статус</TableHead>
           <TableHead>Расположение</TableHead>
-          <TableHead>Загрузить фото</TableHead>
           <TableHead />
         </TableRow>
       </TableHeader>
       <TableBody>
         <TableRow v-for="p in projects" :key="p.id">
-          <TableCell class="min-w-max">
+          <TableCell>
             <NuxtImg
               v-if="p.images.length" format="avif,webp,png,jpg"
               :src="`/images/projects/${p.urlFriendly}/${p.images[0].filename}`"
               :alt="p.images[0].title || 'image'"
-              class="aspect-video max-h-[100px] w-max min-w-max object-cover"
+              class="aspect-video h-[120px] w-fit object-cover"
             />
           </TableCell>
           <TableCell>
@@ -148,9 +147,6 @@ async function uploadFiles(files: File[], project: { id: number, urlFriendly: st
           <TableCell>{{ p.yearEnd }}</TableCell>
           <TableCell>{{ p.status }}</TableCell>
           <TableCell>{{ p.location }}</TableCell>
-          <TableCell class="w-min">
-            <Dropzone :multiple="true" :show-files="true" @upload="uploadFiles($event, p)" />
-          </TableCell>
           <TableCell>
             <Button variant="outline" @click="openChangeProject(p as unknown as ProjectRec)">
               Изменить
