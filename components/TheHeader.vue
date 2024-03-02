@@ -16,7 +16,7 @@ const routes = [{
 
 <template>
   <header class="container z-50 flex flex-col">
-    <div class="z-50 flex items-center justify-between px-8 py-4">
+    <div class="z-50 flex items-center justify-between px-8 py-4 sm:px-4 sm:py-2">
       <NuxtLink to="/" class="flex items-center gap-4">
         <img src="/logo.svg" class="h-10 dark:invert-[70%] md:h-8">
         <span class="sm:hidden">Biplane-Design</span>
