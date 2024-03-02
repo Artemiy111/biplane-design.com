@@ -50,7 +50,7 @@ export default {
     extend: {
 
       fontFamily: {
-        sans: ['Montserrat', fontFamily.sans],
+        sans: ['Montserrat', ...fontFamily.sans],
       },
       colors: {
         border: 'hsl(var(--border))',

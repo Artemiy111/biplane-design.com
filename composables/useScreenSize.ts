@@ -34,7 +34,7 @@ export function useScreenSize() {
   })
 
   function isSize(screenSize: ScreenSize) {
-    return computed(() => size.value === 'default' ? true : getMaxScreenWidth(size.value) <= getMaxScreenWidth(screenSize))
+    return computed(() => size.value === 'default' ? false : getMaxScreenWidth(size.value) <= getMaxScreenWidth(screenSize))
   }
 
   const xxl = isSize('2xl')
