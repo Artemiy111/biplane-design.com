@@ -5,6 +5,7 @@ import CreateProjectSheet from '~/components/admin/CreateProjectSheet.vue'
 import type { FormSchema, Mode } from '~/components/admin/CreateProjectSheet.vue'
 import type { GroupRec, ProjectRec } from '~/server/db/schema'
 
+const { size, md } = useScreenSize()
 const { data: groups, error: groupsError } = await useFetch('/api/groups')
 const { data: projects, error: projectsError, refresh: refreshProjects } = await useFetch('/api/projects')
 
@@ -105,8 +106,8 @@ async function uploadFiles(files: File[], project: { id: number, urlFriendly: st
       @submit="onSubmit"
     />
 
-    <section class="p-8">
-      <Button @click="projectSheetRef?.open()">
+    <section class="px-8 py-4 sm:px-4 sm:py-2">
+      <Button :size="md ? 'sm' : 'default'" :variant="md ? 'secondary' : 'default'" @click="projectSheetRef?.open()">
         Создать проект
       </Button>
     </section>

@@ -125,7 +125,7 @@ function changeCategory(category: CategoryRec) {
             </CarouselItem>
           </CarouselContent>
         </Carousel>
-        <div class="mx-8 my-4 flex items-center justify-between gap-8">
+        <div class="flex items-center justify-between gap-8 px-8 py-4 sm:px-4 sm:py-2">
           <h4>{{ p.title }}</h4>
           <span class="text-slate-400">{{ p.yearStart }}</span>
         </div>

@@ -1,6 +1,6 @@
 <template>
-  <main class="container prose mx-0 max-w-5xl px-8 py-4 text-base">
-    <h1 class="mb-4 text-3xl leading-normal">
+  <main class="container prose prose-sm mx-0 max-w-5xl px-8 py-4 text-base prose-headings:text-2xl 2xl:prose-headings:text-2xl lg:prose-headings:text-xl md:text-sm md:prose-headings:text-lg sm:px-4 sm:py-2 sm:prose-headings:text-base">
+    <h1 class="mb-4 leading-normal">
       О студии
     </h1>
     <p>
