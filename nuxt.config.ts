@@ -4,6 +4,7 @@ import '@total-typescript/ts-reset'
 export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: [
+    '@nuxtjs/supabase',
     '@nuxtjs/tailwindcss',
     'shadcn-nuxt',
     'nuxt-module-eslint-config',
@@ -51,5 +52,8 @@ export default defineNuxtConfig({
     // ],
     ipx: {},
     format: ['avif', 'webp', 'png', 'jpg'],
+  },
+  supabase: {
+    redirect: false,
   },
 })

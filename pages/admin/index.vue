@@ -5,9 +5,16 @@ import CreateProjectSheet from '~/components/admin/CreateProjectSheet.vue'
 import type { FormSchema, Mode } from '~/components/admin/CreateProjectSheet.vue'
 import type { GroupRec, ProjectRec } from '~/server/db/schema'
 
-const { size, md } = useScreenSize()
+definePageMeta({
+  middleware: 'auth',
+})
+
+const { md } = useScreenSize()
 const { data: groups, error: groupsError } = await useFetch('/api/groups')
 const { data: projects, error: projectsError, refresh: refreshProjects } = await useFetch('/api/projects')
+
+// const supabase = useSupabaseClient()
+// const pro = await supabase.from('projects').select('*')
 
 watch(groupsError, () => {
   if (!projectsError.value)
