@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { AvatarFallback, AvatarRoot } from 'radix-vue'
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from '~/components/ui/navigation-menu'
 
-const { md } = useScreenSize()
-
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 const route = useRoute()
+
+const { md } = useScreenSize()
 
 const routes = [{
   link: '/projects',
@@ -12,6 +15,10 @@ const routes = [{
   link: '/about',
   title: 'О нас',
 }]
+
+async function singOut() {
+  await supabase.auth.signOut()
+}
 </script>
 
 <template>
@@ -21,6 +28,32 @@ const routes = [{
         <img src="/logo.svg" class="h-10 dark:invert-[70%] md:h-8">
         <span class="sm:hidden">Biplane-Design</span>
       </NuxtLink>
+      <DropdownMenu v-if="user">
+        <DropdownMenuTrigger>
+          <AvatarRoot>
+            <AvatarFallback :class="navigationMenuTriggerStyle()">
+              {{ user.email }}
+            </AvatarFallback>
+          </AvatarRoot>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>
+            <NuxtLink to="/admin" class="w-full">
+              Админ панель
+            </NuxtLink>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <NuxtLink to="/admin/account" class="w-full">
+              Аккаунт
+            </NuxtLink>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <button variant="link" class="w-full text-start text-red-500" @click="singOut">
+              Выйти
+            </button>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <NavigationMenu>
         <NavigationMenuList class="gap-4 sm:gap-2">
           <NavigationMenuItem v-for="r in routes" :key="r.link">
