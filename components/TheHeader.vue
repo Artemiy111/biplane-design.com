@@ -48,6 +48,11 @@ async function singOut() {
             </NuxtLink>
           </DropdownMenuItem>
           <DropdownMenuItem>
+            <NuxtLink to="/admin/login" class="w-full">
+              Вход/Регистрация
+            </NuxtLink>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
             <button variant="link" class="w-full text-start text-red-500" @click="singOut">
               Выйти
             </button>

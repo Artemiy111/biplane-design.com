@@ -8,10 +8,10 @@ const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const router = useRouter()
 
-watchEffect(() => {
+watch(user, () => {
   if (user.value)
     router.push('/admin')
-})
+}, { immediate: false })
 
 const signUpFormRef = ref<InstanceType<typeof Form> | null>(null)
 const singInFormRef = ref<InstanceType<typeof Form> | null>(null)
@@ -84,6 +84,7 @@ async function singIn(values: SignFormSchema) {
               <FormControl>
                 <Input :model-value="field.value" placeholder="biplane-design@mail.ru" @change="field.onChange" />
               </FormControl>
+              <FormMessage />
             </FormItem>
           </FormField>
           <FormField v-slot="{ field }" name="password">
