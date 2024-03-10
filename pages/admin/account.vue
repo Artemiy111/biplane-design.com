@@ -45,14 +45,14 @@ async function changePassword(values: ChangePasswordSchema) {
   const res = await supabase.auth.updateUser({ password: values.newPassword })
   if (res.error) { toast.error('Не удaлось сменить пароль', { description: res.error.message }) }
   else {
-    toast.success('Пароль сменён')
+    toast.success('Пароль cменён')
     isDialogOpen.value = false
   }
 }
 </script>
 
 <template>
-  <main class="container flex flex-col px-8 py-4 sm:px-4 sm:py-2">
+  <main class="container flex flex-col gap-4 px-8 py-4 sm:px-4 sm:py-2">
     <h1 class="text-2xl font-bold">
       Аккаунт
     </h1>

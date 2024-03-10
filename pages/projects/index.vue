@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
-import type { LocationQueryValue } from 'vue-router'
-import * as z from 'zod'
+import * as v from 'valibot'
 import { Carousel } from '~/components/ui/carousel'
 import type { CategoryRec, GroupRec } from '~/server/db/schema'
 
-const querySchema = z.object({
-  group: z.string().min(3),
-  category: z.string().min(3),
+const querySchema = v.object({
+  group: v.string([v.minLength(3)]),
+  category: v.string([v.minLength(3)]),
 })
 
 const route = useRoute()
@@ -20,12 +19,11 @@ const currentCategory = ref<CategoryRec | null>(currentGroup.value?.categories[0
 const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
 watch(() => route.query, () => {
-  const query = querySchema.safeParse(route.query)
+  const query = v.safeParse(querySchema, route.query)
   if (!query.success)
     return
-
-  const queryGroup = groups.value?.find(g => g.urlFriendly === query.data.group) || null
-  const queryCategory = queryGroup?.categories.find(c => c.urlFriendly === query.data.category) || null
+  const queryGroup = groups.value?.find(g => g.urlFriendly === query.output.group) || null
+  const queryCategory = queryGroup?.categories.find(c => c.urlFriendly === query.output.category) || null
 
   if (!queryGroup || !queryCategory)
     return
@@ -44,21 +42,18 @@ function toUrl(projectUrlFriendly: string, filename: string) {
 
 const categoriesCarouselRef = ref<InstanceType<typeof Carousel> | null>(null)
 const haveHiddenCategories = ref(false)
-const { width } = useWindowSize()
-function isMinusZero(num: number) {
-  return Object.is(-0, num)
+
+function setHiddenCategories() {
+  if (!categoriesCarouselRef.value)
+    return false
+  const progress = categoriesCarouselRef.value.carouselApi!.scrollProgress()
+  haveHiddenCategories.value = progress < 0 || Object.is(-0, progress) || (progress > 0 && progress < 1)
 }
+
 onMounted(() => {
-  if (!categoriesCarouselRef.value)
-    return
-  const progress = categoriesCarouselRef.value.carouselApi!.scrollProgress()
-  haveHiddenCategories.value = isMinusZero(progress)
-})
-watch(width, () => {
-  if (!categoriesCarouselRef.value)
-    return
-  const progress = categoriesCarouselRef.value.carouselApi!.scrollProgress()
-  haveHiddenCategories.value = isMinusZero(progress)
+  setHiddenCategories()
+  categoriesCarouselRef.value?.carouselApi?.on('resize', setHiddenCategories)
+  categoriesCarouselRef.value?.carouselApi?.on('scroll', setHiddenCategories)
 })
 
 function changeTheme(group: GroupRec) {
@@ -90,9 +85,12 @@ function changeCategory(category: CategoryRec) {
     </section>
     <Separator />
     <section
-      v-if="currentGroup?.categories.length" class="mx-8 my-4 sm:mx-2 sm:my-2 sm:gap-2"
-      :class="[haveHiddenCategories ? 'border-r-4 border-primary-foreground' : '']"
+      v-if="currentGroup?.categories.length" class="relative mx-8 my-4 sm:mx-2 sm:my-2 sm:gap-2"
     >
+      <div
+        :class="[haveHiddenCategories ? 'opacity-100' : 'opacity-0']"
+        class="pointer-events-none absolute right-0 top-0 z-50 h-full w-20 border-primary-foreground bg-gradient-to-r from-transparent via-primary-foreground/50 to-primary-foreground transition"
+      />
       <Carousel
         ref="categoriesCarouselRef" class="w-full" :opts="{
           dragFree: true,
