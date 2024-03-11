@@ -89,7 +89,7 @@ function changeCategory(category: CategoryRec) {
     >
       <div
         :class="[haveHiddenCategories ? 'opacity-100' : 'opacity-0']"
-        class="pointer-events-none absolute right-0 top-0 z-50 h-full w-20 border-primary-foreground bg-gradient-to-r from-transparent via-primary-foreground/50 to-primary-foreground transition"
+        class="pointer-events-none absolute right-0 top-0 z-50 h-full w-24 border-primary-foreground bg-gradient-to-r from-transparent to-white transition"
       />
       <Carousel
         ref="categoriesCarouselRef" class="w-full" :opts="{

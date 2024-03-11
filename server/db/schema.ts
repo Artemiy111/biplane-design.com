@@ -1,7 +1,8 @@
 /* eslint-disable ts/no-use-before-define */
 import { integer, pgTable, serial, text, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import { createInsertSchema } from 'drizzle-zod'
+import { createInsertSchema as createInsertSchemaValibot } from 'drizzle-valibot'
 import * as z from 'zod'
 
 export const groups = pgTable('groups', {
@@ -135,6 +136,7 @@ export const images = pgTable('images', {
 
 export type Image = typeof images.$inferSelect
 export type ImageCreate = typeof images.$inferInsert
+export type ImageUpdate = Partial<Pick<Image, 'filename' | 'title' | 'order'>>
 
 export const imageRelations = relations(images, ({ one }) => ({
   project: one(projects, {

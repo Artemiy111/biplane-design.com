@@ -7,7 +7,7 @@ export default defineEventHandler(async () => {
         with: {
           projects: {
             with: {
-              images: true,
+              images: { orderBy: images => images.order },
             },
           },
         },
