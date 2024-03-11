@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
+import { ArrowDown, ArrowUp } from 'lucide-vue-next'
+import type { Image, ImageUpdate } from '~/server/db/schema'
 
 const route = useRoute()
 const projectUrlFriendly = route.params.urlFriendly as string
@@ -9,6 +11,7 @@ async function deleteImages(filenames: string[]) {
   if (!project.value)
     return
   try {
+    // !FIX params
     await $fetch(`/api/projects/${projectUrlFriendly}/images`, {
       method: 'DELETE',
       body: {
@@ -23,6 +26,20 @@ async function deleteImages(filenames: string[]) {
   }
   catch (e) {
     toast.error(`Не удалось удалить изображений: ${filenames.length}`)
+  }
+  refreshImages()
+}
+
+async function updateImage(image: Image, updateData: ImageUpdate) {
+  console.log(image, updateData)
+  try {
+    await $fetch(`/api/projects/${image.projectUrlFriendly}/images/${image.filename}`, {
+      method: 'PUT',
+      body: updateData,
+    })
+  }
+  catch (e) {
+    toast.error('Не удалось обновить изображение')
   }
   refreshImages()
 }
@@ -55,9 +72,17 @@ async function deleteImages(filenames: string[]) {
             </TableCell>
             <TableCell> {{ image.filename }}</TableCell>
             <TableCell>
-              <Button variant="outline" @click="deleteImages([image.filename])">
-                Удалить
-              </Button>
+              <div class="flex w-full flex-col items-center gap-2">
+                <Button variant="ghost" @click="updateImage(image as unknown as Image, { order: image.order + 1 })">
+                  <ArrowUp />
+                </Button>
+                <Button variant="outline" @click="deleteImages([image.filename])">
+                  Удалить
+                </Button>
+                <Button variant="ghost" @click="updateImage(image as unknown as Image, { order: image.order - 1 })">
+                  <ArrowDown />
+                </Button>
+              </div>
             </TableCell>
           </TableRow>
         </TableBody>
