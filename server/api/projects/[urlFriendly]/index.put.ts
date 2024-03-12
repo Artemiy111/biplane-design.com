@@ -24,6 +24,8 @@ export default defineEventHandler(async (event) => {
       }
       catch (e) {
         tx.rollback()
+        console.error(e)
+        return createHttpError(HttpErrorCode.InternalServerError)
       }
     }
   })

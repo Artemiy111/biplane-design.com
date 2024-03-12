@@ -1,73 +1,64 @@
-import process from 'node:process'
+import { cwd } from 'node:process'
 import path from 'node:path'
 import fs from 'node:fs'
 import { Buffer } from 'node:buffer'
 import * as z from 'zod'
-import '@total-typescript/ts-reset'
+import { eq, max, sql } from 'drizzle-orm'
 import { db } from '~/server/db'
+import type { ImageCreate } from '~/server/db/schema'
 import { images } from '~/server/db/schema'
 import { HttpErrorCode, createHttpError } from '~/server/exceptions'
 
-function createFolderIfNotExists(folderPath: string): Error | undefined {
-  try {
-    if (!fs.existsSync(folderPath))
-      fs.mkdirSync(folderPath)
-  }
-  catch (e) {
-    return e as Error
-  }
-}
-
-function createFile(filepath: string, content: Buffer): Error | undefined {
-  try {
-    fs.writeFileSync(filepath, content)
-  }
-  catch (e) {
-    return e as Error
-  }
-}
-
 export default defineEventHandler(async (event) => {
+  const projectUrlFriendly = event.context.params!.urlFriendly as string
   const formData = await readMultipartFormData(event)
   if (!formData)
     return createHttpError(HttpErrorCode.BadRequest)
 
   const fromJson = JSON.parse(Buffer.from(formData[0].data).toString())
   const projectSchema = z.object({
-    id: z.number(),
-    urlFriendly: z.string().min(3),
+    files: z.array(z.object({
+      data: z.instanceof(Buffer),
+      name: z.string().optional(),
+      filename: z.string(),
+      type: z.string().optional(),
+    })).nonempty(),
   })
 
   const data = projectSchema.safeParse(fromJson)
   if (!data.success)
     return createHttpError(HttpErrorCode.BadRequest)
-  const project = data.data
-  formData.shift()
 
-  if (!formData.length)
-    return createHttpError(HttpErrorCode.BadRequest)
+  const folder = path.join(cwd(), `public/images/projects/${projectUrlFriendly}`)
 
-  const folder = path.join(process.cwd(), `public/images/projects/${project.urlFriendly}`)
-  const folderCreationError = createFolderIfNotExists(folder)
-  if (folderCreationError)
-    return createHttpError(HttpErrorCode.InternalServerError)
+  await db.transaction(async (tx) => {
+    try {
+      const { order: startOrder = 1 } = (await tx.select({ order: sql<number | null>`${max(images.order)} + 1`.mapWith(Number) })
+        .from(images).where(eq(images.projectUrlFriendly, projectUrlFriendly)))[0]
 
-  // formData.forEach(async (file) => {
-  //   const filepath = path.join(folder, `${file.filename!}`)
-  //   const fileCreationError = createFile(filepath, file.data)
-  //   if (fileCreationError !== null)
-  //     return createHttpError(HttpErrorCode.InternalServerError)
+      const filesInfo: Array<ImageCreate & { path: string, data: Buffer }> = data.data.files.map((file, idx) => ({
+        projectUrlFriendly,
+        filename: file.filename,
+        order: startOrder + idx,
+        path: path.join(folder, file.filename),
+        data: file.data,
+      }))
 
-  // const folder = project.urlFriendly
-  const files = formData.map(file => ({
-    projectId: project.id,
-    projectUrlFriendly: project.urlFriendly,
-    filename: file.filename!,
-    path: path.join(folder, file.filename!),
-    data: file.data,
-  }))
-  const createdFiles = files.map(file => createFile(file.path, file.data) === undefined ? file : undefined).filter(file => file) as typeof files
-  // const res = await Promise.allSettled(files.map(file => put(file.path, file.data, { access: 'public', token: useRuntimeConfig().public.blobReadWriteToken })))
-  // const createdFiles = files.filter((file, idx) => res[idx].status === 'fulfilled')
-  return await db.insert(images).values(createdFiles).returning()
+      const createdFilesDb = await tx.insert(images).values(filesInfo).returning()
+
+      if (!fs.existsSync(folder))
+        fs.mkdirSync(folder)
+
+      filesInfo.forEach((file) => {
+        fs.writeFileSync(file.path, file.data)
+      })
+
+      return createdFilesDb
+    }
+    catch (e) {
+      tx.rollback()
+      console.error(e)
+      return createHttpError(HttpErrorCode.InternalServerError)
+    }
+  })
 })

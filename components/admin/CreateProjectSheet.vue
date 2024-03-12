@@ -3,8 +3,6 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { type GroupRec, projectInsertSchema } from '~/server/db/schema'
 import Dropzone from '~/components/Dropzone.vue'
-
-// import { type ProjectCreateSchema, projectCreateSchema } from '~/server/validators'
 import { Form } from '~/components/ui/form'
 
 const props = defineProps<{

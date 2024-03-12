@@ -11,14 +11,9 @@ async function deleteImages(filenames: string[]) {
   if (!project.value)
     return
   try {
-    // !FIX params
     await $fetch(`/api/projects/${projectUrlFriendly}/images`, {
       method: 'DELETE',
       body: {
-        project: {
-          id: project.value.id,
-          urlFriendly: project.value.urlFriendly,
-        },
         filenames,
       },
     })
