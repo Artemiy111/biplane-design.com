@@ -1,8 +1,8 @@
-/* eslint-disable no-console */
 import path from 'node:path'
 import fs from 'node:fs'
 import { cwd } from 'node:process'
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, getTableColumns, inArray, sql } from 'drizzle-orm'
+import { PgDialect } from 'drizzle-orm/pg-core'
 import * as z from 'zod'
 import { db } from '~/server/db'
 import { images } from '~/server/db/schema'
@@ -22,18 +22,34 @@ export default defineEventHandler(async (event) => {
   const folder = path.join(cwd(), `public/images/projects/${projectUrlFriendly}`)
 
   await db.transaction(async (tx) => {
-    try {
-      // !FIX изменить порядок при удалении
-      const deletedImagesDb = await tx.delete(images).where(inArray(images.filename, filenames)).returning()
+    const deletedImagesDb = await tx.delete(images).where(and(
+      eq(images.projectUrlFriendly, projectUrlFriendly),
+      inArray(images.filename, filenames),
+    )).returning()
 
-      filenames.forEach(filename => fs.unlinkSync(path.join(folder, filename)))
+    const remainImages = await tx.select(({ ...getTableColumns(images), newOrder: sql<number>`row_number() over (order by ${images.order})`.mapWith(Number).as('new_order') })).from(images)
+    await Promise.all(
+      remainImages.map((img) => {
+        return tx.update(images).set({ order: img.newOrder * 1000 }).where(and(
+          eq(images.projectUrlFriendly, img.projectUrlFriendly),
+          eq(images.filename, img.filename),
+        ))
+      }),
+    )
 
-      return deletedImagesDb
-    }
-    catch (e) {
-      tx.rollback()
-      console.log(e)
-      return createHttpError(HttpErrorCode.InternalServerError)
-    }
+    await Promise.all(
+      remainImages.map((img) => {
+        return tx.update(images).set({ order: img.newOrder }).where(and(
+          eq(images.projectUrlFriendly, img.projectUrlFriendly),
+          eq(images.filename, img.filename),
+        ))
+      }),
+    )
+
+    filenames.forEach(filename => fs.unlinkSync(path.join(folder, filename)))
+    return deletedImagesDb
+  }).catch((e) => {
+    console.log(e)
+    throw createHttpError(HttpErrorCode.InternalServerError)
   })
 })
