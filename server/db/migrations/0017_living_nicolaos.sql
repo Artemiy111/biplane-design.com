@@ -1,0 +1,1 @@
+ALTER TABLE "projects" ALTER COLUMN "preview_filename" SET DATA TYPE varchar(256);

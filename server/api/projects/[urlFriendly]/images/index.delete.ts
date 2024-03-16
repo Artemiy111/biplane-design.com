@@ -23,6 +23,7 @@ export default defineEventHandler(async (event) => {
 
   await db.transaction(async (tx) => {
     try {
+      // !FIX изменить порядок при удалении
       const deletedImagesDb = await tx.delete(images).where(inArray(images.filename, filenames)).returning()
 
       filenames.forEach(filename => fs.unlinkSync(path.join(folder, filename)))

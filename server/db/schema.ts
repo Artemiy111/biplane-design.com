@@ -1,6 +1,7 @@
 /* eslint-disable ts/no-use-before-define */
-import { integer, pgTable, serial, text, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core'
-import { relations, sql } from 'drizzle-orm'
+import type { AnyPgColumn } from 'drizzle-orm/pg-core'
+import { integer, pgTable, serial, text, timestamp, unique, uniqueIndex, varchar } from 'drizzle-orm/pg-core'
+import { relations } from 'drizzle-orm'
 import { createInsertSchema } from 'drizzle-zod'
 import { createInsertSchema as createInsertSchemaValibot } from 'drizzle-valibot'
 import * as z from 'zod'
@@ -58,7 +59,7 @@ export const projects = pgTable('projects', {
   yearStart: integer('year_start'),
   yearEnd: integer('year_end'),
   location: text('location'),
-  previewFilename: integer('preview_filename'),
+  previewId: integer('preview_id').references((): AnyPgColumn => images.id),
   order: serial('order').notNull(),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -80,7 +81,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   }),
   images: many(images),
   preview: one(images, {
-    fields: [projects.previewFilename],
+    fields: [projects.previewId],
     references: [images.filename],
     relationName: 'preview',
   }),
@@ -129,10 +130,13 @@ export const images = pgTable('images', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (t) => {
   return {
-    uniqueFilenameForProject: unique('unique_filename_for_project').on(t.projectUrlFriendly, t.filename),
-    uniqueOrderForProject: unique('unique_order_for_project').on(t.projectUrlFriendly, t.order),
+    uniqueIdxFilenameForProject: uniqueIndex('unique_idx_filename_for_project').on(t.projectUrlFriendly, t.filename),
+    uniqueOrderForProject: uniqueIndex('unique_order_for_project').on(t.projectUrlFriendly, t.order),
   }
 })
+
+// db.execute(sql`alter table ${images} add constraint order_constraint check (order > 0)`)
+// db.execute(sql`alter table ${images} add constraint unique_order_for_project on `)
 
 export type Image = typeof images.$inferSelect
 export type ImageCreate = typeof images.$inferInsert
