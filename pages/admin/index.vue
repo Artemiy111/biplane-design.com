@@ -9,12 +9,13 @@ definePageMeta({
   middleware: 'auth',
 })
 
+useSeoMeta({
+  title: 'Админ-панель',
+})
+
 const { md } = useScreenSize()
 const { data: groups, error: groupsError } = await useFetch('/api/groups')
 const { data: projects, error: projectsError, refresh: refreshProjects } = await useFetch('/api/projects')
-
-// const supabase = useSupabaseClient()
-// const pro = await supabase.from('projects').select('*')
 
 watch(groupsError, () => {
   if (!projectsError.value)
@@ -77,16 +78,13 @@ function openChangeProject(project: ProjectRec) {
     yearEnd: project.yearEnd,
     categoryId: project.categoryId,
     order: project.order,
-    preview: null,
+    previewId: project.previewId,
+    images: [],
   })
 }
 
-async function uploadFiles(files: File[], project: { id: number, urlFriendly: string }) {
+async function uploadImages(images: File[], project: { id: number, urlFriendly: string }) {
   const formData = new FormData()
-  const images = files
-
-  const jsonProject = JSON.stringify(project)
-  formData.append('project', jsonProject)
   images.forEach((image, idx) => formData.append(`image-${idx}`, image))
 
   try {

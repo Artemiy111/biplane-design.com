@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { buttonVariants } from '~/components/ui/button'
+
+useSeoMeta({
+  title: 'Страница не найдена',
+  ogTitle: 'Страница не найдена',
+  description: 'Ошибка 404',
+  ogDescription: 'Ошибка 404',
+})
 </script>
 
 <template>

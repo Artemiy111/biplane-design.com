@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
-import { type GroupRec, projectInsertSchema } from '~/server/db/schema'
+import { type GroupRec, type Image, projectInsertSchema } from '~/server/db/schema'
 import Dropzone from '~/components/Dropzone.vue'
 import { Form } from '~/components/ui/form'
 
@@ -24,14 +24,13 @@ const initialValues = ref<FormSchema>({
   yearStart: null,
   yearEnd: null,
   location: '',
-  preview: null,
-  previewFilename: null,
+  previewId: null,
+  images: [],
 })
-//  !FIXME не совместимые типы превью
 
 const formSchema = projectInsertSchema.merge(z.object({
   groupId: z.union([z.string(), z.number()]).transform(v => Number(v)),
-  preview: z.instanceof(File).nullable(),
+  images: z.array(z.string()),
 }))
 
 export type FormSchema = z.infer<typeof formSchema>
@@ -60,6 +59,8 @@ function handleCloseOnDirty(open: boolean) {
 }
 
 const prev = ref<FormSchema | null>(null)
+
+// type InitialValues = FormSchema & {images: Ima}
 
 async function open(initial?: FormSchema) {
   isOpen.value = true
@@ -212,11 +213,20 @@ defineExpose({
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ handleChange }" name="preview">
+        <FormField v-if="values.images.length" v-slot="{ field }" name="previewId">
           <FormItem>
             <FormLabel>Превью</FormLabel>
             <FormControl>
-              <Dropzone class="h-[300px]" :show-icon="true" :show-files="true" @upload="handleChange($event[0])" />
+              <Select :model-value="String(field.value)" @update:model-value="(v) => setFieldValue(field.name, Number(v))">
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите превью" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="image in (values.images as Image[])" :key="image.filename" :value="image.id.toString()">
+                    {{ image.filename }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </FormControl>
             <FormMessage />
           </FormItem>

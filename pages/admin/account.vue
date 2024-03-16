@@ -9,6 +9,13 @@ definePageMeta({
   middleware: 'auth',
 })
 
+useSeoMeta({
+  title: 'Аккаунт',
+  ogTitle: 'Аккаунт',
+  description: 'Настройки аккаунта',
+  ogDescription: 'Настройки аккаунта',
+})
+
 const user = useSupabaseUser()
 const supabase = useSupabaseClient()
 

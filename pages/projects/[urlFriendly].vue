@@ -15,6 +15,13 @@ const { height: mainCarouselHeight } = useElementSize(mainCarouselRef)
 const totalCount = ref(0)
 const current = ref(0)
 
+useSeoMeta({
+  title: () => `Проекты | ${project.value?.title}`,
+  ogTitle: () => `Проекты | ${project.value?.title}`,
+  description: () => `Расположение: ${project.value?.location}`,
+  ogDescription: () => `Расположение: ${project.value?.location}`,
+})
+
 watch(api, (api) => {
   if (!api)
     return
