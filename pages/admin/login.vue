@@ -8,6 +8,10 @@ const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const router = useRouter()
 
+useSeoMeta({
+  title: 'Вход/Регистрация',
+})
+
 watch(user, () => {
   if (user.value)
     router.push('/admin')
