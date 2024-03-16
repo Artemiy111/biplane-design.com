@@ -7,8 +7,9 @@ import type { Image } from '~/server/db/schema'
 
 const props = defineProps<{
   multiple?: boolean
-  showFiles?: boolean
+  showImages?: boolean
   showIcon?: boolean
+  clearOnUpload?: boolean
   class?: HTMLAttributes['class']
   images?: Image[]
 }>()
@@ -51,6 +52,8 @@ function onChange() {
     files.value.push(...newFiles)
   }
   emit('upload', files.value)
+  if (props.clearOnUpload)
+    clear()
 }
 
 function clear() {
@@ -78,7 +81,7 @@ defineExpose({
     @dragleave="onDragleave"
     @drop.prevent="onDrop"
   >
-    <slot v-if="!files.length">
+    <template v-if="!files.length">
 
       <div class="flex flex-col items-center justify-center gap-2">
         <template v-if="!props.images?.length">
@@ -93,18 +96,15 @@ defineExpose({
           />
         </template>
       </div>
-    </slot>
-    <div v-else>
-      <ul v-if="!props.showFiles">
+    </template>
+    <template v-else>
+      <ul v-if="!props.showImages">
         <div v-for="file in files" :key="file.name">{{ file.name }}</div>
       </ul>
-      <div v-else class="flex flex-col gap-2">
-        <div v-for="file in files" :key="file.name" class="aspect-video w-full">
-          <NuxtImg class="aspect-video w-full object-cover" :src="generateURL(file)" />
-
-        </div>
+      <div v-for="file in files" v-else :key="file.name" class="flex h-full flex-col gap-2">
+        <NuxtImg class="aspect-video h-full w-full object-cover" :src="generateURL(file)" />
       </div>
-    </div>
+    </template>
     <Input
       ref="inputRef" type="file" :multiple="props.multiple"
       accept=".avif,.webp,.png,.jpg,.jpeg"

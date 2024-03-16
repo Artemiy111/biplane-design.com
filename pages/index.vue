@@ -1,5 +1,18 @@
 <script setup lang="ts">
 import { GLTFModel, OrbitControls } from '@tresjs/cientos'
+
+useSeoMeta({
+  title: 'Biplane-Design',
+  ogTitle: 'Biplane-Design',
+  description: 'Студия дизайна',
+  ogDescription: 'Студия дизайна',
+})
+
+useHead({
+  htmlAttrs: {
+    lang: 'ru',
+  },
+})
 </script>
 
 <template>

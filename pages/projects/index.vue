@@ -4,6 +4,13 @@ import * as v from 'valibot'
 import { Carousel } from '~/components/ui/carousel'
 import type { CategoryRec, GroupRec } from '~/server/db/schema'
 
+useSeoMeta({
+  title: 'Проекты',
+  ogTitle: 'Проекты',
+  description: 'Представлены различные категории проектов',
+  ogDescription: 'Представлены различные категории проектов',
+})
+
 const querySchema = v.object({
   group: v.string([v.minLength(3)]),
   category: v.string([v.minLength(3)]),
