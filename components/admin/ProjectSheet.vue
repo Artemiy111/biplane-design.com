@@ -51,11 +51,11 @@ watch(title, () => {
 })
 
 const isOpen = ref(false)
-function handleCloseOnDirty(open: boolean) {
-  if (formRef.value?.meta.dirty && !isOpen)
+function handleClose() {
+  if (formRef.value?.meta.dirty && formRef.value.meta.touched && isOpen.value)
     return
 
-  isOpen.value = open
+  isOpen.value = false
 }
 
 const prev = ref<FormSchema | null>(null)
@@ -65,6 +65,7 @@ const prev = ref<FormSchema | null>(null)
 async function open(initial?: FormSchema) {
   isOpen.value = true
   mode.value = 'update'
+
   if (initial) {
     await nextTick()
     formRef.value?.setValues(initial, false)
@@ -92,7 +93,7 @@ defineExpose({
     <SheetContent
       :side="mode === 'create' ? 'left' : 'right'"
       class="w-full max-w-3xl overflow-auto"
-      @pointer-down-outside="$event.preventDefault(), handleCloseOnDirty(false)"
+      @pointer-down-outside="$event.preventDefault(), handleClose()"
     >
       <SheetHeader>
         <SheetTitle>{{ mode === 'create' ? 'Создать' : 'Изменить' }} проект</SheetTitle>
@@ -109,22 +110,28 @@ defineExpose({
         @submit="emit('submit', $event as FormSchema, prev)"
       >
         {{ values }}
-        <FormField v-slot="{ field, handleChange }" name="title">
+        <FormField v-slot="{ field, handleChange, handleBlur }" name="title">
           <FormItem>
             <FormLabel>Название проекта *</FormLabel>
             <FormControl>
-              <Input :model-value="field.value" placeholder="Мой новый дом" @change="handleChange" />
+              <Input
+                :model-value="field.value" placeholder="Мой новый дом"
+                @change="handleChange"
+                @blur="handleBlur"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ field } " name="groupId">
+        <FormField v-slot="{ field, handleChange, handleBlur } " name="groupId">
           <FormItem>
             <FormLabel>Группа *</FormLabel>
             <Select
-              :model-value="String(field.value)" @update:model-value="(v) => {
-                setFieldValue('groupId', props.groups.find(g => g.id === Number(v))!.id, false)
-                setFieldValue('categoryId', selectedGroup?.categories[0].id, false)
+              :model-value="String(field.value)"
+              @update:model-value="(v) => {
+                handleChange(props.groups.find(g => g.id === Number(v))!.id)
+                setFieldValue('categoryId', selectedGroup?.categories[0].id)
+                handleBlur()
               }"
             >
               <FormControl>
@@ -142,12 +149,13 @@ defineExpose({
             </Select>
           </FormItem>
         </FormField>
-        <FormField v-slot="{ field }" name="categoryId">
+        <FormField v-slot="{ field, handleChange, handleBlur }" name="categoryId">
           <FormItem>
             <FormLabel>Категория *</FormLabel>
             <Select
               :model-value="String(field.value)" @update:model-value="(v) => {
-                setFieldValue('categoryId', Number(v))
+                handleChange(Number(v))
+                handleBlur()
               }"
             >
               <FormControl>
@@ -165,59 +173,82 @@ defineExpose({
             </Select>
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField, handleChange }" name="urlFriendly">
+        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="urlFriendly">
           <FormItem>
             <FormLabel>Человекопонятная ссылка *</FormLabel>
             <FormControl>
               <Input
                 :model-value="componentField.modelValue" placeholder="my-new-house"
-                @change="($event.target.value = toUrlFriendly($event.target.value)), handleChange($event, true)"
+                @change="handleChange(toUrlFriendly($event.target.value))"
+                @blur="handleBlur"
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField, handleChange }" name="status">
+        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="status">
           <FormItem>
             <FormLabel>Статус *</FormLabel>
             <FormControl>
-              <Input :model-value="componentField.modelValue" placeholder="Завершён" @change="handleChange" />
+              <Input
+                :model-value="componentField.modelValue" placeholder="Завершён"
+                @change="handleChange"
+                @blur="handleBlur"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField, handleChange }" name="yearStart">
+        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="yearStart">
           <FormItem>
             <FormLabel>Год начала</FormLabel>
             <FormControl>
-              <Input :model-value="componentField.modelValue" type="number" placeholder="" @change="handleChange" />
+              <Input
+                :model-value="componentField.modelValue" type="number" placeholder=""
+                @change="handleChange"
+                @blur="handleBlur"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField, handleChange }" name="yearEnd">
+        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="yearEnd">
           <FormItem>
             <FormLabel>Год завершения</FormLabel>
             <FormControl>
-              <Input :model-value="componentField.modelValue" type="number" placeholder="" @change="handleChange" />
+              <Input
+                :model-value="componentField.modelValue" type="number" placeholder=""
+                @change="handleChange"
+                @blur="handleBlur"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField, handleChange }" name="location">
+        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="location">
           <FormItem>
             <FormLabel>Расположение *</FormLabel>
             <FormControl>
-              <Input :model-value="componentField.modelValue" placeholder="Уфа" @change="handleChange" />
+              <Input
+                :model-value="componentField.modelValue" placeholder="Уфа"
+                @change="handleChange"
+                @blur="handleBlur"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-if="values.images.length" v-slot="{ field }" name="previewId">
+        <FormField v-if="values.images.length" v-slot="{ field, handleChange, handleBlur }" name="previewId">
           <FormItem>
             <FormLabel>Превью</FormLabel>
             <FormControl>
-              <Select :model-value="String(field.value)" @update:model-value="(v) => setFieldValue(field.name, Number(v))">
+              <Select
+                :model-value="String(field.value)"
+                @update:model-value="(v) => {
+                  handleChange(Number(v))
+                  handleBlur()
+                }"
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Выберите превью" />
                 </SelectTrigger>

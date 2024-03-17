@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
-import Dropzone from '~/components/Dropzone.vue'
-import CreateProjectSheet from '~/components/admin/CreateProjectSheet.vue'
-import type { FormSchema, Mode } from '~/components/admin/CreateProjectSheet.vue'
+import ProjectSheet from '~/components/admin/ProjectSheet.vue'
+import type { FormSchema, Mode } from '~/components/admin/ProjectSheet.vue'
 import type { GroupRec, ProjectRec } from '~/server/db/schema'
 
 definePageMeta({
@@ -11,6 +10,9 @@ definePageMeta({
 
 useSeoMeta({
   title: 'Админ-панель',
+  ogTitle: 'Админ-панель',
+  description: 'Менеджмент базы-данных',
+  ogDescription: 'Менеджмент базы-данных',
 })
 
 const { md } = useScreenSize()
@@ -29,7 +31,7 @@ watch(projectsError, () => {
   toast.error(projectsError.value.message)
 })
 
-const projectSheetRef = ref<InstanceType<typeof CreateProjectSheet> | null>(null)
+const projectSheetRef = ref<InstanceType<typeof ProjectSheet> | null>(null)
 async function onSubmit(values: FormSchema, prev: FormSchema | null) {
   if (!prev) {
     try {
@@ -105,7 +107,7 @@ async function uploadImages(images: File[], project: { id: number, urlFriendly: 
 
 <template>
   <main class="container flex flex-col">
-    <CreateProjectSheet
+    <ProjectSheet
       v-if="groups" ref="projectSheetRef"
       :groups="(groups as unknown as GroupRec[])"
       @submit="onSubmit"
@@ -133,7 +135,7 @@ async function uploadImages(images: File[], project: { id: number, urlFriendly: 
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow v-for="p in projects" :key="p.id">
+        <TableRow v-for="p in projects" :key="p.id" class="cursor-pointer" @click="navigateTo(`/admin/projects/${p.urlFriendly}`)">
           <TableCell>
             <NuxtImg
               v-if="p.images.length" format="avif,webp,png,jpg"
@@ -143,9 +145,8 @@ async function uploadImages(images: File[], project: { id: number, urlFriendly: 
             />
           </TableCell>
           <TableCell>
-            <NuxtLink :to="`/admin/projects/${p.urlFriendly}`">
-              {{ p.title }}
-            </NuxtLink>
+            <NuxtLink :to="`/admin/projects/${p.urlFriendly}`" />
+            {{ p.title }}
           </TableCell>
           <TableCell>{{ p.urlFriendly }}</TableCell>
           <TableCell>{{ p.category.group.title }}</TableCell>
@@ -155,7 +156,7 @@ async function uploadImages(images: File[], project: { id: number, urlFriendly: 
           <TableCell>{{ p.status }}</TableCell>
           <TableCell>{{ p.location }}</TableCell>
           <TableCell>
-            <Button variant="outline" @click="openChangeProject(p as unknown as ProjectRec)">
+            <Button variant="outline" @click.stop="openChangeProject(p as unknown as ProjectRec)">
               Изменить
             </Button>
           </TableCell>

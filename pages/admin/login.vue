@@ -10,6 +10,9 @@ const router = useRouter()
 
 useSeoMeta({
   title: 'Вход/Регистрация',
+  ogTitle: 'Вход/Регистрация',
+  description: 'Вход для администратора',
+  ogDescription: 'Вход для администратора',
 })
 
 watch(user, () => {
