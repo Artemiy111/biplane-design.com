@@ -125,7 +125,6 @@ function changeCategory(category: CategoryRec) {
         <Carousel class="aspect-video w-full">
           <CarouselContent>
             <CarouselItem v-for="img in p.images" :key="img.filename">
-              <!-- <NuxtImg format="avif,webp,png,jpg" :src="`/images/projects/${p.urlFriendly}/${img.filename}`" :alt="img.title || 'image'" class="aspect-video w-full object-cover" /> -->
               <NuxtImg format="avif,webp,png,jpg" :src="toUrl(img.projectUrlFriendly, img.filename)" :alt="img.title || 'image'" class="aspect-video w-full object-cover" />
             </CarouselItem>
           </CarouselContent>

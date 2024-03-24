@@ -1,1 +1,0 @@
-ALTER TABLE "images" ALTER COLUMN "order" SET DATA TYPE integer;

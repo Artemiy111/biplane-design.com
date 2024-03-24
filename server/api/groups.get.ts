@@ -9,10 +9,13 @@ export default defineEventHandler(async () => {
             with: {
               images: { orderBy: images => images.order },
             },
+            orderBy: projects => projects.order,
           },
         },
+        orderBy: categories => categories.order,
       },
     },
+    orderBy: groups => groups.order,
   })
   return groups
 })

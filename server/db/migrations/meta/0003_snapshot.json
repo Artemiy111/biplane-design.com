@@ -1,11 +1,104 @@
 {
-  "id": "f7b0ffab-f4cb-48fe-a0de-cc9bc49922e4",
-  "prevId": "37cffd28-c4b2-49bd-b9b3-75691239f152",
+  "id": "3cbfe8f8-50e1-42c7-97ff-6a03b5ef8df5",
+  "prevId": "ba055df0-4cf3-44fa-a657-05ea0ac28ee4",
   "version": "5",
   "dialect": "pg",
   "tables": {
     "categories": {
       "name": "categories",
+      "schema": "",
+      "columns": {
+        "group_id": {
+          "name": "group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "url_friendly": {
+          "name": "url_friendly",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "order": {
+          "name": "order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "select count(*) + 1 from categories where groupId = NEW.groupId"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "categories_group_id_groups_id_fk": {
+          "name": "categories_group_id_groups_id_fk",
+          "tableFrom": "categories",
+          "tableTo": "groups",
+          "columnsFrom": [
+            "group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "categories_title_unique": {
+          "name": "categories_title_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "title"
+          ]
+        },
+        "url_friendly_for_group": {
+          "name": "url_friendly_for_group",
+          "nullsNotDistinct": false,
+          "columns": [
+            "group_id",
+            "url_friendly"
+          ]
+        },
+        "unique_order_for_group": {
+          "name": "unique_order_for_group",
+          "nullsNotDistinct": false,
+          "columns": [
+            "group_id",
+            "order"
+          ]
+        }
+      }
+    },
+    "groups": {
+      "name": "groups",
       "schema": "",
       "columns": {
         "id": {
@@ -16,19 +109,19 @@
         },
         "title": {
           "name": "title",
-          "type": "text",
+          "type": "varchar(128)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "url_friendly": {
           "name": "url_friendly",
-          "type": "text",
+          "type": "varchar(128)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "theme_id": {
-          "name": "theme_id",
-          "type": "integer",
+        "order": {
+          "name": "order",
+          "type": "serial",
           "primaryKey": false,
           "notNull": true
         },
@@ -48,35 +141,28 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "categories_theme_id_themes_id_fk": {
-          "name": "categories_theme_id_themes_id_fk",
-          "tableFrom": "categories",
-          "tableTo": "themes",
-          "columnsFrom": [
-            "theme_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "categories_title_unique": {
-          "name": "categories_title_unique",
+        "groups_title_unique": {
+          "name": "groups_title_unique",
           "nullsNotDistinct": false,
           "columns": [
             "title"
           ]
         },
-        "categories_url_friendly_unique": {
-          "name": "categories_url_friendly_unique",
+        "groups_url_friendly_unique": {
+          "name": "groups_url_friendly_unique",
           "nullsNotDistinct": false,
           "columns": [
             "url_friendly"
+          ]
+        },
+        "groups_order_unique": {
+          "name": "groups_order_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "order"
           ]
         }
       }
@@ -85,51 +171,82 @@
       "name": "images",
       "schema": "",
       "columns": {
+        "project_url_friendly": {
+          "name": "project_url_friendly",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "id": {
           "name": "id",
           "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "integer",
+        "filename": {
+          "name": "filename",
+          "type": "varchar(200)",
           "primaryKey": false,
           "notNull": true
         },
-        "url": {
-          "name": "url",
-          "type": "text",
+        "title": {
+          "name": "title",
+          "type": "varchar(200)",
           "primaryKey": false,
           "notNull": false
         },
         "order": {
           "name": "order",
-          "type": "serial",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "unique_idx_filename_for_project": {
+          "name": "unique_idx_filename_for_project",
+          "columns": [
+            "project_url_friendly",
+            "filename"
+          ],
+          "isUnique": true
+        },
+        "unique_order_for_project": {
+          "name": "unique_order_for_project",
+          "columns": [
+            "project_url_friendly",
+            "order"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
-        "images_project_id_projects_id_fk": {
-          "name": "images_project_id_projects_id_fk",
+        "images_project_url_friendly_projects_url_friendly_fk": {
+          "name": "images_project_url_friendly_projects_url_friendly_fk",
           "tableFrom": "images",
           "tableTo": "projects",
           "columnsFrom": [
-            "project_id"
+            "project_url_friendly"
           ],
           "columnsTo": [
-            "id"
+            "url_friendly"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -139,6 +256,12 @@
       "name": "projects",
       "schema": "",
       "columns": {
+        "category_id": {
+          "name": "category_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "id": {
           "name": "id",
           "type": "serial",
@@ -147,15 +270,15 @@
         },
         "title": {
           "name": "title",
-          "type": "text",
+          "type": "varchar(200)",
           "primaryKey": false,
           "notNull": true
         },
         "url_friendly": {
           "name": "url_friendly",
-          "type": "text",
+          "type": "varchar(200)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "status": {
           "name": "status",
@@ -181,11 +304,12 @@
           "primaryKey": false,
           "notNull": false
         },
-        "category_id": {
-          "name": "category_id",
+        "order": {
+          "name": "order",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false,
+          "default": "select count(*) + 1 from projects where categoryId = NEW.categoryId"
         },
         "created_at": {
           "name": "created_at",
@@ -226,62 +350,13 @@
           "columns": [
             "url_friendly"
           ]
-        }
-      }
-    },
-    "themes": {
-      "name": "themes",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
         },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "url_friendly": {
-          "name": "url_friendly",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "themes_title_unique": {
-          "name": "themes_title_unique",
+        "unique_order_for_category": {
+          "name": "unique_order_for_category",
           "nullsNotDistinct": false,
           "columns": [
-            "title"
-          ]
-        },
-        "themes_url_friendly_unique": {
-          "name": "themes_url_friendly_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "url_friendly"
+            "category_id",
+            "order"
           ]
         }
       }

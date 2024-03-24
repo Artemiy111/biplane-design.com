@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import { categories, groups, projects } from './schema'
 import { db } from '.'
 import { toUrlFriendly } from '~/utils/toUrlFriendly'
@@ -8,17 +9,20 @@ const categoriesBiplane = [
   ['Логотипы', 'Этикетки'],
 ]
 
-await db.delete(groups)
+db.transaction((tx) => {
+  tx.delete(groups)
+  groupsBiplane.forEach(async (group, idx) => {
+    const insertedGroup = (await tx.insert(groups).values({ title: group, urlFriendly: toUrlFriendly(group), order: idx + 1 }).returning())[0]
 
-groupsBiplane.forEach(async (group, idx) => {
-  const insertedGroup = (await db.insert(groups).values({ title: group, urlFriendly: toUrlFriendly(group) }).returning())[0]
-
-  categoriesBiplane[idx].forEach((async (category) => {
-    await db.insert(categories).values({
-      title: category,
-      urlFriendly: toUrlFriendly(category),
-      groupId: insertedGroup.id,
-    },
-    )
-  }))
+    categoriesBiplane[idx].forEach((async (category, idx) => {
+      await tx.insert(categories).values({
+        title: category,
+        urlFriendly: toUrlFriendly(category),
+        groupId: insertedGroup.id,
+        order: idx + 1,
+      },
+      )
+    }))
+  })
+  return tx.query.categories.findMany()
 })

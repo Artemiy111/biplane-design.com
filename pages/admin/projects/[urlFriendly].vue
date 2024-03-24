@@ -93,23 +93,32 @@ async function uploadImages(images: File[]) {
               <TableCell>
                 <NuxtImg
                   :src="`/images/projects/${project.urlFriendly}/${image.filename}`"
-                  format=".avif, .webp, .png, .jpg"
+                  format="avif,webp,png,jpg"
                   class="aspect-video w-[300px] object-contain"
                   :alt="image.title ? image.title : image.filename"
                 />
               </TableCell>
               <TableCell>
-                <Input :model-value="image.filename" @change="updateImage(image as unknown as Image, { filename: $event.target.value })" />
+                <Input
+                  :model-value="image.filename"
+                  @change="updateImage(image as unknown as Image, { filename: $event.target.value })"
+                />
               </TableCell>
               <TableCell>
                 <div class="flex w-full flex-col items-center gap-2">
-                  <Button v-if="idx !== 0" variant="ghost" @click="updateImage(image as unknown as Image, { order: image.order - 1 })">
+                  <Button
+                    v-if="idx !== 0" variant="ghost"
+                    @click="updateImage(image as unknown as Image, { order: image.order - 1 })"
+                  >
                     <ArrowUp />
                   </Button>
                   <Button variant="outline" @click="deleteImages([image.filename])">
                     Удалить
                   </Button>
-                  <Button v-if="idx !== project.images.length - 1" variant="ghost" @click="updateImage(image as unknown as Image, { order: image.order + 1 })">
+                  <Button
+                    v-if="idx !== project.images.length - 1" variant="ghost"
+                    @click="updateImage(image as unknown as Image, { order: image.order + 1 })"
+                  >
                     <ArrowDown />
                   </Button>
                 </div>
