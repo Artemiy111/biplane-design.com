@@ -19,23 +19,33 @@ useSeoMeta({
 
 const { md } = useScreenSize()
 const { data: groups, error: groupsError } = await useFetch('/api/groups')
-const { data: projects, error: projectsError, refresh: refreshProjects } = await useFetch('/api/projects')
+const {
+  data: projects,
+  error: projectsError,
+  refresh: refreshProjects,
+} = await useFetch('/api/projects')
 
+const selectedGroupId = ref<number | null>(groups.value?.[0].id || null)
 const selectedCategoryId = ref<number | null>(groups.value?.[0]?.categories[0].id || null)
+const projectsOfSelectedCategory = computed(() =>
+  projects.value?.filter(p => {
+    if (selectedCategoryId.value !== null) return p.categoryId === selectedCategoryId.value
+    return p.category.groupId === selectedGroupId.value
+  }),
+)
 
-function selectCategory(categoryId: number) {
+function selectCategory(groupId: number, categoryId: number | null) {
+  selectedGroupId.value = groupId
   selectedCategoryId.value = categoryId
 }
 
 watch(groupsError, () => {
-  if (!projectsError.value)
-    return
+  if (!projectsError.value) return
   toast.error(projectsError.value.message)
 })
 
 watch(projectsError, () => {
-  if (!projectsError.value)
-    return
+  if (!projectsError.value) return
   toast.error(projectsError.value.message)
 })
 
@@ -50,10 +60,8 @@ async function onSubmit(values: FormSchema, prev: FormSchema | null) {
       })
       projectSheetRef.value?.close()
       toast.success('Проект создан')
-    }
-    catch (e) {
-      if (e instanceof Error)
-        toast.error(e.message)
+    } catch (e) {
+      if (e instanceof Error) toast.error(e.message)
       else toast.error(String(e))
     }
     refreshProjects()
@@ -67,10 +75,8 @@ async function onSubmit(values: FormSchema, prev: FormSchema | null) {
     })
     projectSheetRef.value?.close()
     toast.success('Проект изменён')
-  }
-  catch (e) {
-    if (e instanceof Error)
-      toast.error(e.message)
+  } catch (e) {
+    if (e instanceof Error) toast.error(e.message)
     else toast.error(String(e))
   }
 
@@ -82,7 +88,8 @@ function openChangeProject(project: ProjectRec) {
     id: project.id,
     urlFriendly: project.urlFriendly,
     title: project.title,
-    groupId: groups.value?.find(g => g.categories.find(c => c.id === project.categoryId))!.id as unknown as number,
+    groupId: groups.value?.find(g => g.categories.find(c => c.id === project.categoryId))!
+      .id as unknown as number,
     location: project.location,
     status: project.status,
     yearStart: project.yearStart,
@@ -93,7 +100,7 @@ function openChangeProject(project: ProjectRec) {
   })
 }
 
-async function uploadImages(images: File[], project: { id: number, urlFriendly: string }) {
+async function uploadImages(images: File[], project: { id: number; urlFriendly: string }) {
   const formData = new FormData()
   images.forEach((image, idx) => formData.append(`image-${idx}`, image))
 
@@ -104,10 +111,8 @@ async function uploadImages(images: File[], project: { id: number, urlFriendly: 
     })
     toast.success(`Фотографий загружено: ${images.length}`)
     refreshProjects()
-  }
-  catch (e) {
-    if (e instanceof Error)
-      toast.error(e.message)
+  } catch (e) {
+    if (e instanceof Error) toast.error(e.message)
     else toast.error(String(e))
   }
 }
@@ -116,18 +121,28 @@ async function uploadImages(images: File[], project: { id: number, urlFriendly: 
 <template>
   <main class="container grid grid-cols-[300px,1fr]">
     <aside class="flex flex-col gap-4 p-4">
-      <ul class="flex flex-col gap-2">
-        <h3 class="text-xl font-bold">
-          Группы
-        </h3>
-      </ul>
       <li v-for="group in groups" :key="group.id" class="w-full list-none">
         <ul class="flex w-full flex-col gap-2">
-          <span class="w-full rounded-sm border-2 border-primary px-2 py-1 font-bold">{{ group.title }}</span>
+          <span class="w-full rounded-sm border-2 border-primary px-2 py-1 font-bold">{{
+            group.title
+          }}</span>
           <li
-            v-for="category in group.categories" :key="category.id" class="cursor-pointer px-2 py-1 hover:bg-primary-foreground"
+            class="cursor-pointer px-2 py-1 hover:bg-primary-foreground"
+            :class="
+              selectedGroupId === group.id && selectedCategoryId === null
+                ? 'font-bold bg-primary-foreground'
+                : ''
+            "
+            @click="selectCategory(group.id, null)"
+          >
+            Все
+          </li>
+          <li
+            v-for="category in group.categories"
+            :key="category.id"
+            class="cursor-pointer px-2 py-1 hover:bg-primary-foreground"
             :class="category.id === selectedCategoryId ? 'font-bold bg-primary-foreground' : ''"
-            @click="selectCategory(category.id)"
+            @click="selectCategory(group.id, category.id)"
           >
             <span>{{ category.title }}</span>
           </li>
@@ -137,13 +152,18 @@ async function uploadImages(images: File[], project: { id: number, urlFriendly: 
 
     <section v-if="groups?.length">
       <ProjectSheet
-        v-if="groups.length" ref="projectSheetRef"
+        v-if="groups.length"
+        ref="projectSheetRef"
         :groups="(groups as unknown as GroupRec[])"
         @submit="onSubmit"
       />
 
       <section class="px-8 py-4 sm:px-4 sm:py-2">
-        <Button :size="md ? 'sm' : 'default'" :variant="md ? 'secondary' : 'default'" @click="projectSheetRef?.open()">
+        <Button
+          :size="md ? 'sm' : 'default'"
+          :variant="md ? 'secondary' : 'default'"
+          @click="projectSheetRef?.open()"
+        >
           Создать проект
         </Button>
       </section>
@@ -151,9 +171,7 @@ async function uploadImages(images: File[], project: { id: number, urlFriendly: 
       <Table class="">
         <TableHeader>
           <TableRow>
-            <TableHead>
-              Превью
-            </TableHead>
+            <TableHead> Превью </TableHead>
             <TableHead>Проект</TableHead>
             <TableHead>URL Friendly</TableHead>
             <TableHead>Группа</TableHead>
@@ -166,7 +184,12 @@ async function uploadImages(images: File[], project: { id: number, urlFriendly: 
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="p in projects" :key="p.id" class="cursor-pointer" @click="navigateTo(`/admin/projects/${p.urlFriendly}`)">
+          <TableRow
+            v-for="p in projectsOfSelectedCategory"
+            :key="p.id"
+            class="cursor-pointer"
+            @click="navigateTo(`/admin/projects/${p.urlFriendly}`)"
+          >
             <TableCell>
               <NuxtImg
                 v-if="p.images.length"
@@ -188,7 +211,11 @@ async function uploadImages(images: File[], project: { id: number, urlFriendly: 
             <TableCell>{{ p.status }}</TableCell>
             <TableCell>{{ p.location }}</TableCell>
             <TableCell @click.stop>
-              <HoverCard :open-delay="0" :open="hoverCardIsOpen" @update:open="hoverCardIsOpen = $event">
+              <HoverCard
+                :open-delay="0"
+                :open="hoverCardIsOpen"
+                @update:open="hoverCardIsOpen = $event"
+              >
                 <HoverCardTrigger as-child>
                   <Button variant="ghost" @click="hoverCardIsOpen = true">
                     <EllipsisVertical />
@@ -198,9 +225,7 @@ async function uploadImages(images: File[], project: { id: number, urlFriendly: 
                   <Button variant="outline" @click="openChangeProject(p as unknown as ProjectRec)">
                     Изменить
                   </Button>
-                  <Button variant="destructiveOutline">
-                    Удалить
-                  </Button>
+                  <Button variant="destructiveOutline"> Удалить </Button>
                 </HoverCardContent>
               </HoverCard>
             </TableCell>

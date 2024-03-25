@@ -7,5 +7,6 @@
     "tailwindcss",
     "vueuse",
     "Человекопонятная"
-  ]
+  ],
+  "prettier.enable": false
 }
