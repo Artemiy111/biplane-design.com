@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
 import * as v from 'valibot'
+import type { LocationQuery } from 'vue-router'
 import { Carousel } from '~/components/ui/carousel'
-import type { CategoryRec, GroupRec } from '~/server/db/schema'
+import type { CategoryDto, GroupDto } from '~/server/use-cases/types'
 
 useSeoMeta({
   title: 'Проекты',
@@ -19,33 +20,32 @@ const querySchema = v.object({
 const route = useRoute()
 const router = useRouter()
 const { md } = useScreenSize()
-const { data: groups, error: _error } = await useFetch<GroupRec[]>('/api/groups')
+const { data: groups, error: _error } = await useFetch<GroupDto[]>('/api/groups')
 
-const currentGroup = ref<GroupRec | null>(groups.value?.[0] || null)
-const currentCategory = ref<CategoryRec | null>(currentGroup.value?.categories[0] || null)
+const currentGroup = ref<GroupDto | null>(groups.value?.[0] || null)
+const currentCategory = ref<CategoryDto | null>(currentGroup.value?.categories[0] || null)
 const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
-watch(() => route.query, () => {
-  const query = v.safeParse(querySchema, route.query)
-  if (!query.success)
+function handleRouteQuery(query: LocationQuery) {
+  const validatedQuery = v.safeParse(querySchema, query)
+  if (!validatedQuery.success)
     return
-  const queryGroup = groups.value?.find(g => g.urlFriendly === query.output.group) || null
-  const queryCategory = queryGroup?.categories.find(c => c.urlFriendly === query.output.category) || null
+  const queryGroup = groups.value?.find(g => g.uri === validatedQuery.output.group) || null
+  const queryCategory = queryGroup?.categories.find(c => c.uri === validatedQuery.output.category) || null
 
   if (!queryGroup || !queryCategory)
     return
 
   currentGroup.value = queryGroup
   currentCategory.value = queryCategory
-}, { immediate: true })
+}
+
+handleRouteQuery(route.query)
+router.afterEach(guard => handleRouteQuery(guard.query))
 
 watch(() => [currentGroup.value, currentCategory.value], () => {
-  router.push({ query: { ...route.query, group: currentGroup.value?.urlFriendly, category: currentCategory.value?.urlFriendly } })
+  router.push({ query: { ...route.query, group: currentGroup.value?.uri, category: currentCategory.value?.uri } })
 })
-
-function toUrl(projectUrlFriendly: string, filename: string) {
-  return `/images/projects/${projectUrlFriendly}/${filename}`
-}
 
 const categoriesCarouselRef = ref<InstanceType<typeof Carousel> | null>(null)
 const haveHiddenCategories = ref(false)
@@ -63,7 +63,7 @@ onMounted(() => {
   categoriesCarouselRef.value?.carouselApi?.on('scroll', setHiddenCategories)
 })
 
-function changeTheme(group: GroupRec) {
+function changeTheme(group: GroupDto) {
   if (group !== currentGroup.value) {
     currentGroup.value = group
     currentCategory.value = currentGroup.value.categories?.[0] || null
@@ -71,7 +71,7 @@ function changeTheme(group: GroupRec) {
   currentGroup.value = group
 }
 
-function changeCategory(category: CategoryRec) {
+function changeCategory(category: CategoryDto) {
   currentCategory.value = category
 }
 </script>
@@ -121,11 +121,11 @@ function changeCategory(category: CategoryRec) {
     </section>
     <Separator v-if="currentGroup?.categories.length" />
     <section v-if="projectsWithImages?.length" class="grid grid-cols-2 gap-x-[2px] gap-y-[2px] lg:grid-cols-1">
-      <NuxtLink v-for="p in projectsWithImages" :key="p.id" :to="`/projects/${p.urlFriendly}`" class="flex flex-col transition-colors hover:bg-primary-foreground">
+      <NuxtLink v-for="p in projectsWithImages" :key="p.id" :to="`/projects/${p.uri}`" class="flex flex-col transition-colors hover:bg-primary-foreground">
         <Carousel class="aspect-video w-full">
           <CarouselContent>
             <CarouselItem v-for="img in p.images" :key="img.filename">
-              <NuxtImg format="avif,webp,png,jpg" :src="toUrl(img.projectUrlFriendly, img.filename)" :alt="img.title || 'image'" class="aspect-video w-full object-cover" />
+              <NuxtImg format="avif,webp,png,jpg" :src="img.url" :alt="img.alt" class="aspect-video w-full object-cover" />
             </CarouselItem>
           </CarouselContent>
         </Carousel>

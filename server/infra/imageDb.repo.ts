@@ -1,3 +1,5 @@
+import path from 'node:path'
+import { cwd } from 'node:process'
 import { eq } from 'drizzle-orm'
 import { db } from '~/server/db'
 import type { ImageDb } from '~/server/db/schema'
@@ -6,13 +8,14 @@ import type {
   DeleteImage,
   GetImages,
   GetImagesByProjectUri,
+  IImageFsRepo,
   ImageDto,
   ImageId,
   UpdateImage,
   UpdateImageDto,
 } from '~/server/use-cases/types'
 
-const IMAGES_DIR = '/public/images/projects'
+const PROJECTS_DIR = path.join(cwd(), 'public/images/projects')
 
 export const imageDbMapper = {
   toDto(db: ImageDb): ImageDto {
@@ -20,7 +23,7 @@ export const imageDbMapper = {
       projectUri: db.projectUrlFriendly,
       id: db.id,
       filename: db.filename,
-      url: `${IMAGES_DIR}/${db.projectUrlFriendly}/${db.filename}`,
+      url: `${PROJECTS_DIR}/${db.projectUrlFriendly}/${db.filename}`,
       alt: db.title || db.filename,
       order: db.order,
     }

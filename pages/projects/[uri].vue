@@ -2,11 +2,11 @@
 import { useElementSize } from '@vueuse/core'
 import type { ComponentPublicInstance } from 'vue'
 import { Carousel, type CarouselApi } from '@/components/ui/carousel'
-import type { ProjectRec } from '~/server/db/schema'
+import type { ProjectDto } from '~/server/use-cases/types'
 
 const route = useRoute()
-const projectUrlFriendly = route.params.urlFriendly! as string
-const { data: project, error: _error } = await useFetch<ProjectRec>(`/api/projects/${projectUrlFriendly}/`)
+const projectUri = route.params.uri! as string
+const { data: project, error: _error } = await useFetch<ProjectDto>(`/api/projects/${projectUri}/`)
 
 const api = ref<CarouselApi | null>(null)
 const apiTumb = ref<CarouselApi | null>(null)
@@ -77,7 +77,8 @@ function scrollToImage(index: number) {
             @click="current = index"
           >
             <NuxtImg
-              :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
+              :src="img.url"
+              :alt="img.alt"
               format="avif,webp,png,jpg"
               class="aspect-video w-full object-cover"
             />
@@ -104,15 +105,11 @@ function scrollToImage(index: number) {
             class="flex items-center justify-center"
           >
             <NuxtImg
-              :src="`/images/projects/${project.urlFriendly}/${img.filename}`"
+              :src="img.url"
+              :alt="img.alt"
               format="avif,webp,png,jpg"
               class="aspect-video w-full object-contain"
             />
-            <!-- <NuxtImg
-              :src="img.url"
-              format="avif,webp,png,jpg"
-              class="aspect-video w-full object-contain"
-            /> -->
           </CarouselItem>
         </CarouselContent>
       </Carousel>

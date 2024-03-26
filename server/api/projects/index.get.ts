@@ -1,5 +1,10 @@
 import { db } from '~/server/db'
+import { projectDbMapper } from '~/server/infra/projectDb.repo'
 
-export default defineEventHandler(() => {
-  return db.query.projects.findMany({ with: { images: { orderBy: images => images.order }, category: { with: { group: true } } } })
+export default defineEventHandler(async () => {
+  return (await db.query.projects.findMany({
+    with: {
+      images: { orderBy: images => images.order },
+    },
+  })).map(projectDbMapper.toDto)
 })

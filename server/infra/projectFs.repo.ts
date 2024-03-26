@@ -2,39 +2,48 @@ import { cwd } from 'node:process'
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import type { IProjectFsRepo } from '../use-cases/types'
+import { err, ok } from '../shared/result'
+import type { Result } from '../shared/result'
 
-const PROJECTS_DIR = path.join(cwd(), `public/images/projects/`)
+const _PROJECTS_DIR = path.join(cwd(), `public/images/projects`)
 
-export function createProjectFsRepo(projectsDir: string): IProjectFsRepo {
-  const getProjectDir = (uri: string) => path.join(projectsDir, uri)
+export class ProjectFsRepo implements IProjectFsRepo {
+  constructor(private projectsDir: string) {}
 
-  const createProjectDir = async (uri: string) => {
-    const dir = getProjectDir(uri)
-    await fs.mkdir(dir).catch(() => {
-      throw new Error(`Cannot create project dir \`${dir}\``)
-    })
+  getProjectDir(uri: string) { return path.join(this.projectsDir, uri) }
+
+  async createProjectDir(uri: string) {
+    const dir = this.getProjectDir(uri)
+    try {
+      fs.mkdir(dir)
+    }
+    catch (_e) {
+      return err(new Error(`Cannot create project dir \`${dir}\``))
+    }
+    return ok(undefined)
   }
 
-  const renameProjectDir = async (uri: string, newUri: string) => {
-    const dir = getProjectDir(uri)
-    const newDir = getProjectDir(newUri)
+  async renameProjectDir(uri: string, newUri: string) {
+    const dir = this.getProjectDir(uri)
+    const newDir = this.getProjectDir(newUri)
 
-    await fs.rename(dir, newDir).catch(() => {
-      throw new Error(`Cannot rename project dir \`${dir}\``)
-    })
+    try {
+      await fs.rename(dir, newDir)
+    }
+    catch (_e) {
+      return err(new Error(`Cannot rename project dir \`${dir}\``))
+    }
+    return ok(undefined)
   }
 
-  const deleteProjectDir = async (uri: string) => {
-    const dir = getProjectDir(uri)
-    fs.unlink(dir).catch(() => {
-      throw new Error(`Cannot delete project dir \`${dir}\``)
-    })
-  }
-
-  return {
-    getProjectDir,
-    createProjectDir,
-    renameProjectDir,
-    deleteProjectDir,
+  async deleteProjectDir(uri: string) {
+    const dir = this.getProjectDir(uri)
+    try {
+      fs.unlink(dir)
+    }
+    catch (_e) {
+      return err(new Error(`Cannot delete project dir \`${dir}\``))
+    }
+    return ok(undefined)
   }
 }

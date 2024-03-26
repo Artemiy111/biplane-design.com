@@ -1,16 +1,15 @@
-import type { CreateGroup, CreateGroupDto, GetUser } from './types'
+import { GroupDbRepo } from '../infra/groupDb.repo'
+import { UserRepo } from '../infra/user.repo'
+import { err, ok } from '../shared/result'
+import type { CreateGroupDto, IGroupRepo, IUseCase, IUserRepo } from './types'
 
-/**
- * @throws [error]
- */
-export async function createGroupUseCase(
-  group: CreateGroupDto,
-  context: {
-    getUser: GetUser
-    createGroup: CreateGroup
-  },
-) {
-  if (!context.getUser()) throw new Error('Auth error')
+export class CreateGroupUseCase implements IUseCase {
+  constructor(private groupRepo: IGroupRepo, private userRepo: IUserRepo) {}
 
-  return context.createGroup(group)
+  async execute(dto: CreateGroupDto) {
+    if (!(await this.userRepo.getUser()))
+      return err(new Error('Auth'))
+
+    return ok(await this.groupRepo.createGroup(dto))
+  }
 }

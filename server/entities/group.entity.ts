@@ -95,6 +95,7 @@ export class GroupEntity implements IGroupEntity {
   }
 
   setOrder(order: IGroupEntityProps['order']) {
-    if (order < 1) throw new GroupEntityValidationError()
+    if (order < 1)
+      throw new GroupEntityValidationError()
   }
 }

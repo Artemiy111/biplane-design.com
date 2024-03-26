@@ -1,18 +1,14 @@
 import { eq } from 'drizzle-orm'
 import { GroupEntity } from '../entities/group.entity'
+import type { Result } from '../shared/result'
+import { ResultOk, err, ok } from '../shared/result'
 import { IGroupEntity } from './../entities/group.entity'
 import { categoryDbMapper } from './categoryDb.repo'
 import type {
-  CreateGroup,
   CreateGroupDto,
-  DeleteGroup,
-  GetGroup,
-  GetGroupNextOrder,
-  GetGroups,
   GroupDto,
   GroupId,
   IGroupDbRepo,
-  UpdateGroup,
   UpdateGroupDto,
 } from '~/server/use-cases/types'
 import { db } from '~/server/db'
@@ -38,7 +34,7 @@ export const groupMapper = {
   },
 }
 
-const groupDbMapper = {
+export const groupDbMapper = {
   toDto(db: GroupDbDeep): GroupDto {
     return {
       id: db.id,
@@ -65,74 +61,108 @@ const groupDbMapper = {
   },
 }
 
-export const getGroupNextOrder: GetGroupNextOrder = async () => {
-  return (await db.select().from(groups)).length + 1
-}
+export class GroupDbRepo implements IGroupDbRepo {
+  async getGroupNextOrder() {
+    try {
+      const groupsCount = (await db.select().from(groups)).length
+      return ok(groupsCount + 1)
+    }
+    catch (e) {
+      return err(new Error('oops'))
+    }
+  }
 
-export const getGroup: GetGroup = async (id: GroupId) => {
-  const group =
-    (await db.query.groups.findFirst({
-      where: eq(groups.id, id),
-      with: {
-        categories: {
-          with: {
-            projects: {
-              with: {
-                images: { orderBy: images => images.order },
-              },
-              orderBy: projects => projects.order,
-            },
-          },
-          orderBy: categories => categories.order,
-        },
-      },
-      orderBy: groups => groups.order,
-    })) || null
-  return group === null ? null : groupDbMapper.toDto(group)
-}
-
-export const getGroups: GetGroups = async () => {
-  const groups = await db.query.groups.findMany({
-    with: {
-      categories: {
+  async getGroup(id: GroupId) {
+    try {
+      const group
+      = (await db.query.groups.findFirst({
+        where: eq(groups.id, id),
         with: {
-          projects: {
+          categories: {
             with: {
-              images: { orderBy: images => images.order },
+              projects: {
+                with: {
+                  images: { orderBy: images => images.order },
+                },
+                orderBy: projects => projects.order,
+              },
             },
-            orderBy: projects => projects.order,
+            orderBy: categories => categories.order,
           },
         },
-        orderBy: categories => categories.order,
-      },
-    },
-    orderBy: groups => groups.order,
-  })
-  return groups.map(groupDbMapper.toDto)
-}
+        orderBy: groups => groups.order,
+      })) || null
+      return ok(group === null ? null : groupDbMapper.toDto(group))
+    }
+    catch (_e) {
+      return err(new Error('oops'))
+    }
+  }
 
-export const createGroup: CreateGroup = async (dto: CreateGroupDto) => {
-  const nextOrder = await getGroupNextOrder()
-  const group = new GroupEntity({ ...dto, order: nextOrder })
-}
+  async getGroups() {
+    try {
+      const groups = await db.query.groups.findMany({
+        with: {
+          categories: {
+            with: {
+              projects: {
+                with: {
+                  images: { orderBy: images => images.order },
+                },
+                orderBy: projects => projects.order,
+              },
+            },
+            orderBy: categories => categories.order,
+          },
+        },
+        orderBy: groups => groups.order,
+      })
+      return ok(groups.map(groupDbMapper.toDto))
+    }
+    catch (_e) {
+      return err(new Error('oops'))
+    }
+  }
 
-export const updateGroup: UpdateGroup = async (dto: UpdateGroupDto) => {
-  await db.transaction(async tx => {
-    const group = await tx.select().from(groups).where(eq(groups.id, dto.id))
-    const nextOrder = await getGroupNextOrder()
-  })
-  await db.update(groups).set(groupDbMapper.toUpdate(dto))
-  return (await getGroup(dto.id))!
-}
+  async createGroup(dto: CreateGroupDto) {
+    try {
+      const nextOrder = await this.getGroupNextOrder()
+      if (!nextOrder.ok)
+        return err(nextOrder.error)
 
-export const deleteGroup: DeleteGroup = async (id: GroupId) => {}
+      const group = groupDbMapper.toCreate(dto)
 
-export function createGroupDbRepo(): IGroupDbRepo {
-  return {
-    getGroup,
-    getGroups,
-    createGroup,
-    updateGroup,
-    deleteGroup,
+      const createdInDb = (await db.insert(groups)
+        .values({ ...group, order: nextOrder.value })
+        .returning())[0]
+
+      const created = await this.getGroup(createdInDb.id)
+      if (!created.ok)
+        return err(new Error('oops'))
+
+      return ok(created.value!)
+    }
+    catch (e) {
+      return err(new Error('oops'))
+    }
+  }
+
+  async updateGroup(_dto: UpdateGroupDto) {
+    // try{
+    //   await db.transaction(async (tx) => {
+    //     const group = await tx.select().from(groups).where(eq(groups.id, dto.id))
+    //     const nextOrder = await this.getGroupNextOrder()
+    //     await tx.update(groups).set(groupDbMapper.toUpdate(dto))
+    //   })
+    //   return ok((await this.getGroup(dto.id))!)
+    // }
+    // catch (_e) {
+    //   return err(new Error('oops'))
+    // }
+    return err(new Error('oops'))
+  }
+
+  async deleteGroup(_id: GroupId) {
+    return err(new Error('oops'))
   }
 }
