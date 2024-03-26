@@ -1,4 +1,6 @@
-import { eq } from 'drizzle-orm'
+import { and, eq, gt, gte, lt, lte, sql } from 'drizzle-orm'
+import type { PgTransaction } from 'drizzle-orm/pg-core'
+import type { PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js'
 import { GroupEntity } from '../entities/group.entity'
 import type { Result } from '../shared/result'
 import { ResultOk, err, ok } from '../shared/result'
@@ -13,26 +15,25 @@ import type {
 } from '~/server/use-cases/types'
 import { db } from '~/server/db'
 import type { GroupDbCreate, GroupDbDeep, GroupDbUpdate } from '~/server/db/schema'
-import { groups } from '~/server/db/schema'
+import { groups, projects } from '~/server/db/schema'
 
-export const groupMapper = {
-  toCreate(dto: GroupDto): CreateGroupDto {
-    return {
-      title: dto.title,
-      order: dto.order,
-      uri: dto.uri,
-    }
-  },
+// export const groupMapper = {
+//   toCreate(dto: GroupDto): CreateGroupDto {
+//     return {
+//       title: dto.title,
+//       uri: dto.uri,
+//     }
+//   },
 
-  toUpdate(dto: GroupDto): UpdateGroupDto {
-    return {
-      id: dto.id,
-      uri: dto.uri,
-      title: dto.title,
-      order: dto.order,
-    }
-  },
-}
+//   toUpdate(dto: GroupDto): UpdateGroupDto {
+//     return {
+//       id: dto.id,
+//       uri: dto.uri,
+//       title: dto.title,
+//       order: dto.order,
+//     }
+//   },
+// }
 
 export const groupDbMapper = {
   toDto(db: GroupDbDeep): GroupDto {
@@ -44,11 +45,11 @@ export const groupDbMapper = {
       categories: db.categories.map(categoryDbMapper.toDto),
     }
   },
-  toCreate(dto: CreateGroupDto): GroupDbCreate {
+  toCreate(dto: CreateGroupDto, order: number): GroupDbCreate {
     return {
       urlFriendly: dto.uri,
       title: dto.title,
-      order: dto.order,
+      order,
     }
   },
   toUpdate(db: UpdateGroupDto): GroupDbUpdate {
@@ -61,10 +62,30 @@ export const groupDbMapper = {
   },
 }
 
+type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
+
 export class GroupDbRepo implements IGroupDbRepo {
-  async getGroupNextOrder() {
+  private db: typeof db = db
+  private tx: DbTransaction | null = null
+  private get ctx() {
+    return this.tx || db
+  }
+
+  private startTransaction(tx: DbTransaction) {
+    this.tx = tx
+  }
+
+  private endTransaction() {
+    this.tx = null
+  }
+
+  private rollBack() {
+    this.tx?.rollback()
+  }
+
+  private async getGroupNextOrder() {
     try {
-      const groupsCount = (await db.select().from(groups)).length
+      const groupsCount = (await this.ctx.select().from(groups)).length
       return ok(groupsCount + 1)
     }
     catch (e) {
@@ -72,10 +93,54 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
+  private async updateGroupOrder(dto: GroupDto, newOrder: number) {
+    if (dto.order === newOrder)
+      return ok(undefined)
+
+    let returnValue: Result<void, Error> = ok(undefined)
+    try {
+      db.transaction(async (tx) => {
+        this.startTransaction(tx)
+
+        const nextOrder = await this.getGroupNextOrder()
+        if (!nextOrder.ok)
+          return err(nextOrder.error)
+
+        if (newOrder > nextOrder.value)
+          return err('New order is out of range')
+
+        if (newOrder > dto.order) {
+          await tx.update(groups).set({ order: sql`(${groups.order} - 1) * 1000` }).where(and(
+            gt(projects.order, dto.order),
+            lte(projects.order, dto.order),
+          ))
+        }
+        else if (newOrder < dto.order) {
+          await tx.update(projects).set({ order: sql`(${projects.order} + 1) * 1000` }).where(and(
+            gte(projects.order, newOrder),
+            lt(projects.order, dto.order),
+          ))
+        }
+
+        await tx.update(projects).set({ order: dto.order }).where(eq(projects.urlFriendly, dto.uri))
+        await tx.update(projects).set({ order: sql`${projects.order} / 1000` }).where(gte(projects.order, 1000))
+      })
+    }
+    catch (_e) {
+      returnValue = err(new Error('oops'))
+      this.rollBack()
+    }
+    finally {
+      this.endTransaction()
+      // eslint-disable-next-line no-unsafe-finally
+      return returnValue
+    }
+  }
+
   async getGroup(id: GroupId) {
     try {
       const group
-      = (await db.query.groups.findFirst({
+      = (await this.ctx.query.groups.findFirst({
         where: eq(groups.id, id),
         with: {
           categories: {
@@ -91,8 +156,11 @@ export class GroupDbRepo implements IGroupDbRepo {
           },
         },
         orderBy: groups => groups.order,
-      })) || null
-      return ok(group === null ? null : groupDbMapper.toDto(group))
+      }))
+      if (!group)
+        return err(new Error(`Group with id \`${id}\ does not exist`))
+
+      return ok(groupDbMapper.toDto(group))
     }
     catch (_e) {
       return err(new Error('oops'))
@@ -101,7 +169,7 @@ export class GroupDbRepo implements IGroupDbRepo {
 
   async getGroups() {
     try {
-      const groups = await db.query.groups.findMany({
+      const groups = await this.ctx.query.groups.findMany({
         with: {
           categories: {
             with: {
@@ -130,12 +198,8 @@ export class GroupDbRepo implements IGroupDbRepo {
       if (!nextOrder.ok)
         return err(nextOrder.error)
 
-      const group = groupDbMapper.toCreate(dto)
-
-      const createdInDb = (await db.insert(groups)
-        .values({ ...group, order: nextOrder.value })
-        .returning())[0]
-
+      const toCreate = groupDbMapper.toCreate(dto, nextOrder.value)
+      const createdInDb = (await this.db.insert(groups).values(toCreate).returning())[0]
       const created = await this.getGroup(createdInDb.id)
       if (!created.ok)
         return err(new Error('oops'))
@@ -147,19 +211,39 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
-  async updateGroup(_dto: UpdateGroupDto) {
-    // try{
-    //   await db.transaction(async (tx) => {
-    //     const group = await tx.select().from(groups).where(eq(groups.id, dto.id))
-    //     const nextOrder = await this.getGroupNextOrder()
-    //     await tx.update(groups).set(groupDbMapper.toUpdate(dto))
-    //   })
-    //   return ok((await this.getGroup(dto.id))!)
-    // }
-    // catch (_e) {
-    //   return err(new Error('oops'))
-    // }
-    return err(new Error('oops'))
+  async updateGroup(dto: UpdateGroupDto): Promise<Result<GroupDto, Error>> {
+    let returnValue: Result<GroupDto, Error> = err(new Error('oops'))
+
+    try {
+      returnValue = await db.transaction(async (tx) => {
+        this.startTransaction(tx)
+
+        const group = await this.getGroup(dto.id)
+        if (!group.ok)
+          return err(group.error)
+
+        await this.ctx.update(groups)
+          .set({ title: dto.title, urlFriendly: dto.uri })
+          .where(eq(groups.id, dto.id))
+
+        await this.updateGroupOrder(group.value, dto.order)
+
+        const updatedGroup = await this.getGroup(dto.id)
+        if (!updatedGroup.ok)
+          return err(updatedGroup.error)
+
+        return ok(updatedGroup.value)
+      })
+    }
+    catch (e) {
+      returnValue = err(new Error('oops'))
+      this.rollBack()
+    }
+    finally {
+      this.endTransaction()
+      // eslint-disable-next-line no-unsafe-finally
+      return returnValue
+    }
   }
 
   async deleteGroup(_id: GroupId) {

@@ -21,6 +21,7 @@
 
 TODO
 
+- [ ] clean architecture
 - [ ] таблица бд
 - [ ] dbd для элементов
 - [ ] seo

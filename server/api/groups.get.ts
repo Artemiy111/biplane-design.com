@@ -1,6 +1,4 @@
 import { HttpErrorCode, createHttpError } from '../exceptions'
-import { GroupDbRepo, groupDbMapper } from '../infra/groupDb.repo'
-
 import { getGroupsUseCase } from '~/server/di'
 
 export default defineEventHandler(async () => {
