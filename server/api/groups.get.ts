@@ -1,18 +1,9 @@
-import { db } from '~/server/db'
+import { HttpErrorCode, createHttpError } from '../exceptions'
+import { getGroupsUseCase } from '~/server/di'
 
 export default defineEventHandler(async () => {
-  const groups = await db.query.groups.findMany({
-    with: {
-      categories: {
-        with: {
-          projects: {
-            with: {
-              images: { orderBy: images => images.order },
-            },
-          },
-        },
-      },
-    },
-  })
-  return groups
+  const groups = await getGroupsUseCase.execute()
+  if (groups.ok)
+    return groups.value
+  else throw createHttpError(HttpErrorCode.InternalServerError)
 })

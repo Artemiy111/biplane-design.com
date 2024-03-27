@@ -1,5 +1,9 @@
-import { db } from '~/server/db'
+import { getProjectsUseCase } from '~/server/di'
+import { HttpErrorCode, createHttpError } from '~/server/exceptions'
 
-export default defineEventHandler(() => {
-  return db.query.projects.findMany({ with: { images: { orderBy: images => images.order }, category: { with: { group: true } } } })
+export default defineEventHandler(async () => {
+  const res = await getProjectsUseCase.execute()
+  if (!res.ok)
+    throw createHttpError(HttpErrorCode.InternalServerError)
+  return res.value
 })

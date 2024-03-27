@@ -1,2 +1,0 @@
-ALTER TABLE "images" DROP CONSTRAINT "unique_filename_for_project";--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "unique_idx_filename_for_project" ON "images" ("project_url_friendly","filename");

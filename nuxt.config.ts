@@ -4,7 +4,7 @@ import '@total-typescript/ts-reset'
 export default defineNuxtConfig({
   telemetry: { enabled: false },
   devtools: {
-    enabled: true,
+    enabled: false,
 
     timeline: {
       enabled: true,
@@ -52,7 +52,9 @@ export default defineNuxtConfig({
     transpile: ['trpc-nuxt'],
   },
   image: {
-    ipx: {},
+    ipx: {
+
+    },
     format: ['avif', 'webp', 'png', 'jpg'],
   },
   supabase: {

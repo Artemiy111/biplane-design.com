@@ -1,0 +1,1 @@
+ALTER TABLE "groups" ALTER COLUMN "order" SET DATA TYPE serial;

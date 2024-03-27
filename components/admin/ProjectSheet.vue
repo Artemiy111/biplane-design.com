@@ -24,8 +24,8 @@ const initialValues = ref<FormSchema>({
   yearStart: null,
   yearEnd: null,
   location: '',
-  previewId: null,
   images: [],
+  order: 1,
 })
 
 const formSchema = projectInsertSchema.merge(z.object({
@@ -59,8 +59,6 @@ function handleClose() {
 }
 
 const prev = ref<FormSchema | null>(null)
-
-// type InitialValues = FormSchema & {images: Ima}
 
 async function open(initial?: FormSchema) {
   isOpen.value = true
