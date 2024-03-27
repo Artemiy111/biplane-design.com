@@ -1,9 +1,9 @@
 import type { IProjectRepo, IUseCase } from './types'
 
-export class GetGroupUseCase implements IUseCase {
-  constructor(private projectRepo: IProjectRepo) {}
+export class GetProjectByUriUseCase implements IUseCase {
+  constructor(private repo: IProjectRepo) {}
 
   async execute(uri: string) {
-    return this.groupRepo.getGroup(id)
+    return this.repo.getProjectByUri(uri)
   }
 }

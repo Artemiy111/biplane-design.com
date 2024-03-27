@@ -1,5 +1,3 @@
-import { GroupDbRepo } from '../infra/groupDb.repo'
-import { UserRepo } from '../infra/user.repo'
 import { err, ok } from '../shared/result'
 import type { CreateGroupDto, IGroupRepo, IUseCase, IUserRepo } from './types'
 

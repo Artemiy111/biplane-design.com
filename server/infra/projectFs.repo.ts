@@ -1,31 +1,30 @@
-import { cwd } from 'node:process'
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import type { IProjectFsRepo } from '../use-cases/types'
 import { err, ok } from '../shared/result'
-import type { Result } from '../shared/result'
-
-const _PROJECTS_DIR = path.join(cwd(), `public/images/projects`)
 
 export class ProjectFsRepo implements IProjectFsRepo {
   constructor(private projectsDir: string) {}
 
   getProjectDir(uri: string) { return path.join(this.projectsDir, uri) }
 
-  async isProjectDirExists(uri: string) {
+  async isProjectDirExist(uri: string) {
     const dir = this.getProjectDir(uri)
     const exists = await fs.exists(dir)
-    return ok(exists)
+    return exists
   }
 
   async createProjectDir(uri: string) {
     const dir = this.getProjectDir(uri)
+    if (!(await this.isProjectDirExist(uri)))
+      return err(new Error(`Dir of project \`${uri}\` already exists`))
+
     try {
       fs.mkdir(dir)
       return ok(undefined)
     }
     catch (_e) {
-      return err(new Error(`Cannot create project dir \`${dir}\``))
+      return err(new Error(`Cannot create dir for project \`${uri}\``))
     }
   }
 

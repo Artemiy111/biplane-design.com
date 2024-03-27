@@ -1,3 +1,4 @@
+import type { Buffer } from 'node:buffer'
 import type { Result, ResultOk } from '../shared/result'
 
 //
@@ -5,21 +6,22 @@ export interface IUseCase {
   execute: Function
 }
 
+//
+
 export interface IGroupRepo {
-  getGroup: GetGroup
-  getGroups: GetGroups
-  createGroup: CreateGroup
-  updateGroup: UpdateGroup
-  deleteGroup: DeleteGroup
+  getGroup: (id: GroupId) => Promise<Result<GroupDto, Error>>
+  getGroups: () => Promise<Result<GroupDto[], Error>>
+  createGroup: (dto: CreateGroupDto) => Promise<Result<GroupDto, Error>>
+  updateGroup: (dto: UpdateGroupDto) => Promise<Result<GroupDto, Error>>
+  deleteGroup: (id: GroupId) => Promise<Result<void, Error>>
 }
 
 export interface IGroupDbRepo {
-  getGroup: GetGroup
-  getGroups: GetGroups
-  createGroup: CreateGroup
-  updateGroup: UpdateGroup
-  deleteGroup: DeleteGroup
-  // getGroupNextOrder: GetGroupNextOrder
+  getGroup: (id: GroupId) => Promise<Result<GroupDto, Error>>
+  getGroups: () => Promise<Result<GroupDto[], Error>>
+  createGroup: (dto: CreateGroupDto) => Promise<Result<GroupDto, Error>>
+  updateGroup: (dto: UpdateGroupDto) => Promise<Result<GroupDto, Error>>
+  deleteGroup: (id: GroupId) => Promise<Result<void, Error>>
 }
 
 export type GroupId = number
@@ -33,11 +35,6 @@ export interface GroupDto {
 export type CreateGroupDto = Omit<GroupDto, 'id' | 'order' | 'categories'>
 export type UpdateGroupDto = Omit<GroupDto, 'categories'>
 
-export type GetGroup = (id: GroupId) => Promise<Result<GroupDto, Error>>
-export type GetGroups = () => Promise<Result<GroupDto[], Error>>
-export type CreateGroup = (dto: CreateGroupDto) => Promise<Result<GroupDto, Error>>
-export type UpdateGroup = (dto: UpdateGroupDto) => Promise<Result<GroupDto, Error>>
-export type DeleteGroup = (id: GroupId) => Promise<Result<void, Error>>
 // export type GetGroupNextOrder = () => Promise<Result<number, Error>>
 
 export type ChangeGroupOrder = (id: GroupId, order: number) => Promise<void>
@@ -55,11 +52,13 @@ export interface CategoryDto {
 export type CreateCategoryDto = Omit<CategoryDto, 'id' | 'projects'>
 export type UpdateCategoryDto = Omit<CategoryDto, 'projects'>
 
-export type GetCategory = (id: CategoryId) => Promise<CategoryDto | null>
-export type GetCategories = () => Promise<CategoryDto[]>
-export type CreateCategory = (dto: CreateCategoryDto) => Promise<CategoryDto>
-export type UpdateCategory = (dto: UpdateCategoryDto) => Promise<CategoryDto>
-export type DeleteCategory = (id: CategoryId) => Promise<void>
+export interface ICategoryDbRepo {
+  getCategory: (id: CategoryId) => Promise<Result<CategoryDto, Error>>
+  getCategories: () => Promise<Result<CategoryDto[], Error>>
+  createCategory: (dto: CreateCategoryDto) => Promise<Result<CategoryDto, Error>>
+  updateCategory: (dto: UpdateCategoryDto) => Promise<Result<CategoryDto, Error>>
+  deleteCategory: (id: CategoryId) => Promise<Result<void, Error>>
+}
 
 //
 
@@ -81,6 +80,7 @@ export type UpdateProjectDto = Omit<ProjectDto, 'images'>
 
 export interface IProjectRepo {
   getProject: (id: ProjectId) => Promise<Result<ProjectDto, Error>>
+  getProjectByUri: (uri: string) => Promise<Result<ProjectDto, Error>>
   getProjects: () => Promise<Result<ProjectDto[], Error>>
   createProject: (dto: CreateProjectDto) => Promise<Result<ProjectDto, Error>>
   updateProject: (dto: UpdateProjectDto) => Promise<Result<ProjectDto, Error>>
@@ -89,6 +89,7 @@ export interface IProjectRepo {
 
 export interface IProjectDbRepo {
   getProject: (id: ProjectId) => Promise<Result<ProjectDto, Error>>
+  getProjectByUri: (uri: string) => Promise<Result<ProjectDto, Error>>
   getProjects: () => Promise<Result<ProjectDto[], Error>>
   createProject: (dto: CreateProjectDto) => Promise<Result<ProjectDto, Error>>
   updateProject: (dto: UpdateProjectDto) => Promise<Result<ProjectDto, Error>>
@@ -97,7 +98,7 @@ export interface IProjectDbRepo {
 
 export interface IProjectFsRepo {
   getProjectDir: (uri: string) => string
-  isProjectDirExists: (uri: string) => Promise<ResultOk<boolean>>
+  isProjectDirExist: (uri: string) => Promise<boolean>
   createProjectDir: (uri: string) => Promise<Result<void, Error>>
   renameProjectDir: (uri: string, newUri: string) => Promise<Result<void, Error>>
   deleteProjectDir: (uri: string) => Promise<Result<void, Error>>
@@ -118,26 +119,27 @@ export type CreateImageDto = Omit<ImageDto, 'id'>
 export type UpdateImageDto = Omit<ImageDto, ''>
 
 export interface IImageRepo {
-  getImage: (id: ProjectId) => Promise<ImageDto | null>
-  getImageByProjectUri: (uri: string) => Promise<ImageDto[]>
-  createImage: (dto: CreateImageDto) => Promise<ImageDto>
-  updateImage: (dto: UpdateImageDto) => Promise<ImageDto>
-  deleteImage: (id: ImageId) => Promise<void>
+  getImage: (id: ProjectId) => Promise<Result<ImageDto, Error>>
+  getImagesByProjectUri: (uri: string) => Promise<Result<ImageDto[], Error>>
+  createImage: (dto: CreateImageDto) => Promise<Result<ImageDto, Error>>
+  updateImage: (dto: UpdateImageDto) => Promise<Result<ImageDto, Error>>
+  deleteImage: (id: ImageId) => Promise<Result<void, Error>>
 }
 
 export interface IImageDbRepo {
-  getImage: (id: ProjectId) => Promise<ImageDto | null>
-  getImageByProjectUri: (uri: string) => Promise<ImageDto[]>
-  createImage: (dto: CreateImageDto) => Promise<ImageDto>
-  updateImage: (dto: UpdateImageDto) => Promise<ImageDto>
-  deleteImage: (id: ImageId) => Promise<void>
+  getImage: (id: ImageId) => Promise<Result<ImageDto, Error>>
+  getImagesByProjectUri: (uri: string) => Promise<Result<ImageDto[], Error>>
+  createImage: (dto: CreateImageDto) => Promise<Result<ImageDto, Error>>
+  updateImage: (dto: UpdateImageDto) => Promise<Result<ImageDto, Error>>
+  deleteImage: (id: ImageId) => Promise<Result<void, Error>>
 }
 
 export interface IImageFsRepo {
-  getImageFile: (projectDir: string, filename: string) => Promise<Result<File, Error>>
-  createImageFile: (projectDir: string, filename: string, data: File) => Promise<Result<void, Error>>
-  renameImageFile: (projectDir: string, filename: string, newFilename: string) => Promise<Result<void, Error>>
-  deleteImageFile: (projectDir: string, filename: string) => Promise<Result<void, Error>>
+  isImageFileExist: (projectUri: string, filename: string) => Promise<boolean>
+  getImageFile: (projectUri: string, filename: string) => Promise<Result<File, Error>>
+  createImageFile: (projectUri: string, filename: string, data: Buffer) => Promise<Result<void, Error>>
+  renameImageFile: (projectUri: string, filename: string, newFilename: string) => Promise<Result<void, Error>>
+  deleteImageFile: (projectUri: string, filename: string) => Promise<Result<void, Error>>
 }
 
 //

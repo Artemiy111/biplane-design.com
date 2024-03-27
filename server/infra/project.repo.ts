@@ -10,6 +10,10 @@ export class ProjectRepo implements IProjectRepo {
     return this.dbRepo.getProject(id)
   }
 
+  async getProjectByUri(uri: string) {
+    return this.dbRepo.getProjectByUri(uri)
+  }
+
   async getProjects() {
     return this.dbRepo.getProjects()
   }

@@ -4,7 +4,7 @@ import '@total-typescript/ts-reset'
 export default defineNuxtConfig({
   telemetry: { enabled: false },
   devtools: {
-    enabled: true,
+    enabled: false,
 
     timeline: {
       enabled: true,

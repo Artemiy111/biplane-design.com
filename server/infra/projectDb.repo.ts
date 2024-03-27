@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
-import { db } from '../db'
+import type { Db } from '../db'
 import { err, ok } from '../shared/result'
-import type { IProjectDbRepo, ProjectId } from './../use-cases/types'
+import type { CreateProjectDto, IProjectDbRepo, ProjectId } from './../use-cases/types'
 import { imageDbMapper } from './imageDb.repo'
 import { type ProjectDbDeep, images, projects } from '~/server/db/schema'
 import type { ProjectDto } from '~/server/use-cases/types'
@@ -24,9 +24,10 @@ export const projectDbMapper = {
 }
 
 export class ProjectDbRepo implements IProjectDbRepo {
+  constructor(private db: Db) {}
   async getProject(id: ProjectId) {
     try {
-      const project = (await db.query.projects.findFirst({ where: eq(projects.id, id), with: {
+      const project = (await this.db.query.projects.findFirst({ where: eq(projects.id, id), with: {
         images: { orderBy: images.order,
         },
       } }))
@@ -40,9 +41,25 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
+  async getProjectByUri(uri: string) {
+    try {
+      const project = (await this.db.query.projects.findFirst({ where: eq(projects.urlFriendly, uri), with: {
+        images: { orderBy: images.order,
+        },
+      } }))
+      if (!project)
+        return err(new Error(`Project with uri \`${uri}\` is not found`))
+
+      return ok(projectDbMapper.toDto(project))
+    }
+    catch (_e) {
+      return err(new Error('oops'))
+    }
+  }
+
   async getProjects() {
     try {
-      const projects = (await db.query.projects.findMany({
+      const projects = (await this.db.query.projects.findMany({
         with: {
           images: {
             orderBy: images.order,
@@ -56,9 +73,15 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async createProject() {}
+  async createProject(dto: CreateProjectDto) {
+    return Promise.resolve(err(new Error('not impl')))
+  }
 
-  async updateProject() {}
+  async updateProject() {
+    return Promise.resolve(err(new Error('not impl')))
+  }
 
-  async deleteProject() {}
+  async deleteProject() {
+    return Promise.resolve(err(new Error('not impl')))
+  }
 }

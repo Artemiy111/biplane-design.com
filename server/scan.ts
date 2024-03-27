@@ -11,8 +11,9 @@ const dbProjects = await db.query.projects.findMany({ with: { images: true } })
 
 const dir = `${cwd()}/public/images/projects`
 
-const isImageExt = (ext: string) =>
-  ext === 'avif' || ext === 'webp' || ext === 'png' || ext === 'jpg' || ext === 'jpg'
+function isImageExt(ext: string) {
+  return ext === 'avif' || ext === 'webp' || ext === 'png' || ext === 'jpg' || ext === 'jpg'
+}
 
 function findNonExistingImages(dbImages: ImageDb[]): ImageDb[] {}
 
@@ -22,19 +23,21 @@ function findNonExistingImages(dbImages: ImageDb[]): ImageDb[] {}
 // - фото есть в БД, но нет в папке     -> удаляем из БД
 // - фото есть в папке, но нет в БД     -> добавляем в БД
 
-dbProjects.forEach(async project => {
+dbProjects.forEach(async (project) => {
   try {
     const paths = fs.readdirSync(`${dir}/${project.urlFriendly}`)
     const files = paths.filter(p => fs.statSync(path.join(dir, project.urlFriendly, p)).isFile())
 
-    const imagesFilenames = files.filter(f => {
+    const imagesFilenames = files.filter((f) => {
       const ext = f.split('.')[1]
-      if (!ext) return false
-      if (isImageExt(ext)) return true
+      if (!ext)
+        return false
+      if (isImageExt(ext))
+        return true
       return false
     })
 
-    project.images.forEach(async image => {
+    project.images.forEach(async (image) => {
       if (!imagesFilenames.find(img => img === image.filename)) {
         console.log(
           `${project.urlFriendly} / ${image.filename} Не существует в директории. Удаляю из БД`,
@@ -53,7 +56,8 @@ dbProjects.forEach(async project => {
           )
       }
     })
-  } catch (e) {
+  }
+  catch (e) {
     console.error(`${project.urlFriendly} / Не существует`)
   }
 })

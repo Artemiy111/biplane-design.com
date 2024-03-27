@@ -1,10 +1,9 @@
-import { db } from '~/server/db'
-import { projectDbMapper } from '~/server/infra/projectDb.repo'
+import { getProjectsUseCase } from '~/server/di'
+import { HttpErrorCode, createHttpError } from '~/server/exceptions'
 
 export default defineEventHandler(async () => {
-  return (await db.query.projects.findMany({
-    with: {
-      images: { orderBy: images => images.order },
-    },
-  })).map(projectDbMapper.toDto)
+  const res = await getProjectsUseCase.execute()
+  if (!res.ok)
+    throw createHttpError(HttpErrorCode.InternalServerError)
+  return res.value
 })

@@ -1,9 +1,9 @@
 import type { IGroupDbRepo, IUseCase } from './types'
 
 export class GetGroupsUseCase implements IUseCase {
-  constructor(private groupRepo: IGroupDbRepo) {}
+  constructor(private repo: IGroupDbRepo) {}
 
   async execute() {
-    return this.groupRepo.getGroups()
+    return this.repo.getGroups()
   }
 }

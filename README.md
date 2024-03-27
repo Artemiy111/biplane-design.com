@@ -19,6 +19,8 @@
 - open-graph
 - состояние в url
 
+Изображения хранятся локально в /public/images/projects/:projectUri/:filename
+
 TODO
 
 - [ ] clean architecture
