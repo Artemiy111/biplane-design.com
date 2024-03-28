@@ -67,7 +67,7 @@ function useSelected(initial: SelectedGroupAndCategoryState) {
 const { selected, setSelected } = useSelected({ group: groups.value![0], category: groups.value![0].categories[0] })
 
 const selectedCategoryOrGroupProjects = computed(() =>
-  projects.value?.filter((project) => {
+  projects.value.filter((project) => {
     if (selected.value.category)
       return project.categoryId === selected.value.category.id
 
@@ -131,8 +131,7 @@ function openProjectSheet(project: ProjectDto) {
     id: project.id,
     urlFriendly: project.uri,
     title: project.title,
-    groupId: groups.value?.find(g => g.categories.find(c => c.id === project.categoryId))!
-      .id as unknown as number,
+    groupId: getGroupById(getCategoryById(project.categoryId).groupId).id,
     location: project.location,
     status: project.status,
     yearStart: project.yearStart,
@@ -180,7 +179,7 @@ function openProjectSheet(project: ProjectDto) {
       <ProjectSheet
         v-if="groups.length"
         ref="projectSheetRef"
-        :groups="(groups)"
+        :groups="groups"
         @submit="onSubmit"
       />
 

@@ -59,7 +59,11 @@ async function singIn(values: SignFormSchema) {
         </TabsTrigger>
       </TabsList>
       <TabsContent value="sign-up">
-        <Form ref="signUpFormRef" class="flex flex-col gap-4" :validation-schema="signFormValidationSchema" @submit="singUp($event as SignFormSchema)">
+        <Form
+          ref="signUpFormRef" class="flex flex-col gap-4"
+          :validation-schema="signFormValidationSchema"
+          @submit="singUp($event as SignFormSchema)"
+        >
           <FormField v-slot="{ field, handleChange }" name="email">
             <FormItem>
               <FormLabel>Email</FormLabel>
@@ -84,7 +88,11 @@ async function singIn(values: SignFormSchema) {
         </Form>
       </TabsContent>
       <TabsContent value="sign-in">
-        <Form ref="singInFormRef" class="flex flex-col gap-4" :validation-schema="signFormValidationSchema" @submit="singIn($event as SignFormSchema)">
+        <Form
+          ref="singInFormRef" class="flex flex-col gap-4"
+          :validation-schema="signFormValidationSchema"
+          @submit="singIn($event as SignFormSchema)"
+        >
           <FormField v-slot="{ field }" name="email">
             <FormItem>
               <FormLabel>Email</FormLabel>
