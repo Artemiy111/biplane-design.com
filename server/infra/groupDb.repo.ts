@@ -1,9 +1,6 @@
 import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
-import type { PgTransaction } from 'drizzle-orm/pg-core'
-import type { PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js'
-import { GroupEntity } from '../entities/group.entity'
 import type { Result } from '../shared/result'
-import { ResultOk, err, ok } from '../shared/result'
+import { err, ok } from '../shared/result'
 import { IGroupEntity } from './../entities/group.entity'
 import { categoryDbMapper } from './categoryDb.repo'
 import type {
@@ -65,14 +62,14 @@ export const groupDbMapper = {
 export class GroupDbRepo implements IGroupDbRepo {
   constructor(private db: Db) {}
 
-  private async getGroupNextOrder(tx?: DbTransaction) {
+  private async getNextOrder(tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
-      const groupsCount = (await ctx.select().from(groups)).length
-      return ok(groupsCount + 1)
+      const count = (await ctx.select().from(groups)).length
+      return ok(count + 1)
     }
     catch (e) {
-      return err(new Error('oops'))
+      return err(new Error(`Could not get next order of group`))
     }
   }
 
@@ -81,11 +78,10 @@ export class GroupDbRepo implements IGroupDbRepo {
       return ok(undefined)
 
     const ctx = tx || this.db
-    let returnValue: Result<void, Error> = ok(undefined)
 
     try {
-      await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getGroupNextOrder()
+      return await ctx.transaction(async (tx) => {
+        const nextOrder = await this.getNextOrder()
         if (!nextOrder.ok)
           return err(nextOrder.error)
 
@@ -110,15 +106,11 @@ export class GroupDbRepo implements IGroupDbRepo {
       })
     }
     catch (_e) {
-      returnValue = err(new Error('oops'))
-    }
-    finally {
-      // eslint-disable-next-line no-unsafe-finally
-      return returnValue
+      return err(new Error(`Could not update order of group with id \`${dto.id}\``))
     }
   }
 
-  async getGroup(id: GroupId, tx?: DbTransaction) {
+  async getOne(id: GroupId, tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
       const group
@@ -145,11 +137,11 @@ export class GroupDbRepo implements IGroupDbRepo {
       return ok(groupDbMapper.toDto(group))
     }
     catch (_e) {
-      return err(new Error('oops'))
+      return err(new Error(`Could not get group with id \`${id}\``))
     }
   }
 
-  async getGroups(tx?: DbTransaction) {
+  async getAll(tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
       const groups = await ctx.query.groups.findMany({
@@ -171,40 +163,39 @@ export class GroupDbRepo implements IGroupDbRepo {
       return ok(groups.map(groupDbMapper.toDto))
     }
     catch (_e) {
-      return err(new Error('oops'))
+      return err(new Error(`Could not get groups`))
     }
   }
 
-  async createGroup(dto: CreateGroupDto, tx?: DbTransaction) {
+  async create(dto: CreateGroupDto, tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
       return ctx.transaction(async (tx) => {
-        const nextOrder = await this.getGroupNextOrder(tx)
+        const nextOrder = await this.getNextOrder(tx)
         if (!nextOrder.ok)
-          return err(nextOrder.error)
+          return tx.rollback()
 
         const toCreate = groupDbMapper.toCreate(dto, nextOrder.value)
 
         const createdInDb = (await tx.insert(groups).values(toCreate).returning())[0]
-        const created = await this.getGroup(createdInDb.id, tx)
+        const created = await this.getOne(createdInDb.id, tx)
         if (!created.ok)
-          return err(new Error('oops'))
+          return tx.rollback()
 
         return ok(created.value!)
       })
     }
     catch (e) {
-      return err(new Error('oops'))
+      return err(new Error(`Could not create group`))
     }
   }
 
-  async updateGroup(dto: UpdateGroupDto, tx?: DbTransaction): Promise<Result<GroupDto, Error>> {
+  async update(dto: UpdateGroupDto, tx?: DbTransaction): Promise<Result<GroupDto, Error>> {
     const ctx = tx || this.db
-    let returnValue: Result<GroupDto, Error> = err(new Error('oops'))
 
     try {
-      returnValue = await ctx.transaction(async (tx) => {
-        const group = await this.getGroup(dto.id, tx)
+      return await ctx.transaction(async (tx) => {
+        const group = await this.getOne(dto.id, tx)
         if (!group.ok)
           return err(group.error)
 
@@ -214,7 +205,7 @@ export class GroupDbRepo implements IGroupDbRepo {
 
         await this.updateGroupOrder(group.value, dto.order, tx)
 
-        const updatedGroup = await this.getGroup(dto.id, tx)
+        const updatedGroup = await this.getOne(dto.id, tx)
         if (!updatedGroup.ok)
           return err(updatedGroup.error)
 
@@ -222,15 +213,11 @@ export class GroupDbRepo implements IGroupDbRepo {
       })
     }
     catch (e) {
-      returnValue = err(new Error('oops'))
-    }
-    finally {
-      // eslint-disable-next-line no-unsafe-finally
-      return returnValue
+      return err(new Error('oops'))
     }
   }
 
-  async deleteGroup(id: GroupId, tx?: DbTransaction) {
+  async delete(id: GroupId, tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
       return await ctx.transaction(async (tx) => {

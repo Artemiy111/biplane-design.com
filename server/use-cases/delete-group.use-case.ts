@@ -1,4 +1,4 @@
-import { err, ok } from '../shared/result'
+import { err } from '../shared/result'
 import type { GroupId, IGroupRepo, IUseCase, IUserRepo } from './types'
 
 export class DeleteGroupUseCase implements IUseCase {
@@ -8,6 +8,6 @@ export class DeleteGroupUseCase implements IUseCase {
     if (!(await this.userRepo.getUser()))
       return err(new Error('Auth'))
 
-    return ok(await this.groupRepo.deleteGroup(id))
+    return await this.groupRepo.delete(id)
   }
 }

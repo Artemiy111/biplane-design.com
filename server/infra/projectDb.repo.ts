@@ -1,9 +1,9 @@
-import { eq } from 'drizzle-orm'
-import type { Db } from '../db'
+import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
+import type { Db, DbTransaction } from '../db'
 import { err, ok } from '../shared/result'
-import type { CreateProjectDto, IProjectDbRepo, ProjectId } from './../use-cases/types'
+import type { CreateProjectDto, IProjectDbRepo, ProjectId, UpdateProjectDto } from './../use-cases/types'
 import { imageDbMapper } from './imageDb.repo'
-import { type ProjectDbDeep, images, projects } from '~/server/db/schema'
+import { type ProjectDbCreate, type ProjectDbDeep, images, projects } from '~/server/db/schema'
 import type { ProjectDto } from '~/server/use-cases/types'
 
 export const projectDbMapper = {
@@ -21,13 +21,38 @@ export const projectDbMapper = {
       images: db.images.map(imageDbMapper.toDto),
     }
   },
+  toCreate(dto: CreateProjectDto, order: number): ProjectDbCreate {
+    return {
+      categoryId: dto.categoryId,
+      title: dto.title,
+      urlFriendly: dto.uri,
+      yearStart: dto.yearStart,
+      yearEnd: dto.yearEnd,
+      location: dto.location,
+      status: dto.status,
+      order,
+    }
+  },
 }
 
 export class ProjectDbRepo implements IProjectDbRepo {
   constructor(private db: Db) {}
-  async getProject(id: ProjectId) {
+
+  async getNextOrder(tx?: DbTransaction) {
+    const ctx = tx || this.db
     try {
-      const project = (await this.db.query.projects.findFirst({ where: eq(projects.id, id), with: {
+      const count = (await ctx.select().from(projects)).length
+      return ok(count + 1)
+    }
+    catch (e) {
+      return err(new Error(`Could not get next order of project`))
+    }
+  }
+
+  async getOne(id: ProjectId, tx?: DbTransaction) {
+    const ctx = tx || this.db
+    try {
+      const project = (await ctx.query.projects.findFirst({ where: eq(projects.id, id), with: {
         images: { orderBy: images.order,
         },
       } }))
@@ -41,9 +66,10 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async getProjectByUri(uri: string) {
+  async getByUri(uri: string, tx?: DbTransaction) {
+    const ctx = tx || this.db
     try {
-      const project = (await this.db.query.projects.findFirst({ where: eq(projects.urlFriendly, uri), with: {
+      const project = (await ctx.query.projects.findFirst({ where: eq(projects.urlFriendly, uri), with: {
         images: { orderBy: images.order,
         },
       } }))
@@ -57,9 +83,10 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async getProjects() {
+  async getAll(tx?: DbTransaction) {
+    const ctx = tx || this.db
     try {
-      const projects = (await this.db.query.projects.findMany({
+      const projects = (await ctx.query.projects.findMany({
         with: {
           images: {
             orderBy: images.order,
@@ -73,15 +100,124 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async createProject(dto: CreateProjectDto) {
-    return Promise.resolve(err(new Error('not impl')))
+  async create(dto: CreateProjectDto, tx?: DbTransaction) {
+    const ctx = tx || this.db
+
+    try {
+      return ctx.transaction(async (tx) => {
+        const nextOrder = await this.getNextOrder(tx)
+        if (!nextOrder.ok)
+          return tx.rollback()
+
+        const toCreate = projectDbMapper.toCreate(dto, nextOrder.value)
+
+        const createdInDb = (await tx.insert(projects).values(toCreate).returning())[0]
+        const created = await this.getOne(createdInDb.id, tx)
+        if (!created.ok)
+          return tx.rollback()
+
+        return ok(created.value!)
+      })
+    }
+    catch (e) {
+      return err(new Error(`Could not create group`))
+    }
   }
 
-  async updateProject() {
-    return Promise.resolve(err(new Error('not impl')))
+  private async updateOrder(dto: ProjectDto, newOrder: number, tx?: DbTransaction) {
+    if (dto.order === newOrder)
+      return ok(undefined)
+
+    const ctx = tx || this.db
+
+    try {
+      return await ctx.transaction(async (tx) => {
+        const nextOrder = await this.getNextOrder()
+        if (!nextOrder.ok)
+          return err(nextOrder.error)
+
+        if (newOrder > nextOrder.value)
+          return err('New order is out of range')
+
+        if (newOrder > dto.order) {
+          await tx.update(projects).set({ order: sql`(${projects.order} - 1) * 1000` }).where(and(
+            gt(projects.order, dto.order),
+            lte(projects.order, dto.order),
+          ))
+        }
+        else if (newOrder < dto.order) {
+          await tx.update(projects).set({ order: sql`(${projects.order} + 1) * 1000` }).where(and(
+            gte(projects.order, newOrder),
+            lt(projects.order, dto.order),
+          ))
+        }
+
+        await tx.update(projects).set({ order: dto.order }).where(eq(projects.urlFriendly, dto.uri))
+        await tx.update(projects).set({ order: sql`${projects.order} / 1000` }).where(gte(projects.order, 1000))
+      })
+    }
+    catch (_e) {
+      return err(new Error(`Could not update order of group with id \`${dto.id}\``))
+    }
   }
 
-  async deleteProject() {
-    return Promise.resolve(err(new Error('not impl')))
+  async update(dto: UpdateProjectDto, tx?: DbTransaction) {
+    const ctx = tx || this.db
+
+    try {
+      return await ctx.transaction(async (tx) => {
+        const group = await this.getOne(dto.id, tx)
+        if (!group.ok)
+          return err(group.error)
+
+        await tx.update(projects)
+          .set({ title: dto.title, urlFriendly: dto.uri })
+          .where(eq(projects.id, dto.id))
+
+        await this.updateOrder(group.value, dto.order, tx)
+
+        const updatedGroup = await this.getOne(dto.id, tx)
+        if (!updatedGroup.ok)
+          return err(updatedGroup.error)
+
+        return ok(updatedGroup.value)
+      })
+    }
+    catch (e) {
+      return err(new Error('oops'))
+    }
+  }
+
+  async delete(id: ProjectId, tx?: DbTransaction) {
+    const ctx = tx || this.db
+    try {
+      return await this.db.transaction(async (tx) => {
+        await this.db.delete(projects).where(eq(projects.id, id))
+
+        const remainProjects = await tx.select((
+          { ...getTableColumns(projects), newOrder: sql<number>`row_number() over (order by ${projects.order})`.mapWith(Number).as('new_order') }
+        )).from(projects)
+
+        await Promise.all(
+          remainProjects.map((proj) => {
+            return tx.update(projects).set({ order: proj.newOrder * 1000 }).where(
+              eq(projects.urlFriendly, proj.urlFriendly),
+            )
+          }),
+        )
+
+        await Promise.all(
+          remainProjects.map((proj) => {
+            return tx.update(projects).set({ order: proj.newOrder }).where(
+              eq(projects.urlFriendly, proj.urlFriendly),
+            )
+          }),
+        )
+        return ok(undefined)
+      })
+    }
+    catch (_e) {
+      return err(new Error(`Could not delete project with id \`${id}\``))
+    }
   }
 }

@@ -30,7 +30,7 @@ export const imageDbMapper = {
 export class ImageDbRepo implements IImageDbRepo {
   constructor(private db: Db) {}
 
-  async getImage(id: ImageId) {
+  async getOne(id: ImageId) {
     try {
       const image = await this.db.query.images.findFirst({ where: eq(images.id, id) })
       if (!image)
@@ -51,7 +51,7 @@ export class ImageDbRepo implements IImageDbRepo {
     }
   }
 
-  async getImagesByProjectUri(uri: string) {
+  async getAllByProjectUri(uri: string) {
     try {
       return ok((await this.db.select().from(images).where(eq(images.projectUrlFriendly, uri))).map(imageDbMapper.toDto))
     }
@@ -60,15 +60,15 @@ export class ImageDbRepo implements IImageDbRepo {
     }
   }
 
-  async createImage() {
+  async create() {
     return Promise.resolve(err(new Error('not impl')))
   }
 
-  async updateImage(_dto: UpdateImageDto) {
+  async update(_dto: UpdateImageDto) {
     return Promise.resolve(err(new Error('not impl')))
   }
 
-  async deleteImage(_id: ImageId) {
+  async delete(_id: ImageId) {
     return Promise.resolve(err(new Error('not impl')))
   }
 }

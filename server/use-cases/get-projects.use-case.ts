@@ -4,6 +4,6 @@ export class GetProjectsUseCase implements IUseCase {
   constructor(private repo: IProjectRepo) {}
 
   async execute() {
-    return this.repo.getProjects()
+    return this.repo.getAll()
   }
 }

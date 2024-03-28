@@ -4,6 +4,6 @@ export class GetProjectByUriUseCase implements IUseCase {
   constructor(private repo: IProjectRepo) {}
 
   async execute(uri: string) {
-    return this.repo.getProjectByUri(uri)
+    return this.repo.getByUri(uri)
   }
 }

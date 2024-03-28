@@ -1,4 +1,4 @@
-import { err, ok } from '../shared/result'
+import { err } from '../shared/result'
 import type { CreateGroupDto, IGroupRepo, IUseCase, IUserRepo } from './types'
 
 export class CreateGroupUseCase implements IUseCase {
@@ -8,6 +8,6 @@ export class CreateGroupUseCase implements IUseCase {
     if (!(await this.userRepo.getUser()))
       return err(new Error('Auth'))
 
-    return ok(await this.groupRepo.createGroup(dto))
+    return await this.groupRepo.create(dto)
   }
 }

@@ -19,6 +19,7 @@ import { ImageFsRepo } from './infra/imageFs.repo'
 import { GetProjectsUseCase } from './use-cases/get-projects.use-case'
 import { CategoryDbRepo } from './infra/categoryDb.repo'
 import { GetImageUseCase } from './use-cases/get-image.use-case'
+import { CreateCategoryUseCase } from './use-cases/create-category.use-case'
 
 const PROJECTS_DIR = path.join(`/public/images/projects`)
 
@@ -41,6 +42,7 @@ export const deleteGroupUseCase = new DeleteGroupUseCase(groupDbRepo, userRepo)
 export const createGroupUseCase = new CreateGroupUseCase(groupDbRepo, userRepo)
 
 export const getCategoryUseCase = new GetCategoryUseCase(categoryDbRepo)
+export const createCategoryUseCase = new CreateCategoryUseCase(categoryDbRepo, userRepo)
 
 export const getProjectByUriUseCase = new GetProjectByUriUseCase(projectRepo)
 export const getProjectsUseCase = new GetProjectsUseCase(projectRepo)
