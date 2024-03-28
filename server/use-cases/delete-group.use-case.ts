@@ -6,7 +6,7 @@ export class DeleteGroupUseCase implements IUseCase {
 
   async execute(id: GroupId) {
     if (!(await this.userRepo.getUser()))
-      return err(new Error('Auth'))
+      return err(new Error('Unauthorized'))
 
     return await this.groupRepo.delete(id)
   }

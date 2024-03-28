@@ -12,25 +12,7 @@ import type {
 } from '~/server/use-cases/types'
 import type { Db, DbTransaction } from '~/server/db'
 import type { GroupDbCreate, GroupDbDeep, GroupDbUpdate } from '~/server/db/schema'
-import { groups, projects } from '~/server/db/schema'
-
-// export const groupMapper = {
-//   toCreate(dto: GroupDto): CreateGroupDto {
-//     return {
-//       title: dto.title,
-//       uri: dto.uri,
-//     }
-//   },
-
-//   toUpdate(dto: GroupDto): UpdateGroupDto {
-//     return {
-//       id: dto.id,
-//       uri: dto.uri,
-//       title: dto.title,
-//       order: dto.order,
-//     }
-//   },
-// }
+import { groups } from '~/server/db/schema'
 
 export const groupDbMapper = {
   toDto(db: GroupDbDeep): GroupDto {
@@ -49,13 +31,17 @@ export const groupDbMapper = {
       order,
     }
   },
-  toUpdate(db: UpdateGroupDto): GroupDbUpdate {
+  toUpdate(dto: UpdateGroupDto): GroupDbUpdate {
     return {
-      id: db.id,
-      order: db.order,
-      title: db.title,
-      urlFriendly: db.uri,
+      id: dto.id,
+      order: dto.order,
+      title: dto.title,
+      urlFriendly: dto.uri,
     }
+  },
+  toUpdateWithoutOrder(db: GroupDbUpdate): Omit<GroupDbUpdate, 'order'> {
+    const { order: _order, ...toUpdate } = db
+    return toUpdate
   },
 }
 
@@ -73,7 +59,7 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
-  private async updateGroupOrder(dto: GroupDto, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: GroupDto, newOrder: number, tx?: DbTransaction) {
     if (dto.order === newOrder)
       return ok(undefined)
 
@@ -90,19 +76,19 @@ export class GroupDbRepo implements IGroupDbRepo {
 
         if (newOrder > dto.order) {
           await tx.update(groups).set({ order: sql`(${groups.order} - 1) * 1000` }).where(and(
-            gt(projects.order, dto.order),
-            lte(projects.order, dto.order),
+            gt(groups.order, dto.order),
+            lte(groups.order, dto.order),
           ))
         }
         else if (newOrder < dto.order) {
-          await tx.update(projects).set({ order: sql`(${projects.order} + 1) * 1000` }).where(and(
-            gte(projects.order, newOrder),
-            lt(projects.order, dto.order),
+          await tx.update(groups).set({ order: sql`(${groups.order} + 1) * 1000` }).where(and(
+            gte(groups.order, newOrder),
+            lt(groups.order, dto.order),
           ))
         }
 
-        await tx.update(projects).set({ order: dto.order }).where(eq(projects.urlFriendly, dto.uri))
-        await tx.update(projects).set({ order: sql`${projects.order} / 1000` }).where(gte(projects.order, 1000))
+        await tx.update(groups).set({ order: dto.order }).where(eq(groups.urlFriendly, dto.uri))
+        await tx.update(groups).set({ order: sql`${groups.order} / 1000` }).where(gte(groups.order, 1000))
       })
     }
     catch (_e) {
@@ -197,23 +183,23 @@ export class GroupDbRepo implements IGroupDbRepo {
       return await ctx.transaction(async (tx) => {
         const group = await this.getOne(dto.id, tx)
         if (!group.ok)
-          return err(group.error)
+          return tx.rollback()
 
         await tx.update(groups)
-          .set({ title: dto.title, urlFriendly: dto.uri })
+          .set(groupDbMapper.toUpdateWithoutOrder(groupDbMapper.toUpdate(dto)))
           .where(eq(groups.id, dto.id))
 
-        await this.updateGroupOrder(group.value, dto.order, tx)
+        await this.updateOrder(group.value, dto.order, tx)
 
         const updatedGroup = await this.getOne(dto.id, tx)
         if (!updatedGroup.ok)
-          return err(updatedGroup.error)
+          return tx.rollback()
 
         return ok(updatedGroup.value)
       })
     }
     catch (e) {
-      return err(new Error('oops'))
+      return err(new Error(`Could not update group with id \`${dto.id}\``))
     }
   }
 
@@ -223,24 +209,24 @@ export class GroupDbRepo implements IGroupDbRepo {
       return await ctx.transaction(async (tx) => {
         const toDelete = await tx.query.groups.findFirst({ where: eq(groups.id, id) })
         if (!toDelete)
-          return err(new Error('oops'))
+          return tx.rollback()
 
-        const deletedInDb = (await tx.delete(projects).where(eq(projects.id, id)).returning())[0]
+        const deletedInDb = (await tx.delete(groups).where(eq(groups.id, id)).returning())[0]
         if (!deletedInDb)
-          return err(new Error('oops'))
+          return tx.rollback()
 
-        const remainProjects = await tx.select(({ ...getTableColumns(projects), newOrder: sql<number>`row_number() over (order by ${projects.order})`.mapWith(Number).as('new_order') })).from(projects)
+        const remain = await tx.select(({ ...getTableColumns(groups), newOrder: sql<number>`row_number() over (order by ${groups.order})`.mapWith(Number).as('new_order') })).from(groups)
         await Promise.all(
-          remainProjects.map((proj) => {
-            return tx.update(projects).set({ order: proj.newOrder * 1000 }).where(
-              eq(projects.urlFriendly, proj.urlFriendly),
+          remain.map((group) => {
+            return tx.update(groups).set({ order: group.newOrder * 1000 }).where(
+              eq(groups.id, group.id),
             )
           }),
         )
         await Promise.all(
-          remainProjects.map((proj) => {
-            return tx.update(projects).set({ order: proj.newOrder }).where(
-              eq(projects.urlFriendly, proj.urlFriendly),
+          remain.map((group) => {
+            return tx.update(groups).set({ order: group.newOrder }).where(
+              eq(groups.id, group.id),
             )
           }),
         )
@@ -248,7 +234,7 @@ export class GroupDbRepo implements IGroupDbRepo {
       })
     }
     catch (_e) {
-      return err(new Error('oops'))
+      return err(new Error(`Could not delete group with id \`${id}\``))
     }
   }
 }

@@ -1,9 +1,10 @@
 import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import type { Db, DbTransaction } from '../db'
 import { err, ok } from '../shared/result'
+import type { ProjectDbUpdate } from './../db/schema'
 import type { CreateProjectDto, IProjectDbRepo, ProjectId, UpdateProjectDto } from './../use-cases/types'
 import { imageDbMapper } from './imageDb.repo'
-import { type ProjectDbCreate, type ProjectDbDeep, images, projects } from '~/server/db/schema'
+import { type ProjectDbCreate, type ProjectDbDeep, projects } from '~/server/db/schema'
 import type { ProjectDto } from '~/server/use-cases/types'
 
 export const projectDbMapper = {
@@ -33,6 +34,23 @@ export const projectDbMapper = {
       order,
     }
   },
+  toUpdate(dto: UpdateProjectDto): ProjectDbUpdate {
+    return {
+      categoryId: dto.categoryId,
+      id: dto.id,
+      title: dto.title,
+      urlFriendly: dto.uri,
+      yearStart: dto.yearStart,
+      yearEnd: dto.yearEnd,
+      location: dto.location,
+      status: dto.status,
+      order: dto.order,
+    }
+  },
+  toUpdateWithoutOrder(db: ProjectDbUpdate): Omit<ProjectDbUpdate, 'order'> {
+    const { order: _order, ...toUpdate } = db
+    return toUpdate
+  },
 }
 
 export class ProjectDbRepo implements IProjectDbRepo {
@@ -53,7 +71,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
     const ctx = tx || this.db
     try {
       const project = (await ctx.query.projects.findFirst({ where: eq(projects.id, id), with: {
-        images: { orderBy: images.order,
+        images: { orderBy: images => images.order,
         },
       } }))
       if (!project)
@@ -62,7 +80,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
       return ok(projectDbMapper.toDto(project))
     }
     catch (_e) {
-      return err(new Error('oops'))
+      return err(new Error(`Could not get project`))
     }
   }
 
@@ -70,7 +88,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
     const ctx = tx || this.db
     try {
       const project = (await ctx.query.projects.findFirst({ where: eq(projects.urlFriendly, uri), with: {
-        images: { orderBy: images.order,
+        images: { orderBy: images => images.order,
         },
       } }))
       if (!project)
@@ -79,7 +97,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
       return ok(projectDbMapper.toDto(project))
     }
     catch (_e) {
-      return err(new Error('oops'))
+      return err(new Error(`Could not get project by uri \`${uri}\``))
     }
   }
 
@@ -89,14 +107,14 @@ export class ProjectDbRepo implements IProjectDbRepo {
       const projects = (await ctx.query.projects.findMany({
         with: {
           images: {
-            orderBy: images.order,
+            orderBy: images => images.order,
           },
         },
       }))
       return ok(projects.map(projectDbMapper.toDto))
     }
     catch (_e) {
-      return err(new Error('oops'))
+      return err(new Error(`Could not get projects`))
     }
   }
 
@@ -120,7 +138,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
       })
     }
     catch (e) {
-      return err(new Error(`Could not create group`))
+      return err(new Error(`Could not create project`))
     }
   }
 
@@ -157,7 +175,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
       })
     }
     catch (_e) {
-      return err(new Error(`Could not update order of group with id \`${dto.id}\``))
+      return err(new Error(`Could not update order of project with id \`${dto.id}\``))
     }
   }
 
@@ -168,30 +186,30 @@ export class ProjectDbRepo implements IProjectDbRepo {
       return await ctx.transaction(async (tx) => {
         const group = await this.getOne(dto.id, tx)
         if (!group.ok)
-          return err(group.error)
+          return tx.rollback()
 
         await tx.update(projects)
-          .set({ title: dto.title, urlFriendly: dto.uri })
+          .set(projectDbMapper.toUpdateWithoutOrder(projectDbMapper.toUpdate(dto)))
           .where(eq(projects.id, dto.id))
 
         await this.updateOrder(group.value, dto.order, tx)
 
         const updatedGroup = await this.getOne(dto.id, tx)
         if (!updatedGroup.ok)
-          return err(updatedGroup.error)
+          return tx.rollback()
 
         return ok(updatedGroup.value)
       })
     }
     catch (e) {
-      return err(new Error('oops'))
+      return err(new Error(`Could not update project with id \`${dto.id}\``))
     }
   }
 
   async delete(id: ProjectId, tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
-      return await this.db.transaction(async (tx) => {
+      return await ctx.transaction(async (tx) => {
         await this.db.delete(projects).where(eq(projects.id, id))
 
         const remainProjects = await tx.select((

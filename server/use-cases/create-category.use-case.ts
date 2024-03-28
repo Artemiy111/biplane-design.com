@@ -6,7 +6,7 @@ export class CreateCategoryUseCase implements IUseCase {
 
   async execute(dto: CreateCategoryDto) {
     if (!(await this.userRepo.getUser()))
-      return err(new Error('Auth'))
+      return err(new Error('Unauthorized'))
 
     return await this.categoryRepo.create(dto)
   }
