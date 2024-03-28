@@ -11,7 +11,7 @@ export class ImageFsRepo implements IImageFsRepo {
   constructor(private projectFsRepo: IProjectFsRepo) {}
 
   private getImageFilepath(projectUri: string, filename: string) {
-    const dir = this.projectFsRepo.getProjectDir(projectUri)
+    const dir = this.projectFsRepo.getDir(projectUri)
     return path.join(dir, filename)
   }
 
@@ -35,8 +35,8 @@ export class ImageFsRepo implements IImageFsRepo {
   }
 
   async getImageFiles(projectUri: string) {
-    const dir = this.projectFsRepo.getProjectDir(projectUri)
-    if (!(await this.projectFsRepo.isProjectDirExist(projectUri)))
+    const dir = this.projectFsRepo.getDir(projectUri)
+    if (!(await this.projectFsRepo.isDirExist(projectUri)))
       return err(new Error(`Could not get images of project \`${projectUri}\`. Project dir does not exist`))
 
     try {
@@ -67,8 +67,8 @@ export class ImageFsRepo implements IImageFsRepo {
     const filepath = this.getImageFilepath(projectUri, filename)
 
     try {
-      if (!(await this.projectFsRepo.isProjectDirExist(projectUri)))
-        await this.projectFsRepo.createProjectDir(projectUri)
+      if (!(await this.projectFsRepo.isDirExist(projectUri)))
+        await this.projectFsRepo.createDir(projectUri)
 
       if ((await this.isImageFileExist(projectUri, filename)))
         return err(new Error(`Image \`${filename}\` of project \`${projectUri}\` already exists`))

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { AvatarFallback, AvatarRoot } from 'radix-vue'
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from '~/components/ui/navigation-menu'
 
 const supabase = useSupabaseClient()
@@ -28,37 +27,35 @@ async function singOut() {
         <img src="/logo.svg" class="h-10 dark:invert-[70%] md:h-8">
         <span class="sm:hidden">Biplane-Design</span>
       </NuxtLink>
-      <DropdownMenu v-if="user">
-        <DropdownMenuTrigger>
-          <AvatarRoot>
-            <AvatarFallback :class="navigationMenuTriggerStyle()">
-              {{ user.email }}
-            </AvatarFallback>
-          </AvatarRoot>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem>
-            <NuxtLink to="/admin" class="w-full">
-              Админ панель
-            </NuxtLink>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <NuxtLink to="/admin/account" class="w-full">
-              Аккаунт
-            </NuxtLink>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <NuxtLink to="/admin/login" class="w-full">
-              Вход/Регистрация
-            </NuxtLink>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <button variant="link" class="w-full text-start text-red-500" @click="singOut">
-              Выйти
-            </button>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ClientOnly>
+        <DropdownMenu>
+          <DropdownMenuTrigger v-if="user">
+            {{ user.email }}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem>
+              <NuxtLink to="/admin" class="w-full">
+                Админ панель
+              </NuxtLink>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <NuxtLink to="/admin/account" class="w-full">
+                Аккаунт
+              </NuxtLink>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <NuxtLink to="/admin/login" class="w-full">
+                Вход/Регистрация
+              </NuxtLink>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <button variant="link" class="w-full text-start text-red-500" @click="singOut">
+                Выйти
+              </button>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </ClientOnly>
       <NavigationMenu>
         <NavigationMenuList class="gap-4 sm:gap-2">
           <NavigationMenuItem v-for="r in routes" :key="r.link">
