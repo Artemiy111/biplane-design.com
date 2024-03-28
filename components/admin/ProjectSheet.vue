@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
-import { type GroupRec, type Image, projectInsertSchema } from '~/server/db/schema'
+import type { GroupDto, ImageDto } from '~/server/use-cases/types'
+import { projectInsertSchema } from '~/server/db/schema'
 import Dropzone from '~/components/Dropzone.vue'
 import { Form } from '~/components/ui/form'
 
 const props = defineProps<{
-  groups: GroupRec[]
+  groups: GroupDto[]
 }>()
 
 const emit = defineEmits<{
@@ -251,7 +252,7 @@ defineExpose({
                   <SelectValue placeholder="Выберите превью" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="image in (values.images as Image[])" :key="image.filename" :value="image.id.toString()">
+                  <SelectItem v-for="image in (values.images as ImageDto[])" :key="image.filename" :value="image.id.toString()">
                     {{ image.filename }}
                   </SelectItem>
                 </SelectContent>

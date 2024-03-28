@@ -4,7 +4,7 @@ import { EllipsisVertical } from 'lucide-vue-next'
 import { FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table'
 import ProjectSheet from '~/components/admin/ProjectSheet.vue'
 import type { FormSchema, Mode } from '~/components/admin/ProjectSheet.vue'
-import type { CategoryRec, GroupRec, ProjectRec } from '~/server/db/schema'
+import type { CategoryDto, GroupDto, ProjectDto } from '~/server/use-cases/types'
 
 definePageMeta({
   middleware: 'auth',
@@ -18,35 +18,74 @@ useSeoMeta({
 })
 
 const { md } = useScreenSize()
-const { data: groups, error: groupsError } = await useFetch('/api/groups')
-const {
-  data: projects,
-  error: projectsError,
-  refresh: refreshProjects,
-} = await useFetch('/api/projects')
+const { data, error: fetchError, refresh } = await useFetch('/api/groups', {
+  transform: (groups) => {
+    const categories = groups.flatMap(group => group.categories)
+    const projects = categories.flatMap(category => category.projects)
 
-const selectedGroupId = ref<number | null>(groups.value?.[0].id || null)
-const selectedCategoryId = ref<number | null>(groups.value?.[0]?.categories[0].id || null)
-const projectsOfSelectedCategory = computed(() =>
-  projects.value?.filter(p => {
-    if (selectedCategoryId.value !== null) return p.categoryId === selectedCategoryId.value
-    return p.category.groupId === selectedGroupId.value
+    return {
+      groups,
+      categories,
+      projects,
+    }
+  },
+})
+
+const groups = toRef(data.value?.groups || [])
+const groupsMap = computed(() => new Map(groups.value.map(g => [g.id, g])))
+const categories = toRef(data.value?.categories || [])
+const categoriesMap = computed(() => new Map(categories.value.map(c => [c.id, c])))
+const projects = toRef(data.value?.projects || [])
+
+type SelectedGroupAndCategoryState = {
+  group: GroupDto
+  category: null
+} | {
+  group: GroupDto
+  category: CategoryDto
+}
+
+function getCategoryById(id: number) {
+  return categoriesMap.value.get(id)!
+}
+
+function getGroupById(id: number) {
+  return groupsMap.value.get(id)!
+}
+
+function useSelected(initial: SelectedGroupAndCategoryState) {
+  const selected = ref<SelectedGroupAndCategoryState>(initial)
+
+  const setSelected = (newSelected: SelectedGroupAndCategoryState) => { selected.value = newSelected }
+
+  return {
+    selected: readonly(selected),
+    setSelected,
+  }
+}
+
+const { selected, setSelected } = useSelected({ group: groups.value![0], category: groups.value![0].categories[0] })
+
+const selectedCategoryOrGroupProjects = computed(() =>
+  projects.value?.filter((project) => {
+    if (selected.value.category)
+      return project.categoryId === selected.value.category.id
+
+    const category = getCategoryById(project.categoryId)
+    const group = getGroupById(category.groupId)
+
+    return group.id === selected.value.group.id
   }),
 )
 
-function selectCategory(groupId: number, categoryId: number | null) {
-  selectedGroupId.value = groupId
-  selectedCategoryId.value = categoryId
+function selectCategory(group: GroupDto, category: CategoryDto | null) {
+  setSelected({ group, category })
 }
 
-watch(groupsError, () => {
-  if (!projectsError.value) return
-  toast.error(projectsError.value.message)
-})
-
-watch(projectsError, () => {
-  if (!projectsError.value) return
-  toast.error(projectsError.value.message)
+watch(fetchError, () => {
+  if (!fetchError.value)
+    return
+  toast.error(fetchError.value.message)
 })
 
 const hoverCardIsOpen = ref(false)
@@ -60,11 +99,13 @@ async function onSubmit(values: FormSchema, prev: FormSchema | null) {
       })
       projectSheetRef.value?.close()
       toast.success('Проект создан')
-    } catch (e) {
-      if (e instanceof Error) toast.error(e.message)
+    }
+    catch (e) {
+      if (e instanceof Error)
+        toast.error(e.message)
       else toast.error(String(e))
     }
-    refreshProjects()
+    refresh()
     return
   }
 
@@ -75,18 +116,20 @@ async function onSubmit(values: FormSchema, prev: FormSchema | null) {
     })
     projectSheetRef.value?.close()
     toast.success('Проект изменён')
-  } catch (e) {
-    if (e instanceof Error) toast.error(e.message)
+  }
+  catch (e) {
+    if (e instanceof Error)
+      toast.error(e.message)
     else toast.error(String(e))
   }
 
-  refreshProjects()
+  refresh()
 }
 
-function openChangeProject(project: ProjectRec) {
+function openProjectSheet(project: ProjectDto) {
   projectSheetRef.value?.open({
     id: project.id,
-    urlFriendly: project.urlFriendly,
+    urlFriendly: project.uri,
     title: project.title,
     groupId: groups.value?.find(g => g.categories.find(c => c.id === project.categoryId))!
       .id as unknown as number,
@@ -98,23 +141,6 @@ function openChangeProject(project: ProjectRec) {
     order: project.order,
     images: [],
   })
-}
-
-async function uploadImages(images: File[], project: { id: number; urlFriendly: string }) {
-  const formData = new FormData()
-  images.forEach((image, idx) => formData.append(`image-${idx}`, image))
-
-  try {
-    const _res = await $fetch(`/api/projects/${project.urlFriendly}/images`, {
-      method: 'POST',
-      body: formData,
-    })
-    toast.success(`Фотографий загружено: ${images.length}`)
-    refreshProjects()
-  } catch (e) {
-    if (e instanceof Error) toast.error(e.message)
-    else toast.error(String(e))
-  }
 }
 </script>
 
@@ -129,11 +155,11 @@ async function uploadImages(images: File[], project: { id: number; urlFriendly: 
           <li
             class="cursor-pointer px-2 py-1 hover:bg-primary-foreground"
             :class="
-              selectedGroupId === group.id && selectedCategoryId === null
+              selected.group.id === group.id && !selected.category
                 ? 'font-bold bg-primary-foreground'
                 : ''
             "
-            @click="selectCategory(group.id, null)"
+            @click="selectCategory(group, null)"
           >
             Все
           </li>
@@ -141,8 +167,8 @@ async function uploadImages(images: File[], project: { id: number; urlFriendly: 
             v-for="category in group.categories"
             :key="category.id"
             class="cursor-pointer px-2 py-1 hover:bg-primary-foreground"
-            :class="category.id === selectedCategoryId ? 'font-bold bg-primary-foreground' : ''"
-            @click="selectCategory(group.id, category.id)"
+            :class="category.id === selected.category?.id ? 'font-bold bg-primary-foreground' : ''"
+            @click="selectCategory(group, category)"
           >
             <span>{{ category.title }}</span>
           </li>
@@ -154,7 +180,7 @@ async function uploadImages(images: File[], project: { id: number; urlFriendly: 
       <ProjectSheet
         v-if="groups.length"
         ref="projectSheetRef"
-        :groups="(groups as unknown as GroupRec[])"
+        :groups="(groups)"
         @submit="onSubmit"
       />
 
@@ -171,7 +197,7 @@ async function uploadImages(images: File[], project: { id: number; urlFriendly: 
       <Table class="">
         <TableHeader>
           <TableRow>
-            <TableHead> Превью </TableHead>
+            <TableHead>Превью</TableHead>
             <TableHead>Проект</TableHead>
             <TableHead>URL Friendly</TableHead>
             <TableHead>Группа</TableHead>
@@ -185,31 +211,31 @@ async function uploadImages(images: File[], project: { id: number; urlFriendly: 
         </TableHeader>
         <TableBody>
           <TableRow
-            v-for="p in projectsOfSelectedCategory"
-            :key="p.id"
+            v-for="project in selectedCategoryOrGroupProjects"
+            :key="project.id"
             class="cursor-pointer"
-            @click="navigateTo(`/admin/projects/${p.urlFriendly}`)"
+            @click="navigateTo(`/admin/projects/${project.uri}`)"
           >
             <TableCell>
               <NuxtImg
-                v-if="p.images.length"
+                v-if="project.images.length"
                 format="avif,webp,png,jpg"
-                :src="`/images/projects/${p.urlFriendly}/${p.images[0].filename}`"
-                :alt="p.images[0].title || 'изображение'"
+                :src="project.images[0].url"
+                :alt="project.images[0].alt"
                 class="aspect-video max-h-[100px] w-fit object-cover"
               />
             </TableCell>
             <TableCell>
-              <NuxtLink :to="`/admin/projects/${p.urlFriendly}`" />
-              {{ p.title }}
+              <NuxtLink :to="`/admin/projects/${project.uri}`" />
+              {{ project.title }}
             </TableCell>
-            <TableCell>{{ p.urlFriendly }}</TableCell>
-            <TableCell>{{ p.category.group.title }}</TableCell>
-            <TableCell>{{ p.category.title }}</TableCell>
-            <TableCell>{{ p.yearStart }}</TableCell>
-            <TableCell>{{ p.yearEnd }}</TableCell>
-            <TableCell>{{ p.status }}</TableCell>
-            <TableCell>{{ p.location }}</TableCell>
+            <TableCell>{{ project.uri }}</TableCell>
+            <TableCell>{{ getGroupById(getCategoryById(project.categoryId).groupId).title }}</TableCell>
+            <TableCell>{{ getCategoryById(project.categoryId).title }}</TableCell>
+            <TableCell>{{ project.yearStart }}</TableCell>
+            <TableCell>{{ project.yearEnd }}</TableCell>
+            <TableCell>{{ project.status }}</TableCell>
+            <TableCell>{{ project.location }}</TableCell>
             <TableCell @click.stop>
               <HoverCard
                 :open-delay="0"
@@ -222,10 +248,12 @@ async function uploadImages(images: File[], project: { id: number; urlFriendly: 
                   </Button>
                 </HoverCardTrigger>
                 <HoverCardContent class="z-10 flex w-fit flex-col gap-4">
-                  <Button variant="outline" @click="openChangeProject(p as unknown as ProjectRec)">
+                  <Button variant="outline" @click="openProjectSheet(project)">
                     Изменить
                   </Button>
-                  <Button variant="destructiveOutline"> Удалить </Button>
+                  <Button variant="destructiveOutline">
+                    Удалить
+                  </Button>
                 </HoverCardContent>
               </HoverCard>
             </TableCell>
