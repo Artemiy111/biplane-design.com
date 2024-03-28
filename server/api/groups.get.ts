@@ -5,5 +5,5 @@ export default defineEventHandler(async () => {
   const groups = await getGroupsUseCase.execute()
   if (groups.ok)
     return groups.value
-  else throw createHttpError(HttpErrorCode.InternalServerError)
+  throw createHttpError(HttpErrorCode.InternalServerError)
 })

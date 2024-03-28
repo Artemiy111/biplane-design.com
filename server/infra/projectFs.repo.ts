@@ -6,17 +6,17 @@ import { err, ok } from '../shared/result'
 export class ProjectFsRepo implements IProjectFsRepo {
   constructor(private projectsDir: string) {}
 
-  getProjectDir(uri: string) { return path.join(this.projectsDir, uri) }
+  getDir(uri: string) { return path.join(this.projectsDir, uri) }
 
-  async isProjectDirExist(uri: string) {
-    const dir = this.getProjectDir(uri)
+  async isDirExist(uri: string) {
+    const dir = this.getDir(uri)
     const exists = await fs.exists(dir)
     return exists
   }
 
-  async createProjectDir(uri: string) {
-    const dir = this.getProjectDir(uri)
-    if (!(await this.isProjectDirExist(uri)))
+  async createDir(uri: string) {
+    const dir = this.getDir(uri)
+    if (!(await this.isDirExist(uri)))
       return err(new Error(`Dir of project \`${uri}\` already exists`))
 
     try {
@@ -28,9 +28,9 @@ export class ProjectFsRepo implements IProjectFsRepo {
     }
   }
 
-  async renameProjectDir(uri: string, newUri: string) {
-    const dir = this.getProjectDir(uri)
-    const newDir = this.getProjectDir(newUri)
+  async renameDir(uri: string, newUri: string) {
+    const dir = this.getDir(uri)
+    const newDir = this.getDir(newUri)
 
     try {
       await fs.rename(dir, newDir)
@@ -41,8 +41,8 @@ export class ProjectFsRepo implements IProjectFsRepo {
     }
   }
 
-  async deleteProjectDir(uri: string) {
-    const dir = this.getProjectDir(uri)
+  async deleteDir(uri: string) {
+    const dir = this.getDir(uri)
     try {
       fs.unlink(dir)
       return ok(undefined)

@@ -3,7 +3,7 @@ import { FolderUp } from 'lucide-vue-next'
 import type { HTMLAttributes } from 'vue'
 import { Input } from '~/components/ui/input'
 import { cn } from '~/lib/utils'
-import type { Image } from '~/server/db/schema'
+import type { ImageDto } from '~/server/use-cases/types'
 
 const props = defineProps<{
   multiple?: boolean
@@ -11,7 +11,7 @@ const props = defineProps<{
   showIcon?: boolean
   clearOnUpload?: boolean
   class?: HTMLAttributes['class']
-  images?: Image[]
+  images?: ImageDto[]
 }>()
 
 const emit = defineEmits<{
@@ -91,8 +91,11 @@ defineExpose({
         <template v-else>
           <NuxtImg
             v-for="image in images"
-            :key="image.filename" format=".avif,.webp,.png,.jpg,.jpeg" class="aspect-video w-full object-cover"
-            :src="`/images/projects/${image.projectUrlFriendly}/${image.filename}`"
+            :key="image.filename"
+            format=".avif,.webp,.png,.jpg,.jpeg"
+            class="aspect-video w-full object-cover"
+            :src="image.url"
+            :alt="image.alt"
           />
         </template>
       </div>

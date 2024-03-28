@@ -4,23 +4,23 @@ import type { CreateImageDto, IImageDbRepo, IImageFsRepo, IImageRepo, ImageId, U
 export class ImageRepo implements IImageRepo {
   constructor(private dbRepo: IImageDbRepo, private fsRepo: IImageFsRepo) {}
 
-  async getImage(id: ImageId) {
-    return await this.dbRepo.getImage(id)
+  async getOne(id: ImageId) {
+    return await this.dbRepo.getOne(id)
   }
 
-  async getImagesByProjectUri(uri: string) {
-    return await this.dbRepo.getImagesByProjectUri(uri)
+  async getAllByProjectUri(uri: string) {
+    return await this.dbRepo.getAllByProjectUri(uri)
   }
 
-  async createImage(_dto: CreateImageDto) {
+  async create(_dto: CreateImageDto) {
     return err(new Error(`not impl`))
   }
 
-  async updateImage(_dto: UpdateImageDto) {
+  async update(_dto: UpdateImageDto) {
     return err(new Error(`not impl`))
   }
 
-  async deleteImage(_id: ImageId) {
+  async delete(_id: ImageId) {
     return err(new Error(`not impl`))
   }
 }

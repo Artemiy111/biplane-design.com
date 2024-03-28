@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const projectUrlFriendly = event.context.params!.urlFriendly as string
 
   return await db.transaction(async (tx) => {
-    const deleted = db.delete(projects).where(eq(projects.urlFriendly, projectUrlFriendly)).returning()
+    const deleted = await tx.delete(projects).where(eq(projects.urlFriendly, projectUrlFriendly)).returning()
 
     const remainProjects = await tx.select(({ ...getTableColumns(projects), newOrder: sql<number>`row_number() over (order by ${projects.order})`.mapWith(Number).as('new_order') })).from(projects)
     await Promise.all(

@@ -4,6 +4,6 @@ export class GetGroupsUseCase implements IUseCase {
   constructor(private repo: IGroupDbRepo) {}
 
   async execute() {
-    return this.repo.getGroups()
+    return this.repo.getAll()
   }
 }

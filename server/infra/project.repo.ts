@@ -6,56 +6,56 @@ import type { CreateProjectDto, IProjectDbRepo, IProjectFsRepo, IProjectRepo, Pr
 export class ProjectRepo implements IProjectRepo {
   constructor(private dbRepo: IProjectDbRepo, private fsRepo: IProjectFsRepo) {}
 
-  async getProject(id: ProjectId) {
-    return this.dbRepo.getProject(id)
+  async getOne(id: ProjectId) {
+    return this.dbRepo.getOne(id)
   }
 
-  async getProjectByUri(uri: string) {
-    return this.dbRepo.getProjectByUri(uri)
+  async getByUri(uri: string) {
+    return this.dbRepo.getByUri(uri)
   }
 
-  async getProjects() {
-    return this.dbRepo.getProjects()
+  async getAll() {
+    return this.dbRepo.getAll()
   }
 
-  async createProject(dto: CreateProjectDto) {
-    const createdInDb = await this.dbRepo.createProject(dto)
+  async create(dto: CreateProjectDto) {
+    const createdInDb = await this.dbRepo.create(dto)
     if (!createdInDb.ok)
       return err(createdInDb.error)
 
-    const createdInFs = await this.fsRepo.createProjectDir(dto.uri)
+    const createdInFs = await this.fsRepo.createDir(dto.uri)
     if (!createdInFs.ok)
       return err(createdInFs.error)
 
     return createdInDb
   }
 
-  async updateProject(dto: UpdateProjectDto) {
-    const project = await this.dbRepo.getProject(dto.id)
+  async update(dto: UpdateProjectDto) {
+    const project = await this.dbRepo.getOne(dto.id)
     if (!project.ok)
       return err(project.error)
 
-    const updatedInDb = await this.dbRepo.updateProject(dto)
+    const updatedInDb = await this.dbRepo.update(dto)
     if (!updatedInDb.ok)
       return err(updatedInDb.error)
 
-    const updatedInFs = await this.fsRepo.renameProjectDir(project.value.uri, dto.uri)
+    const updatedInFs = await this.fsRepo.renameDir(project.value.uri, dto.uri)
     if (!updatedInFs.ok)
       return err(updatedInFs.error)
 
     return updatedInDb
   }
 
-  async deleteProject(id: ProjectId) {
-    const project = await this.dbRepo.getProject(id)
+  async delete(id: ProjectId) {
+    const project = await this.dbRepo.getOne(id)
     if (!project.ok)
       return err(project.error)
 
-    const deletedInDb = await this.dbRepo.deleteProject(project.value.id)
+    const deletedInDb = await this.dbRepo.delete(project.value.id)
     if (!deletedInDb.ok)
       return err(deletedInDb.error)
 
-    const deletedInFs = await this.fsRepo.deleteProjectDir(project.value.uri)
+    const deletedInFs = await this.fsRepo.deleteDir(project.value.uri)
     if (!deletedInFs.ok)
       return err(deletedInFs.error)
 
