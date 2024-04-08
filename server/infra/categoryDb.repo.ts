@@ -45,7 +45,8 @@ export class CategoryDbRepo implements ICategoryDbRepo {
   async getNextOrder(tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
-      return ok((await ctx.select().from(categories)).length)
+      const count = (await ctx.select().from(categories)).length
+      return ok(count + 1)
     }
     catch (_e) {
       return err(new Error(`Cannot get order of new category`))
@@ -116,6 +117,8 @@ export class CategoryDbRepo implements ICategoryDbRepo {
           return tx.rollback()
 
         return ok(created.value!)
+      }, {
+        isolationLevel: 'read committed',
       })
     }
     catch (e) {

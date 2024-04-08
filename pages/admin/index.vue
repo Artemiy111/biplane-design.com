@@ -20,8 +20,8 @@ useSeoMeta({
 const { md } = useScreenSize()
 const { data, error: fetchError, refresh } = await useFetch('/api/groups', {
   transform: (groups) => {
-    const categories = groups.flatMap(group => group.categories)
-    const projects = categories.flatMap(category => category.projects)
+    const categories = groups.flatMap(group => group.categories) ?? []
+    const projects = categories.flatMap(category => category.projects) ?? []
 
     return {
       groups,
