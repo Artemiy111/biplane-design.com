@@ -169,6 +169,8 @@ export class GroupDbRepo implements IGroupDbRepo {
           return tx.rollback()
 
         return ok(created.value!)
+      }, {
+        isolationLevel: 'read committed',
       })
     }
     catch (e) {

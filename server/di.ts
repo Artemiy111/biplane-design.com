@@ -1,6 +1,4 @@
 import path from 'node:path'
-import { DeleteCategoryUseCase } from './use-cases/delete-category.use-case'
-import { UpdateCategoryUseCase } from './use-cases/update-category.use-case'
 import { db } from './db'
 
 import { GetProjectUseCase } from './use-cases/get-project.use-case'
@@ -15,6 +13,8 @@ import { GetImagesByProjectUriUseCase } from './use-cases/get-images-by-project-
 
 import { GetCategoryUseCase } from './use-cases/get-category.use-case'
 import { CreateCategoryUseCase } from './use-cases/create-category.use-case'
+import { UpdateCategoryUseCase } from './use-cases/update-category.use-case'
+import { DeleteCategoryUseCase } from './use-cases/delete-category.use-case'
 
 import { GetGroupUseCase } from './use-cases/get-group.use-case'
 import { GetGroupsUseCase } from './use-cases/get-groups.use-case'
