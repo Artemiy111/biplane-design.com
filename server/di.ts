@@ -10,6 +10,9 @@ import { DeleteProjectUseCase } from './use-cases/delete-project.use-case'
 
 import { GetImageUseCase } from './use-cases/get-image.use-case'
 import { GetImagesByProjectUriUseCase } from './use-cases/get-images-by-project-uri'
+import { CreateImageUseCase } from './use-cases/create-image.use-case'
+import { UpdateImageUseCase } from './use-cases/update-image.use-case'
+import { DeleteImageUseCase } from './use-cases/delete-image.use-case'
 
 import { GetCategoryUseCase } from './use-cases/get-category.use-case'
 import { CreateCategoryUseCase } from './use-cases/create-category.use-case'
@@ -67,3 +70,6 @@ export const deleteProjectUseCase = new DeleteProjectUseCase(projectRepo, userRe
 
 export const getImagesByProjectUriUseCase = new GetImagesByProjectUriUseCase(imageRepo)
 export const getImageUseCase = new GetImageUseCase(imageRepo)
+export const createImageUseCase = new CreateImageUseCase(imageRepo, userRepo)
+export const updateImageUseCase = new UpdateImageUseCase(imageRepo, userRepo)
+export const deleteImageUseCase = new DeleteImageUseCase(imageRepo, userRepo)
