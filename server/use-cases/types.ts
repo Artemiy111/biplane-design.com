@@ -115,7 +115,9 @@ export interface ImageDto {
   alt: string
   order: number
 }
-export type CreateImageDto = Omit<ImageDto, 'id' | 'order'>
+export type CreateImageDto = Omit<ImageDto, 'id' | 'order'> & {
+  data: Buffer
+}
 export type UpdateImageDto = Omit<ImageDto, ''>
 
 export interface IImageRepo {

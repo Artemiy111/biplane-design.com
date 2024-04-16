@@ -177,7 +177,7 @@ export const images = pgTable(
 
 export type ImageDb = typeof images.$inferSelect
 export type ImageDbCreate = Omit<WithoutDates<ImageDb>, 'id'>
-export type ImageFbUpdate = WithoutDates<ImageDb>
+export type ImageDbUpdate = WithoutDates<ImageDb>
 
 export type ImageCreate = typeof images.$inferInsert
 export type ImageUpdate = Partial<Pick<ImageDb, 'filename' | 'title' | 'order'>>
