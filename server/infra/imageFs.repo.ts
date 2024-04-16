@@ -82,6 +82,9 @@ export class ImageFsRepo implements IImageFsRepo {
   }
 
   async renameImageFile(projectUri: string, filename: string, newFilename: string) {
+    if (filename === newFilename)
+      return ok(undefined)
+
     if (!(await this.isImageFileExist(projectUri, filename)))
       return err(new Error(`Image \`${filename}\` of project \`${projectUri}\` does not exist`))
 

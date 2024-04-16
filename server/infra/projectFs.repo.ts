@@ -29,6 +29,9 @@ export class ProjectFsRepo implements IProjectFsRepo {
   }
 
   async renameDir(uri: string, newUri: string) {
+    if (uri === newUri)
+      return ok(undefined)
+
     const dir = this.getDir(uri)
     const newDir = this.getDir(newUri)
 
