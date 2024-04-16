@@ -150,7 +150,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
 
     try {
       return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder()
+        const nextOrder = await this.getNextOrder(tx)
         if (!nextOrder.ok)
           return err(nextOrder.error)
 
@@ -184,21 +184,21 @@ export class ProjectDbRepo implements IProjectDbRepo {
 
     try {
       return await ctx.transaction(async (tx) => {
-        const group = await this.getOne(dto.id, tx)
-        if (!group.ok)
+        const project = await this.getOne(dto.id, tx)
+        if (!project.ok)
           return tx.rollback()
+
+        await this.updateOrder(project.value, dto.order, tx)
 
         await tx.update(projects)
           .set(projectDbMapper.toUpdateWithoutOrder(projectDbMapper.toUpdate(dto)))
           .where(eq(projects.id, dto.id))
 
-        await this.updateOrder(group.value, dto.order, tx)
-
-        const updatedGroup = await this.getOne(dto.id, tx)
-        if (!updatedGroup.ok)
+        const updatedProject = await this.getOne(dto.id, tx)
+        if (!updatedProject.ok)
           return tx.rollback()
 
-        return ok(updatedGroup.value)
+        return ok(updatedProject.value)
       })
     }
     catch (e) {
@@ -219,7 +219,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
         await Promise.all(
           remainProjects.map((proj) => {
             return tx.update(projects).set({ order: proj.newOrder * 1000 }).where(
-              eq(projects.urlFriendly, proj.urlFriendly),
+              eq(projects.id, proj.id),
             )
           }),
         )
@@ -227,7 +227,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
         await Promise.all(
           remainProjects.map((proj) => {
             return tx.update(projects).set({ order: proj.newOrder }).where(
-              eq(projects.urlFriendly, proj.urlFriendly),
+              eq(projects.id, proj.id),
             )
           }),
         )

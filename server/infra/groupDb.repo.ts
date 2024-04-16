@@ -1,7 +1,6 @@
 import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import type { Result } from '../shared/result'
 import { err, ok } from '../shared/result'
-import { IGroupEntity } from './../entities/group.entity'
 import { categoryDbMapper } from './categoryDb.repo'
 import type {
   CreateGroupDto,
