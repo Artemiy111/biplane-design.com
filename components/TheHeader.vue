@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from '~/components/ui/navigation-menu'
+import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '~/components/ui/navigation-menu'
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()

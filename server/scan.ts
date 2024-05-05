@@ -4,8 +4,8 @@ import path from 'node:path'
 import { cwd } from 'node:process'
 import { and, eq } from 'drizzle-orm'
 import type { ImageDb } from './db/schema'
-import { images, projects } from './db/schema'
-import { client, db } from '~/server/db'
+import { images } from './db/schema'
+import { db } from '~/server/db'
 
 const dbProjects = await db.query.projects.findMany({ with: { images: true } })
 
@@ -15,7 +15,7 @@ function isImageExt(ext: string) {
   return ext === 'avif' || ext === 'webp' || ext === 'png' || ext === 'jpg' || ext === 'jpg'
 }
 
-function findNonExistingImages(dbImages: ImageDb[]): ImageDb[] {}
+function findNonExistingImages(dbImages: ImageDb[]): ImageDb[] { }
 
 // Проект есть в БД но нет в папке      -> информируем
 // Проекта нет в БД, но есть в папке    -> уведомляем

@@ -1,5 +1,4 @@
 /* eslint-disable ts/no-use-before-define */
-import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import {
   integer,
   pgTable,
@@ -10,10 +9,7 @@ import {
   uniqueIndex,
   varchar,
 } from 'drizzle-orm/pg-core'
-import { relations, sql } from 'drizzle-orm'
-import { createInsertSchema } from 'drizzle-zod'
-import { createInsertSchema as createInsertSchemaValibot } from 'drizzle-valibot'
-import * as z from 'zod'
+import { relations } from 'drizzle-orm'
 
 type WithoutDates<T> = Omit<T, 'createdAt' | 'updatedAt'>
 
@@ -50,7 +46,7 @@ export const categories = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
-  t => {
+  (t) => {
     return {
       uniqueUrlFriendlyForGroup: unique('url_friendly_for_group').on(t.groupId, t.urlFriendly),
       uniqueOrderForGroup: unique('unique_order_for_group').on(t.groupId, t.order),
@@ -91,7 +87,7 @@ export const projects = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
-  t => {
+  (t) => {
     return {
       uniqueOrderForCategory: unique('unique_order_for_category').on(t.categoryId, t.order),
     }
@@ -113,40 +109,6 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   images: many(images),
 }))
 
-const MIN_YEAR = 2000
-const MAX_YEAR = 2050
-
-export const projectInsertSchema = createInsertSchema(projects, {
-  title: z.string().trim().min(3, 'Минимум 3 символа'),
-  categoryId: z.union([z.string(), z.number()]).transform(v => Number(v)),
-  urlFriendly: z
-    .string()
-    .trim()
-    .min(3, 'Минимум 3 символа')
-    .refine(s => {
-      const url = `https://g.com/${s}`
-      try {
-        z.string().url().parse(url)
-        return true
-      } catch (e) {
-        return false
-      }
-    }, 'Не валидный URL'),
-  status: z.string().trim().min(3, 'Минимум 3 символа'),
-  yearStart: z
-    .number()
-    .min(MIN_YEAR, `Год начала не может быть меньше ${MIN_YEAR}`)
-    .max(MAX_YEAR, `Год начала не может быть больше ${MAX_YEAR}`)
-    .nullable(),
-  yearEnd: z
-    .number()
-    .min(MIN_YEAR, `Год завершения не может быть меньше ${MIN_YEAR}`)
-    .max(MAX_YEAR, `Год завершения не может быть больше ${MAX_YEAR}`)
-
-    .nullable(),
-  location: z.string().trim().min(3, 'Минимум 3 символа'),
-})
-
 export const images = pgTable(
   'images',
   {
@@ -161,7 +123,7 @@ export const images = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
-  t => {
+  (t) => {
     return {
       uniqueIdxFilenameForProject: uniqueIndex('unique_idx_filename_for_project').on(
         t.projectUrlFriendly,

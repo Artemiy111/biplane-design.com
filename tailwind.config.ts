@@ -35,20 +35,7 @@ export default {
       '2xl': '32px',
       '3xl': '36px',
     },
-    fontWeight: {
-      DEFAULT: '500',
-      thin: '200',
-      // extralight: '300',
-      light: '400',
-      normal: '500',
-      medium: '600',
-      // semibold: '600',
-      bold: '700',
-      // extrabold: '800',
-      // black: '900',
-    },
     extend: {
-
       fontFamily: {
         sans: ['Montserrat', ...fontFamily.sans],
       },
