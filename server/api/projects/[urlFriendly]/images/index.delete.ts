@@ -2,7 +2,6 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { cwd } from 'node:process'
 import { and, eq, getTableColumns, inArray, sql } from 'drizzle-orm'
-import { PgDialect } from 'drizzle-orm/pg-core'
 import * as z from 'zod'
 import { db } from '~/server/db'
 import { images } from '~/server/db/schema'
@@ -48,8 +47,7 @@ export default defineEventHandler(async (event) => {
 
     filenames.forEach(filename => fs.unlinkSync(path.join(folder, filename)))
     return deletedImagesDb
-  }).catch((e) => {
-    console.log(e)
+  }).catch((_e) => {
     throw createHttpError(HttpErrorCode.InternalServerError)
   })
 })

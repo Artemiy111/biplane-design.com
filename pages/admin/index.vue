@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
 import { EllipsisVertical } from 'lucide-vue-next'
-import { FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table'
 import ProjectSheet from '~/components/admin/ProjectSheet.vue'
-import type { FormSchema, Mode } from '~/components/admin/ProjectSheet.vue'
+import type { FormSchema } from '~/components/admin/ProjectSheet.vue'
 import type { CategoryDto, GroupDto, ProjectDto } from '~/server/use-cases/types'
 
 definePageMeta({
@@ -110,7 +109,7 @@ async function onSubmit(values: FormSchema, prev: FormSchema | null) {
   }
 
   try {
-    await $fetch(`/api/projects/${prev.urlFriendly}`, {
+    await $fetch(`/api/projects/${prev.uri}`, {
       method: 'PUT',
       body: values,
     })
@@ -129,7 +128,7 @@ async function onSubmit(values: FormSchema, prev: FormSchema | null) {
 function openProjectSheet(project: ProjectDto) {
   projectSheetRef.value?.open({
     id: project.id,
-    urlFriendly: project.uri,
+    uri: project.uri,
     title: project.title,
     groupId: getGroupById(getCategoryById(project.categoryId).groupId).id,
     location: project.location,

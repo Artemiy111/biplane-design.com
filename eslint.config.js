@@ -1,6 +1,5 @@
-import antfu from '@antfu/eslint-config'
-import NuxtEslintConfig from './.nuxt/eslint.config.mjs'
+// import antfu from '@antfu/eslint-config'
+import nuxt from './.nuxt/eslint.config.mjs'
 
-export default antfu({
-  typescript: true,
-}, NuxtEslintConfig)
+export default nuxt()
+    

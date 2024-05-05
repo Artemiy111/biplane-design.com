@@ -4,14 +4,14 @@ import type { IProjectFsRepo } from '../use-cases/types'
 import { err, ok } from '../shared/result'
 
 export class ProjectFsRepo implements IProjectFsRepo {
-  constructor(private projectsDir: string) {}
+  constructor(private projectsDir: string) { }
 
   getDir(uri: string) { return path.join(this.projectsDir, uri) }
 
   async isDirExist(uri: string) {
     const dir = this.getDir(uri)
     const exists = await fs.exists(dir)
-    return exists
+    return ok(exists)
   }
 
   async createDir(uri: string) {
