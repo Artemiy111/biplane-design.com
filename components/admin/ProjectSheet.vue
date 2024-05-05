@@ -3,7 +3,6 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import type { GroupDto, ImageDto } from '~/server/use-cases/types'
 import { projectInsertSchema } from '~/server/db/schema'
-import Dropzone from '~/components/Dropzone.vue'
 import { Form } from '~/components/ui/form'
 
 const props = defineProps<{

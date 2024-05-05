@@ -1,4 +1,4 @@
-import { useEventListener, useWindowSize } from '@vueuse/core'
+import { useEventListener } from '@vueuse/core'
 import { type ScreenSize, screens } from '~/tailwind.config'
 
 function getMaxScreenWidth(size: ScreenSize) {

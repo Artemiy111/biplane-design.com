@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
 import { ArrowDown, ArrowUp } from 'lucide-vue-next'
-import type { ImageDto, UpdateImageDto } from '~/server/use-cases/types'
+import type { UpdateImageDto } from '~/server/use-cases/types'
 import Dropzone from '~/components/Dropzone.vue'
 
 const route = useRoute()

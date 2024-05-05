@@ -8,5 +8,6 @@
     "vueuse",
     "Человекопонятная"
   ],
-  "prettier.enable": false
+  "prettier.enable": false,
+  "eslint.experimental.useFlatConfig": true
 }

@@ -1,5 +1,4 @@
-import { sql } from 'drizzle-orm'
-import { categories, groups, projects } from './schema'
+import { categories, groups } from './schema'
 import { db } from '.'
 import { toUrlFriendly } from '~/utils/toUrlFriendly'
 

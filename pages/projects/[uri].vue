@@ -82,11 +82,6 @@ function scrollToImage(index: number) {
               format="avif,webp,png,jpg"
               class="aspect-video w-full object-cover"
             />
-            <!--  <NuxtImg
-              :src="img.url"
-              format="avif,webp,png,jpg"
-              class="aspect-video w-full object-cover"
-            /> -->
           </CarouselItem>
         </CarouselContent>
       </Carousel>

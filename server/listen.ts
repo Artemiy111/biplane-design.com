@@ -1,6 +1,4 @@
 /* eslint-disable no-console */
-import fs from 'node:fs'
-import path from 'node:path'
 import { cwd } from 'node:process'
 import chokidar from 'chokidar'
 

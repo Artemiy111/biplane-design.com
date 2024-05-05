@@ -1,5 +1,4 @@
 /* eslint-disable ts/no-use-before-define */
-import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import {
   integer,
   pgTable,
@@ -10,9 +9,8 @@ import {
   uniqueIndex,
   varchar,
 } from 'drizzle-orm/pg-core'
-import { relations, sql } from 'drizzle-orm'
+import { relations } from 'drizzle-orm'
 import { createInsertSchema } from 'drizzle-zod'
-import { createInsertSchema as createInsertSchemaValibot } from 'drizzle-valibot'
 import * as z from 'zod'
 
 type WithoutDates<T> = Omit<T, 'createdAt' | 'updatedAt'>
@@ -50,7 +48,7 @@ export const categories = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
-  t => {
+  (t) => {
     return {
       uniqueUrlFriendlyForGroup: unique('url_friendly_for_group').on(t.groupId, t.urlFriendly),
       uniqueOrderForGroup: unique('unique_order_for_group').on(t.groupId, t.order),
@@ -91,7 +89,7 @@ export const projects = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
-  t => {
+  (t) => {
     return {
       uniqueOrderForCategory: unique('unique_order_for_category').on(t.categoryId, t.order),
     }
@@ -123,12 +121,13 @@ export const projectInsertSchema = createInsertSchema(projects, {
     .string()
     .trim()
     .min(3, 'Минимум 3 символа')
-    .refine(s => {
+    .refine((s) => {
       const url = `https://g.com/${s}`
       try {
         z.string().url().parse(url)
         return true
-      } catch (e) {
+      }
+      catch (e) {
         return false
       }
     }, 'Не валидный URL'),
@@ -161,7 +160,7 @@ export const images = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
-  t => {
+  (t) => {
     return {
       uniqueIdxFilenameForProject: uniqueIndex('unique_idx_filename_for_project').on(
         t.projectUrlFriendly,

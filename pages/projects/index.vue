@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useWindowSize } from '@vueuse/core'
 import * as v from 'valibot'
 import type { LocationQuery } from 'vue-router'
 import { Carousel } from '~/components/ui/carousel'

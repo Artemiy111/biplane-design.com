@@ -6,7 +6,6 @@ import { images } from '~/server/db/schema'
 import type {
   CreateImageDto,
   IImageDbRepo,
-  IImageFsRepo,
   ImageDto,
   ImageId,
   UpdateImageDto,

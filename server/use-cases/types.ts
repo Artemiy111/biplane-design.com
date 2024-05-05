@@ -1,9 +1,19 @@
 import type { Buffer } from 'node:buffer'
-import type { Result, ResultOk } from '../shared/result'
+import type { Result } from '../shared/result'
 
 //
 export interface IUseCase {
   execute: Function
+}
+
+export interface IProjectSyncRepo {
+  getDirsNotExistingInDb: () => string[]
+  getDbProjectsExistingInFs: () => ProjectDto[]
+}
+
+export interface IImageSyncRepo {
+  getFilesNotExistingInDb: () => ImageFile[]
+  getDbImagesNotExistingInFs: () => ImageDto[]
 }
 
 //
@@ -114,6 +124,12 @@ export interface ImageDto {
   url: string
   alt: string
   order: number
+}
+
+export interface ImageFile {
+  filename: string
+  projectUri: string
+  file: File
 }
 export type CreateImageDto = Omit<ImageDto, 'id' | 'order'> & {
   data: Buffer

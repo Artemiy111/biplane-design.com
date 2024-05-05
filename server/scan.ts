@@ -4,8 +4,8 @@ import path from 'node:path'
 import { cwd } from 'node:process'
 import { and, eq } from 'drizzle-orm'
 import type { ImageDb } from './db/schema'
-import { images, projects } from './db/schema'
-import { client, db } from '~/server/db'
+import { images } from './db/schema'
+import { db } from '~/server/db'
 
 const dbProjects = await db.query.projects.findMany({ with: { images: true } })
 

@@ -5,7 +5,6 @@ export default defineNuxtConfig({
   telemetry: { enabled: false },
   devtools: {
     enabled: false,
-
     timeline: {
       enabled: true,
     },
@@ -13,27 +12,29 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/supabase',
     '@nuxtjs/tailwindcss',
-    'shadcn-nuxt',
-    'nuxt-module-eslint-config',
     '@nuxtjs/google-fonts',
-    '@nuxt/image',
-    '@tresjs/nuxt',
     '@nuxtjs/partytown',
+    '@nuxt/image',
+    '@nuxt/eslint',
+    '@nuxt/fonts',
+    'shadcn-nuxt',
+    '@tresjs/nuxt',
   ],
-  googleFonts: {
-    families: {
-      Inter: true,
-      Montserrat: true,
-    },
-  },
-  app: { head: { htmlAttrs: { lang: 'ru' } } },
-  eslintConfig: {
-    setup: false,
+  // style
+  fonts: {
+    families: [{
+      name: 'Montserrat',
+    }, {
+      name: 'Inter',
+    }],
   },
   shadcn: {
     componentDir: './components/ui',
     prefix: '',
   },
+  //
+  app: { head: { htmlAttrs: { lang: 'ru' } } },
+
   imports: {
     dirs: [],
   },
@@ -44,16 +45,12 @@ export default defineNuxtConfig({
     supabaseUrl: '',
     supabaseKey: '',
     supabaseString: '',
-    public: {
-      blobReadWriteToken: '',
-    },
   },
   build: {
     transpile: ['trpc-nuxt'],
   },
   image: {
     ipx: {
-
     },
     format: ['avif', 'webp', 'png', 'jpg'],
   },
