@@ -3,21 +3,21 @@ import fs from 'node:fs'
 import { cwd } from 'node:process'
 import path from 'node:path'
 import { and, eq, gt, gte, lt, lte, max, sql } from 'drizzle-orm'
-import * as v from 'valibot'
+import * as z from 'zod'
 import { db } from '~/server/db'
 import { images } from '~/server/db/schema'
 import { HttpErrorCode, createHttpError } from '~/server/exceptions'
 
-const BodySchema = v.object({
-  filename: v.optional(v.string()),
-  order: v.optional(v.number()),
-  title: v.optional(v.string()),
+const bodySchema = z.object({
+  filename: z.string(),
+  order: z.number(),
+  title: z.string()
 })
 
 export default defineEventHandler(async (event) => {
   const projectUrlFriendly = event.context.params!.urlFriendly as string
   const filename = decodeURI(event.context.params!.filename as string)
-  const body = await readValidatedBody(event, body => v.parse(BodySchema, body))
+  const body = await readValidatedBody(event, bodySchema.parse)
 
   return await db.transaction(async (tx) => {
     try {

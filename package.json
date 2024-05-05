@@ -21,20 +21,19 @@
     "db:seed": "bun ./server/db/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.569.0",
     "@nuxtjs/supabase": "^1.2.2",
     "@tanstack/vue-table": "^8.16.0",
     "@tresjs/cientos": "^3.8.0",
     "@tresjs/nuxt": "^2.1.1",
     "@trpc/client": "^10.45.2",
     "@trpc/server": "^10.45.2",
-    "@vee-validate/valibot": "^4.12.6",
     "@vee-validate/zod": "^4.12.6",
     "@vueuse/core": "^10.9.0",
     "chokidar": "^3.6.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.30.10",
-    "drizzle-valibot": "^0.2.0",
     "drizzle-zod": "^0.5.1",
     "embla-carousel": "8.0.4",
     "embla-carousel-vue": "8.0.4",
@@ -46,7 +45,6 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.164.1",
     "trpc-nuxt": "^0.10.21",
-    "valibot": "^0.30.0",
     "vee-validate": "^4.12.6",
     "vue": "^3.4.26",
     "vue-router": "^4.3.2",
@@ -58,7 +56,6 @@
     "@nuxt/eslint": "^0.3.10",
     "@nuxt/fonts": "^0.7.0",
     "@nuxt/image": "^1.7.0",
-    "@nuxtjs/google-fonts": "^3.2.0",
     "@nuxtjs/partytown": "^1.5.0",
     "@nuxtjs/tailwindcss": "^6.12.0",
     "@tailwindcss/typography": "^0.5.13",
@@ -68,7 +65,9 @@
     "dotenv": "^16.4.5",
     "drizzle-kit": "^0.20.17",
     "eslint": "^9.2.0",
+    "pg": "^8.11.5",
     "shadcn-nuxt": "^0.10.4",
-    "tailwindcss": "^3.4.3"
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.5"
   }
 }

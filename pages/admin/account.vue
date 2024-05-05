@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import * as v from 'valibot'
-import { toTypedSchema } from '@vee-validate/valibot'
+import * as  z from 'zod'
+import { toTypedSchema } from '@vee-validate/zod'
 import { toast } from 'vue-sonner'
 import { Form } from '~/components/ui/form'
 import { Dialog } from '~/components/ui/dialog'
@@ -10,28 +10,30 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Аккаунт',
-  ogTitle: 'Аккаунт',
-  description: 'Настройки аккаунта',
-  ogDescription: 'Настройки аккаунта',
+  title: 'Аккаунт администратора',
+  ogTitle: 'Аккаунт администратора',
+  description: 'Настройки аккаунта администратора',
+  ogDescription: 'Настройки аккаунта администратора',
 })
 
 const user = useSupabaseUser()
 const supabase = useSupabaseClient()
 
-const changePasswordSchema = v.object({
-  currentPassword: v.string([v.minLength(6)]),
-  newPassword: v.string([v.minLength(6)]),
-  repeatPassword: v.string([v.minLength(6)]),
-}, [
-  v.forward(v.custom(i => i.newPassword === i.repeatPassword, 'Пароли не совпадают'), ['repeatPassword']),
-])
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(6),
+  newPassword: z.string().min(6),
+  repeatPassword: z.string().min(6)
+}).refine(data => data.newPassword === data.repeatPassword, {
+  message: 'Пароли не совпадают',
+  path: ['repeatPassword']
+})
+
 const initialValues: ChangePasswordSchema = {
   currentPassword: '',
   newPassword: '',
   repeatPassword: '',
 }
-type ChangePasswordSchema = v.Output<typeof changePasswordSchema>
+type ChangePasswordSchema = z.infer<typeof changePasswordSchema>
 
 const formRef = ref<InstanceType<typeof Form> | null>(null)
 const isDialogOpen = ref(false)

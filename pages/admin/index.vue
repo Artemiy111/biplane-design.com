@@ -109,7 +109,7 @@ async function onSubmit(values: FormSchema, prev: FormSchema | null) {
   }
 
   try {
-    await $fetch(`/api/projects/${prev.urlFriendly}`, {
+    await $fetch(`/api/projects/${prev.uri}`, {
       method: 'PUT',
       body: values,
     })
@@ -128,7 +128,7 @@ async function onSubmit(values: FormSchema, prev: FormSchema | null) {
 function openProjectSheet(project: ProjectDto) {
   projectSheetRef.value?.open({
     id: project.id,
-    urlFriendly: project.uri,
+    uri: project.uri,
     title: project.title,
     groupId: getGroupById(getCategoryById(project.categoryId).groupId).id,
     location: project.location,

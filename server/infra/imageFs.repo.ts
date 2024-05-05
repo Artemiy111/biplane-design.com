@@ -8,7 +8,7 @@ const extNames = ['.avif', '.webp', '.png', '.jpg', '.jpeg']
 const extNamesSet = new Set(extNames)
 
 export class ImageFsRepo implements IImageFsRepo {
-  constructor(private projectFsRepo: IProjectFsRepo) {}
+  constructor(private projectFsRepo: IProjectFsRepo) { }
 
   private getImageFilepath(projectUri: string, filename: string) {
     const dir = this.projectFsRepo.getDir(projectUri)
@@ -17,7 +17,8 @@ export class ImageFsRepo implements IImageFsRepo {
 
   async isImageFileExist(projectUri: string, filename: string) {
     const filepath = this.getImageFilepath(projectUri, filename)
-    return await fs.exists(filepath)
+    const exists = await fs.exists(filepath)
+    return ok(exists)
   }
 
   async getImageFile(projectUri: string, filename: string) {

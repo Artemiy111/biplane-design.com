@@ -47,8 +47,7 @@ export default defineEventHandler(async (event) => {
 
     filenames.forEach(filename => fs.unlinkSync(path.join(folder, filename)))
     return deletedImagesDb
-  }).catch((e) => {
-    console.log(e)
+  }).catch((_e) => {
     throw createHttpError(HttpErrorCode.InternalServerError)
   })
 })

@@ -12,7 +12,6 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/supabase',
     '@nuxtjs/tailwindcss',
-    '@nuxtjs/google-fonts',
     '@nuxtjs/partytown',
     '@nuxt/image',
     '@nuxt/eslint',

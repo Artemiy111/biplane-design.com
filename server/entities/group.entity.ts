@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
-import * as v from 'valibot'
-
+import * as z from 'zod'
 type GroupEntityId = number
 
 export interface ICategoryEntity {
@@ -21,15 +20,14 @@ export class GroupEntityValidationError extends Error {
   }
 }
 
-const GroupEntitySchema = v.object({
-  id: v.optional(v.number()),
-  title: v.string([v.minLength(3)]),
-  uri: v.string([v.minLength(3)]),
-  // categories: v.array(v.any()),
-  order: v.number([v.minValue(1)]),
+const GroupEntitySchema = z.object({
+  id: z.optional(z.number()),
+  title: z.string().min(3),
+  uri: z.string().min(3),
+  order: z.number().min(1)
 })
 
-type _GroupEntityValidatedFields = v.Input<typeof GroupEntitySchema>
+type _GroupEntityValidatedFields = z.infer<typeof GroupEntitySchema>
 
 export interface IGroupEntity extends IGroupEntityProps {
   validate: () => void
@@ -52,7 +50,7 @@ export class GroupEntity implements IGroupEntity {
   }
 
   public validate() {
-    const validated = v.safeParse(GroupEntitySchema, {
+    const validated = GroupEntitySchema.safeParse({
       id: this.id,
       title: this.title,
       uri: this.uri,
@@ -61,7 +59,6 @@ export class GroupEntity implements IGroupEntity {
     })
 
     if (!validated.success) {
-      console.log(validated.issues[0].path?.[0].key)
       throw new GroupEntityValidationError()
     }
   }

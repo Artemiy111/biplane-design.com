@@ -15,7 +15,7 @@ function isImageExt(ext: string) {
   return ext === 'avif' || ext === 'webp' || ext === 'png' || ext === 'jpg' || ext === 'jpg'
 }
 
-function findNonExistingImages(dbImages: ImageDb[]): ImageDb[] {}
+function findNonExistingImages(dbImages: ImageDb[]): ImageDb[] { }
 
 // Проект есть в БД но нет в папке      -> информируем
 // Проекта нет в БД, но есть в папке    -> уведомляем

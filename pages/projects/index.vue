@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import * as v from 'valibot'
+import * as z from 'zod'
 import type { LocationQuery } from 'vue-router'
 import { Carousel } from '~/components/ui/carousel'
 import type { CategoryDto, GroupDto } from '~/server/use-cases/types'
+import { LoaderCircle } from 'lucide-vue-next'
 
 useSeoMeta({
   title: 'Проекты',
@@ -11,26 +12,27 @@ useSeoMeta({
   ogDescription: 'Представлены различные категории проектов',
 })
 
-const querySchema = v.object({
-  group: v.string([v.minLength(3)]),
-  category: v.string([v.minLength(3)]),
+const querySchema = z.object({
+  group: z.string().min(3),
+  category: z.string().min(3)
 })
 
 const route = useRoute()
 const router = useRouter()
 const { md } = useScreenSize()
-const { data: groups, error: _error } = await useFetch<GroupDto[]>('/api/groups')
+const { data: groups, pending, error: _error } = await useLazyFetch<GroupDto[]>('/api/groups')
 
 const currentGroup = ref<GroupDto | null>(groups.value?.[0] || null)
 const currentCategory = ref<CategoryDto | null>(currentGroup.value?.categories[0] || null)
 const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
 function handleRouteQuery(query: LocationQuery) {
-  const validatedQuery = v.safeParse(querySchema, query)
+  const validatedQuery = querySchema.safeParse(query)
   if (!validatedQuery.success)
     return
-  const queryGroup = groups.value?.find(g => g.uri === validatedQuery.output.group) || null
-  const queryCategory = queryGroup?.categories.find(c => c.uri === validatedQuery.output.category) || null
+
+  const queryGroup = groups.value?.find(g => g.uri === validatedQuery.data.group) || null
+  const queryCategory = queryGroup?.categories.find(c => c.uri === validatedQuery.data.category) || null
 
   if (!queryGroup || !queryCategory)
     return
@@ -76,7 +78,10 @@ function changeCategory(category: CategoryDto) {
 </script>
 
 <template>
-  <main class="container flex h-full flex-grow flex-col">
+  <main v-if="pending" class="container flex h-full flex-grow flex-col items-center justify-center">
+    <LoaderCircle :size="60" :stroke-width="1.5" class="animate-spin" />
+  </main>
+  <main v-else class="container flex h-full flex-grow flex-col">
     <section class="grid grid-cols-2 items-center divide-x text-3xl 2xl:text-2xl lg:text-xl md:text-lg sm:text-base">
       <h2
         v-for="group in groups" :key="group.id"

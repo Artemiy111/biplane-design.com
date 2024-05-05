@@ -3,7 +3,8 @@ import type { Result } from '../shared/result'
 
 //
 export interface IUseCase {
-  execute: Function
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  execute: (...params: any[]) => void
 }
 
 export interface IProjectSyncRepo {
@@ -108,7 +109,7 @@ export interface IProjectDbRepo {
 
 export interface IProjectFsRepo {
   getDir: (uri: string) => string
-  isDirExist: (uri: string) => Promise<boolean>
+  isDirExist: (uri: string) => Promise<Result<boolean, Error>>
   createDir: (uri: string) => Promise<Result<void, Error>>
   renameDir: (uri: string, newUri: string) => Promise<Result<void, Error>>
   deleteDir: (uri: string) => Promise<Result<void, Error>>
@@ -153,7 +154,7 @@ export interface IImageDbRepo {
 }
 
 export interface IImageFsRepo {
-  isImageFileExist: (projectUri: string, filename: string) => Promise<boolean>
+  isImageFileExist: (projectUri: string, filename: string) => Promise<Result<boolean, Error>>
   getImageFile: (projectUri: string, filename: string) => Promise<Result<File, Error>>
   createImageFile: (projectUri: string, filename: string, data: Buffer) => Promise<Result<void, Error>>
   renameImageFile: (projectUri: string, filename: string, newFilename: string) => Promise<Result<void, Error>>

@@ -2,7 +2,6 @@
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import type { GroupDto, ImageDto } from '~/server/use-cases/types'
-import { projectInsertSchema } from '~/server/db/schema'
 import { Form } from '~/components/ui/form'
 
 const props = defineProps<{
@@ -17,7 +16,7 @@ const mode = ref<Mode>('create')
 
 const initialValues = ref<FormSchema>({
   title: '',
-  urlFriendly: '',
+  uri: '',
   groupId: props.groups?.[0].id,
   categoryId: props.groups?.[0].categories[0].id,
   status: '',
@@ -25,13 +24,47 @@ const initialValues = ref<FormSchema>({
   yearEnd: null,
   location: '',
   images: [],
-  order: 1,
 })
 
-const formSchema = projectInsertSchema.merge(z.object({
+
+const MIN_YEAR = 2000
+const MAX_YEAR = 2050
+
+export const formSchema = z.object({
+  title: z.string().trim().min(3, 'Минимум 3 символа'),
+  categoryId: z.union([z.string(), z.number()]).transform(v => Number(v)),
+  uri: z
+    .string()
+    .trim()
+    .min(3, 'Минимум 3 символа')
+    .refine((s) => {
+      const url = `https://g.com/${s}`
+      try {
+        z.string().url().parse(url)
+        return true
+      }
+      catch (e) {
+        return false
+      }
+    }, 'Не валидный URL'),
+  status: z.string().trim().min(3, 'Минимум 3 символа'),
+  yearStart: z
+    .number()
+    .min(MIN_YEAR, `Год начала не может быть меньше ${MIN_YEAR}`)
+    .max(MAX_YEAR, `Год начала не может быть больше ${MAX_YEAR}`)
+    .nullable(),
+  yearEnd: z
+    .number()
+    .min(MIN_YEAR, `Год завершения не может быть меньше ${MIN_YEAR}`)
+    .max(MAX_YEAR, `Год завершения не может быть больше ${MAX_YEAR}`)
+
+    .nullable(),
+  location: z.string().trim().min(3, 'Минимум 3 символа'),
+  
   groupId: z.union([z.string(), z.number()]).transform(v => Number(v)),
   images: z.array(z.string()),
-}))
+})
+
 
 export type FormSchema = z.infer<typeof formSchema>
 
