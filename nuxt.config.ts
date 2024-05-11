@@ -41,12 +41,14 @@ export default defineNuxtConfig({
     dirs: [],
   },
   runtimeConfig: {
+    databaseUrl: '',
     supabaseUrl: '',
     supabaseKey: '',
-    supabaseString: '',
-  },
-  build: {
-    transpile: ['trpc-nuxt'],
+
+    awsAccessKeyId: '',
+    awsSecretAccessKey: '',
+    endpointUrl: '',
+    region: ''
   },
   image: {
     ipx: {

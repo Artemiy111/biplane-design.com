@@ -1,6 +1,6 @@
 {
-  "id": "c03c727a-98dd-4326-ac9a-48bb5ff7f2a1",
-  "prevId": "8ca20a5f-ea42-44bd-8e1e-55cc52d889d6",
+  "id": "3dc95747-9913-4f6d-97f1-0d2846260704",
+  "prevId": "c47a6af6-ef8b-4c93-8fbe-78372758619b",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -26,8 +26,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "url_friendly": {
-          "name": "url_friendly",
+        "uri": {
+          "name": "uri",
           "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
@@ -65,8 +65,8 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -78,12 +78,12 @@
             "title"
           ]
         },
-        "url_friendly_for_group": {
-          "name": "url_friendly_for_group",
+        "unique_uri_for_group": {
+          "name": "unique_uri_for_group",
           "nullsNotDistinct": false,
           "columns": [
             "group_id",
-            "url_friendly"
+            "uri"
           ]
         },
         "unique_order_for_group": {
@@ -112,8 +112,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "url_friendly": {
-          "name": "url_friendly",
+        "uri": {
+          "name": "uri",
           "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
@@ -150,11 +150,11 @@
             "title"
           ]
         },
-        "groups_url_friendly_unique": {
-          "name": "groups_url_friendly_unique",
+        "groups_uri_unique": {
+          "name": "groups_uri_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "url_friendly"
+            "uri"
           ]
         },
         "groups_order_unique": {
@@ -170,9 +170,9 @@
       "name": "images",
       "schema": "",
       "columns": {
-        "project_url_friendly": {
-          "name": "project_url_friendly",
-          "type": "varchar(200)",
+        "project_id": {
+          "name": "project_id",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -188,8 +188,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "title": {
-          "name": "title",
+        "alt": {
+          "name": "alt",
           "type": "varchar(200)",
           "primaryKey": false,
           "notNull": false
@@ -219,7 +219,7 @@
         "unique_idx_filename_for_project": {
           "name": "unique_idx_filename_for_project",
           "columns": [
-            "project_url_friendly",
+            "project_id",
             "filename"
           ],
           "isUnique": true
@@ -227,22 +227,22 @@
         "unique_order_for_project": {
           "name": "unique_order_for_project",
           "columns": [
-            "project_url_friendly",
+            "project_id",
             "order"
           ],
           "isUnique": true
         }
       },
       "foreignKeys": {
-        "images_project_url_friendly_projects_url_friendly_fk": {
-          "name": "images_project_url_friendly_projects_url_friendly_fk",
+        "images_project_id_projects_id_fk": {
+          "name": "images_project_id_projects_id_fk",
           "tableFrom": "images",
           "tableTo": "projects",
           "columnsFrom": [
-            "project_url_friendly"
+            "project_id"
           ],
           "columnsTo": [
-            "url_friendly"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "cascade"
@@ -273,8 +273,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "url_friendly": {
-          "name": "url_friendly",
+        "uri": {
+          "name": "uri",
           "type": "varchar(200)",
           "primaryKey": false,
           "notNull": true
@@ -301,7 +301,7 @@
           "name": "location",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "order": {
           "name": "order",
@@ -336,17 +336,17 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "projects_url_friendly_unique": {
-          "name": "projects_url_friendly_unique",
+        "projects_uri_unique": {
+          "name": "projects_uri_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "url_friendly"
+            "uri"
           ]
         },
         "unique_order_for_category": {

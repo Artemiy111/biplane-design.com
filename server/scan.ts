@@ -47,7 +47,7 @@ dbProjects.forEach(async (project) => {
           .delete(images)
           .where(
             and(
-              eq(images.projectUrlFriendly, image.projectUrlFriendly),
+              eq(images.projectUri, image.projectUrlFriendly),
               eq(images.filename, image.filename),
             ),
           )

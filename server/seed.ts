@@ -2,7 +2,7 @@ import { logger } from './shared/logger'
 import type { CreateCategoryDto, CreateGroupDto } from './use-cases/types'
 import { createCategoryUseCase, createGroupUseCase } from './di'
 
-import { toUrlFriendly } from '~/utils/toUrlFriendly'
+import { toUri } from '~/utils/toUri'
 
 const groupsBiplane = ['Архитектура', 'Графика']
 const categoriesBiplane = [
@@ -13,7 +13,7 @@ const categoriesBiplane = [
 const groupsToCreate: CreateGroupDto[] = groupsBiplane.map((g) => {
   return {
     title: g,
-    uri: toUrlFriendly(g),
+    uri: toUri(g),
   }
 })
 
@@ -28,7 +28,7 @@ const createdCategories = createdGroups.map((g, idx) => {
   if (g.ok) {
     const dtos: CreateCategoryDto[] = categoriesBiplane[idx].map(c => ({
       title: c,
-      uri: toUrlFriendly(c),
+      uri: toUri(c),
       groupId: g.value.id,
     }))
     return Promise.all(dtos.map(dto => createCategoryUseCase.execute(dto)))

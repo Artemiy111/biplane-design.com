@@ -1,32 +1,30 @@
 import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import type { Db, DbTransaction } from '../db'
 import { err, ok } from '../shared/result'
-import type { ProjectDbUpdate } from './../db/schema'
-import type { CreateProjectDto, IProjectDbRepo, ProjectId, UpdateProjectDto } from './../use-cases/types'
 import { imageDbMapper } from './imageDb.repo'
-import { type ProjectDbCreate, type ProjectDbDeep, projects } from '~/server/db/schema'
-import type { ProjectDto } from '~/server/use-cases/types'
+import { type ProjectDbCreate, type ProjectDbDeep, type ProjectDbUpdate, projects } from '~/server/db/schema'
+import type { ProjectDbDto, CreateProjectDto, IProjectDbRepo, ProjectId, UpdateProjectDto } from '~/server/use-cases/types'
 
 export const projectDbMapper = {
-  toDto(db: ProjectDbDeep): ProjectDto {
+  toDbDto(db: ProjectDbDeep): ProjectDbDto {
     return {
       categoryId: db.categoryId,
       id: db.id,
       title: db.title,
-      uri: db.urlFriendly,
+      uri: db.uri,
       yearStart: db.yearStart,
       yearEnd: db.yearEnd,
       location: db.location,
       status: db.status,
       order: db.order,
-      images: db.images.map(imageDbMapper.toDto),
+      images: db.images.map(imageDbMapper.toDbDto),
     }
   },
   toCreate(dto: CreateProjectDto, order: number): ProjectDbCreate {
     return {
       categoryId: dto.categoryId,
       title: dto.title,
-      urlFriendly: dto.uri,
+      uri: dto.uri,
       yearStart: dto.yearStart,
       yearEnd: dto.yearEnd,
       location: dto.location,
@@ -39,7 +37,7 @@ export const projectDbMapper = {
       categoryId: dto.categoryId,
       id: dto.id,
       title: dto.title,
-      urlFriendly: dto.uri,
+      uri: dto.uri,
       yearStart: dto.yearStart,
       yearEnd: dto.yearEnd,
       location: dto.location,
@@ -54,7 +52,7 @@ export const projectDbMapper = {
 }
 
 export class ProjectDbRepo implements IProjectDbRepo {
-  constructor(private db: Db) {}
+  constructor(private db: Db) { }
 
   async getNextOrder(tx?: DbTransaction) {
     const ctx = tx || this.db
@@ -70,14 +68,17 @@ export class ProjectDbRepo implements IProjectDbRepo {
   async getOne(id: ProjectId, tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
-      const project = (await ctx.query.projects.findFirst({ where: eq(projects.id, id), with: {
-        images: { orderBy: images => images.order,
-        },
-      } }))
+      const project = (await ctx.query.projects.findFirst({
+        where: eq(projects.id, id), with: {
+          images: {
+            orderBy: images => images.order,
+          },
+        }
+      }))
       if (!project)
         return err(new Error(`Project with id \`${id}\` is not found`))
 
-      return ok(projectDbMapper.toDto(project))
+      return ok(projectDbMapper.toDbDto(project))
     }
     catch (_e) {
       return err(new Error(`Could not get project`))
@@ -87,14 +88,17 @@ export class ProjectDbRepo implements IProjectDbRepo {
   async getByUri(uri: string, tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
-      const project = (await ctx.query.projects.findFirst({ where: eq(projects.urlFriendly, uri), with: {
-        images: { orderBy: images => images.order,
-        },
-      } }))
+      const project = (await ctx.query.projects.findFirst({
+        where: eq(projects.uri, uri), with: {
+          images: {
+            orderBy: images => images.order,
+          },
+        }
+      }))
       if (!project)
         return err(new Error(`Project with uri \`${uri}\` is not found`))
 
-      return ok(projectDbMapper.toDto(project))
+      return ok(projectDbMapper.toDbDto(project))
     }
     catch (_e) {
       return err(new Error(`Could not get project by uri \`${uri}\``))
@@ -111,7 +115,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
           },
         },
       }))
-      return ok(projects.map(projectDbMapper.toDto))
+      return ok(projects.map(projectDbMapper.toDbDto))
     }
     catch (_e) {
       return err(new Error(`Could not get projects`))
@@ -142,7 +146,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  private async updateOrder(dto: ProjectDto, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: ProjectDbDto, newOrder: number, tx?: DbTransaction) {
     if (dto.order === newOrder)
       return ok(undefined)
 
@@ -170,7 +174,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
           ))
         }
 
-        await tx.update(projects).set({ order: dto.order }).where(eq(projects.urlFriendly, dto.uri))
+        await tx.update(projects).set({ order: dto.order }).where(eq(projects.uri, dto.uri))
         await tx.update(projects).set({ order: sql`${projects.order} / 1000` }).where(gte(projects.order, 1000))
       })
     }

@@ -1,9 +1,9 @@
 import path from 'node:path'
 import fs from 'node:fs/promises'
-import type { IProjectFsRepo } from '../use-cases/types'
+import type { IProjectBucketRepo } from '../use-cases/types'
 import { err, ok } from '../shared/result'
 
-export class ProjectFsRepo implements IProjectFsRepo {
+export class ProjectFsRepo implements IProjectBucketRepo {
   constructor(private projectsDir: string) { }
 
   getDir(uri: string) { return path.join(this.projectsDir, uri) }

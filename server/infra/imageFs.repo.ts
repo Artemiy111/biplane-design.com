@@ -2,13 +2,13 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { Buffer } from 'node:buffer'
 import { err, ok } from '../shared/result'
-import type { IImageFsRepo, IProjectFsRepo } from './../use-cases/types'
+import type { IImageFsRepo, IProjectBucketRepo } from './../use-cases/types'
 
 const extNames = ['.avif', '.webp', '.png', '.jpg', '.jpeg']
 const extNamesSet = new Set(extNames)
 
 export class ImageFsRepo implements IImageFsRepo {
-  constructor(private projectFsRepo: IProjectFsRepo) { }
+  constructor(private projectFsRepo: IProjectBucketRepo) { }
 
   private getImageFilepath(projectUri: string, filename: string) {
     const dir = this.projectFsRepo.getDir(projectUri)

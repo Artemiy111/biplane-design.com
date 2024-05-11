@@ -16,7 +16,7 @@ type WithoutDates<T> = Omit<T, 'createdAt' | 'updatedAt'>
 export const groups = pgTable('groups', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 128 }).notNull().unique(),
-  urlFriendly: varchar('url_friendly', { length: 128 }).notNull().unique(),
+  uri: varchar('uri', { length: 128 }).notNull().unique(),
   order: integer('order').notNull().unique(),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -37,10 +37,10 @@ export const categories = pgTable(
   {
     groupId: integer('group_id')
       .notNull()
-      .references(() => groups.id, { onDelete: 'cascade' }),
+      .references(() => groups.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     id: serial('id').primaryKey(),
     title: varchar('title', { length: 128 }).notNull().unique(),
-    urlFriendly: varchar('url_friendly', { length: 128 }).notNull(),
+    uri: varchar('uri', { length: 128 }).notNull(),
     order: integer('order').notNull(),
 
     createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -48,7 +48,7 @@ export const categories = pgTable(
   },
   (t) => {
     return {
-      uniqueUrlFriendlyForGroup: unique('url_friendly_for_group').on(t.groupId, t.urlFriendly),
+      uniqueUriForGroup: unique('unique_uri_for_group').on(t.groupId, t.uri),
       uniqueOrderForGroup: unique('unique_order_for_group').on(t.groupId, t.order),
     }
   },
@@ -74,10 +74,10 @@ export const projects = pgTable(
   {
     categoryId: integer('category_id')
       .notNull()
-      .references(() => categories.id),
+      .references(() => categories.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     id: serial('id').primaryKey(),
     title: varchar('title', { length: 200 }).notNull(),
-    urlFriendly: varchar('url_friendly', { length: 200 }).notNull().unique(),
+    uri: varchar('uri', { length: 200 }).notNull().unique(),
     status: text('status').notNull(),
     yearStart: integer('year_start'),
     yearEnd: integer('year_end'),
@@ -112,12 +112,10 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
 export const images = pgTable(
   'images',
   {
-    projectUrlFriendly: varchar('project_url_friendly', { length: 200 })
-      .references(() => projects.urlFriendly, { onUpdate: 'cascade', onDelete: 'cascade' })
-      .notNull(),
+    projectId: integer('project_id').notNull().references(() => projects.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     id: serial('id').primaryKey(),
     filename: varchar('filename', { length: 200 }).notNull(),
-    title: varchar('title', { length: 200 }),
+    alt: varchar('alt', { length: 200 }).notNull(),
     order: integer('order').notNull(),
 
     createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -126,11 +124,11 @@ export const images = pgTable(
   (t) => {
     return {
       uniqueIdxFilenameForProject: uniqueIndex('unique_idx_filename_for_project').on(
-        t.projectUrlFriendly,
+        t.projectId,
         t.filename,
       ),
       uniqueOrderForProject: uniqueIndex('unique_order_for_project').on(
-        t.projectUrlFriendly,
+        t.projectId,
         t.order,
       ),
     }
@@ -142,12 +140,12 @@ export type ImageDbCreate = Omit<WithoutDates<ImageDb>, 'id'>
 export type ImageDbUpdate = WithoutDates<ImageDb>
 
 export type ImageCreate = typeof images.$inferInsert
-export type ImageUpdate = Partial<Pick<ImageDb, 'filename' | 'title' | 'order'>>
+export type ImageUpdate = Partial<Pick<ImageDb, 'filename' | 'alt' | 'order'>>
 
 export const imageRelations = relations(images, ({ one }) => ({
   project: one(projects, {
-    fields: [images.projectUrlFriendly],
-    references: [projects.urlFriendly],
+    fields: [images.projectId],
+    references: [projects.id],
     relationName: 'project',
   }),
 }))

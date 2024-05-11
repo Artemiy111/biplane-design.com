@@ -1,63 +1,99 @@
+import { ImageDb } from '../db/schema'
 import { err, ok } from '../shared/result'
-import type { CreateProjectDto, IProjectDbRepo, IProjectFsRepo, IProjectRepo, ProjectId, UpdateProjectDto } from '../use-cases/types'
+import type { CreateProjectDto, IProjectDbRepo, IProjectBucketRepo, IProjectRepo, ProjectId, UpdateProjectDto, IImageRepo, IImageBucketRepo, ProjectDbDto, ProjectDto, ImageDto } from '../use-cases/types'
+import { imageMapper } from './image.repo'
 
 // Что делать если изменилось только в бд, но не в файловой системе?
 
+const projectMapper = {
+  toDto(dbDto: ProjectDbDto, images: ImageDto[]): ProjectDto {
+    return {
+      ...dbDto,
+      images
+    }
+  }
+}
+
 export class ProjectRepo implements IProjectRepo {
-  constructor(private dbRepo: IProjectDbRepo, private fsRepo: IProjectFsRepo) {}
+  constructor(private dbRepo: IProjectDbRepo, private bucketRepo: IProjectBucketRepo, private imageRepo: IImageRepo) { }
 
   async getOne(id: ProjectId) {
-    return this.dbRepo.getOne(id)
+    const project = await this.dbRepo.getOne(id)
+    if (!project.ok) return project
+
+    const images = await this.imageRepo.getAllByProjectId(project.value.id)
+    if (!images.ok) return images
+
+    return ok(projectMapper.toDto(project.value, images.value))
   }
 
   async getByUri(uri: string) {
-    return this.dbRepo.getByUri(uri)
+    const project = await this.dbRepo.getByUri(uri)
+    if (!project.ok) return project
+
+    const images = await this.imageRepo.getAllByProjectId(project.value.id)
+    if (!images.ok) return images
+
+    return ok(projectMapper.toDto(project.value, images.value))
   }
 
   async getAll() {
-    return this.dbRepo.getAll()
+    const projects = await this.dbRepo.getAll()
+    if (!projects.ok) return projects
+
+
+    try {
+      const images = await Promise.all(projects.value.map(async (project) => {
+        const images = await this.imageRepo.getAllByProjectId(project.id)
+        if (!images.ok) throw new Error('oops')
+        return images.value
+      }))
+      const res = projects.value.map((project, idx) => projectMapper.toDto(project, images[idx]))
+      return ok(res)
+    } catch (_e) {
+      return err(_e as Error)
+    }
+
   }
 
   async create(dto: CreateProjectDto) {
     const createdInDb = await this.dbRepo.create(dto)
-    if (!createdInDb.ok)
-      return err(createdInDb.error)
+    if (!createdInDb.ok) return createdInDb
 
-    const createdInFs = await this.fsRepo.createDir(dto.uri)
-    if (!createdInFs.ok)
-      return err(createdInFs.error)
+    const createdInFs = await this.bucketRepo.createDir(dto.uri)
+    if (!createdInFs.ok) return createdInFs
 
-    return createdInDb
+    const images = await this.imageRepo.getAllByProjectId(createdInDb.value.id)
+    if (!images.ok) return images
+
+    return ok(projectMapper.toDto(createdInDb.value, images.value))
   }
 
   async update(dto: UpdateProjectDto) {
     const project = await this.dbRepo.getOne(dto.id)
-    if (!project.ok)
-      return err(project.error)
+    if (!project.ok) return project
 
     const updatedInDb = await this.dbRepo.update(dto)
-    if (!updatedInDb.ok)
-      return err(updatedInDb.error)
+    if (!updatedInDb.ok) return updatedInDb
 
-    const updatedInFs = await this.fsRepo.renameDir(project.value.uri, dto.uri)
-    if (!updatedInFs.ok)
-      return err(updatedInFs.error)
+    const updatedInFs = await this.bucketRepo.renameDir(project.value.uri, dto.uri)
+    if (!updatedInFs.ok) return updatedInFs
 
-    return updatedInDb
+    const images = await this.imageRepo.getAllByProjectId(updatedInDb.value.id)
+    if (!images.ok) return images
+
+    return ok(projectMapper.toDto(updatedInDb.value, images.value))
   }
 
   async delete(id: ProjectId) {
     const project = await this.dbRepo.getOne(id)
-    if (!project.ok)
-      return err(project.error)
+    if (!project.ok) return project
 
     const deletedInDb = await this.dbRepo.delete(project.value.id)
-    if (!deletedInDb.ok)
-      return err(deletedInDb.error)
+    if (!deletedInDb.ok) return deletedInDb
 
-    const deletedInFs = await this.fsRepo.deleteDir(project.value.uri)
-    if (!deletedInFs.ok)
-      return err(deletedInFs.error)
+    const deletedInFs = await this.bucketRepo.deleteDir(project.value.uri)
+    if (!deletedInFs.ok) return deletedInFs
 
     return ok(undefined)
   }

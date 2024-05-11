@@ -31,13 +31,13 @@ chokidar.watch(dir, { cwd: dir, ignoreInitial: false, atomic: true, depth: 1 })
       return
 
     try {
-      const project = await db.select().from(projects).where(eq(projects.urlFriendly, info.projectUrlFriendly))
+      const project = await db.select().from(projects).where(eq(projects.uri, info.projectUrlFriendly))
       if (!project.length) {
         console.log(`${info.projectUrlFriendly} / не существует в БД. Пропускаю добавление изображения к БД`)
         return
       }
       const image = await db.select().from(images).where(and(
-        eq(images.projectUrlFriendly, info.projectUrlFriendly),
+        eq(images.projectUri, info.projectUrlFriendly),
         eq(images.filename, info.filename),
       ))
       if (image.length) {
@@ -58,14 +58,14 @@ chokidar.watch(dir, { cwd: dir, ignoreInitial: false, atomic: true, depth: 1 })
       return
 
     try {
-      const project = await db.select().from(projects).where(eq(projects.urlFriendly, info.projectUrlFriendly))
+      const project = await db.select().from(projects).where(eq(projects.uri, info.projectUrlFriendly))
       if (!project.length) {
         console.log(`${info.projectUrlFriendly} / не существует в БД. Пропускаю удаление изображения из БД`)
         return
       }
 
       const deletedImages = await db.delete(images).where(and(
-        eq(images.projectUrlFriendly, info.projectUrlFriendly),
+        eq(images.projectUri, info.projectUrlFriendly),
         eq(images.filename, info.filename),
       )).returning()
 
@@ -78,13 +78,13 @@ chokidar.watch(dir, { cwd: dir, ignoreInitial: false, atomic: true, depth: 1 })
   })
   .on('unlinkDir', async (projectUrlFriendly) => {
     try {
-      const project = await db.select().from(projects).where(eq(projects.urlFriendly, projectUrlFriendly))
+      const project = await db.select().from(projects).where(eq(projects.uri, projectUrlFriendly))
       if (!project.length) {
         console.log(`${projectUrlFriendly} / не существует. Пропускаю удаление изображений из БД`)
         return
       }
 
-      const deletedImages = await db.delete(images).where(eq(images.projectUrlFriendly, projectUrlFriendly)).returning()
+      const deletedImages = await db.delete(images).where(eq(images.projectUri, projectUrlFriendly)).returning()
       deletedImages.forEach(image =>
         console.log(`${projectUrlFriendly} / ${image.filename} -`),
       )

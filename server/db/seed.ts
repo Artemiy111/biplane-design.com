@@ -1,6 +1,6 @@
 import { categories, groups } from './schema'
 import { db } from '.'
-import { toUrlFriendly } from '~/utils/toUrlFriendly'
+import { toUri } from '~/utils/toUri'
 
 const groupsBiplane = ['Архитектура', 'Графика']
 const categoriesBiplane = [
@@ -11,12 +11,12 @@ const categoriesBiplane = [
 db.transaction((tx) => {
   tx.delete(groups)
   groupsBiplane.forEach(async (group, idx) => {
-    const insertedGroup = (await tx.insert(groups).values({ title: group, urlFriendly: toUrlFriendly(group), order: idx + 1 }).returning())[0]
+    const insertedGroup = (await tx.insert(groups).values({ title: group, urlFriendly: toUri(group), order: idx + 1 }).returning())[0]
 
     categoriesBiplane[idx].forEach((async (category, idx) => {
       await tx.insert(categories).values({
         title: category,
-        urlFriendly: toUrlFriendly(category),
+        urlFriendly: toUri(category),
         groupId: insertedGroup.id,
         order: idx + 1,
       },

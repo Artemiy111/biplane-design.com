@@ -11,16 +11,16 @@ export const categoryDbMapper = {
       groupId: db.groupId,
       id: db.id,
       title: db.title,
-      uri: db.urlFriendly,
+      uri: db.uri,
       order: db.order,
-      projects: db.projects.map(projectDbMapper.toDto),
+      projects: db.projects.map(projectDbMapper.toDbDto),
     }
   },
   toCreate(dto: CreateCategoryDto, order: number): CategoryDbCreate {
     return {
       groupId: dto.groupId,
       title: dto.title,
-      urlFriendly: dto.uri,
+      uri: dto.uri,
       order,
     }
   },
@@ -29,7 +29,7 @@ export const categoryDbMapper = {
       groupId: dto.groupId,
       id: dto.id,
       title: dto.title,
-      urlFriendly: dto.uri,
+      uri: dto.uri,
       order: dto.order,
     }
   },
@@ -40,7 +40,7 @@ export const categoryDbMapper = {
 }
 
 export class CategoryDbRepo implements ICategoryDbRepo {
-  constructor(private db: Db) {}
+  constructor(private db: Db) { }
 
   async getNextOrder(tx?: DbTransaction) {
     const ctx = tx || this.db
@@ -154,7 +154,7 @@ export class CategoryDbRepo implements ICategoryDbRepo {
           ))
         }
 
-        await tx.update(categories).set({ order: dto.order }).where(eq(categories.urlFriendly, dto.uri))
+        await tx.update(categories).set({ order: dto.order }).where(eq(categories.uri, dto.uri))
         await tx.update(categories).set({ order: sql`${categories.order} / 1000` }).where(gte(categories.order, 1000))
       })
     }
