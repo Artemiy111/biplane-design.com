@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { cwd } from 'node:process'
 import chokidar from 'chokidar'
 

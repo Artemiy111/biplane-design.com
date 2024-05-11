@@ -1,8 +1,8 @@
 import { err } from '../shared/result'
-import type { CategoryId, ICategoryDbRepo, IUseCase, IUserRepo } from './types'
+import type { CategoryId, ICategoryRepo, IUseCase, IUserRepo } from './types'
 
 export class DeleteCategoryUseCase implements IUseCase {
-  constructor(private categoryRepo: ICategoryDbRepo, private userRepo: IUserRepo) {}
+  constructor(private categoryRepo: ICategoryRepo, private userRepo: IUserRepo) { }
 
   async execute(id: CategoryId) {
     if (!(await this.userRepo.getUser()))

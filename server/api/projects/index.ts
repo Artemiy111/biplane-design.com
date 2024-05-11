@@ -1,21 +1,16 @@
 import { z } from 'zod'
-import { getProjectUseCase, updateProjectUseCase, deleteProjectUseCase } from '~/server/di'
+import { createProjectUseCase, getProjectsUseCase } from '~/server/di'
 import { HttpErrorCode, createHttpError } from '~/server/exceptions'
 
-
 export default defineEventHandler(async (event) => {
-  const id = Number(event.context.params!.id! as string)
-
   switch (event.method) {
     case 'GET': {
-      const res = await getProjectUseCase.execute(id)
+      const res = await getProjectsUseCase.execute()
       if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
       return res.value
     }
-
-    case "PUT": {
+    case 'POST': {
       const Body = z.object({
-        id: z.number(),
         categoryId: z.number(),
         title: z.string(),
         uri: z.string(),
@@ -23,18 +18,11 @@ export default defineEventHandler(async (event) => {
         yearStart: z.number().nullable(),
         yearEnd: z.number().nullable(),
         status: z.string(),
-        order: z.number().min(1)
       })
       const body = await readValidatedBody(event, Body.parse)
-      const res = await updateProjectUseCase.execute(body)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
-      return res.value
-    }
-    case 'DELETE': {
-      const res = await deleteProjectUseCase.execute(id)
+      const res = await createProjectUseCase.execute(body)
       if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
       return res.value
     }
   }
 })
-

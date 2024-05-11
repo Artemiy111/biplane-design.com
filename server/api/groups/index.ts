@@ -2,7 +2,6 @@ import { z } from 'zod'
 import { HttpErrorCode, createHttpError } from '../../exceptions'
 import { getGroupsUseCase, createGroupUseCase } from '~/server/di'
 
-
 export default defineEventHandler(async (event) => {
   switch (event.method) {
     case 'GET': {

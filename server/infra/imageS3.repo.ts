@@ -1,7 +1,9 @@
-import { S3ServiceException, S3Client, HeadObjectCommand, PutObjectCommand, DeleteObjectCommand, GetObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3'
+import type { S3ServiceException, S3Client } from '@aws-sdk/client-s3'
+import { HeadObjectCommand, PutObjectCommand, DeleteObjectCommand, GetObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { err, ok, Result } from '../shared/result'
-import { IImageBucketRepo } from '../use-cases/types'
+import type { Result } from '../shared/result'
+import { err, ok } from '../shared/result'
+import type { IImageBucketRepo } from '../use-cases/types'
 
 export class ImageS3Repo implements IImageBucketRepo {
   constructor(private bucketName: string, private s3: S3Client) { }
@@ -16,7 +18,8 @@ export class ImageS3Repo implements IImageBucketRepo {
     try {
       await this.s3.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: key }))
       return ok(true)
-    } catch (_e) {
+    }
+    catch (_e) {
       const error = _e as S3ServiceException
       if (error.name === 'NotFound') {
         return ok(false)
@@ -32,7 +35,8 @@ export class ImageS3Repo implements IImageBucketRepo {
       const params = { Bucket: this.bucketName, Key: key }
       const url = await getSignedUrl(this.s3, new GetObjectCommand(params), { expiresIn: 3600 })
       return ok(url)
-    } catch (_e) {
+    }
+    catch (_e) {
       const error = _e as S3ServiceException
       return err(new Error(`Could not get URL for image '${filename}' in project '${projectUri}': ${error.message}`))
     }
@@ -44,7 +48,8 @@ export class ImageS3Repo implements IImageBucketRepo {
     try {
       await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key, Body: data }))
       return ok(undefined)
-    } catch (_e) {
+    }
+    catch (_e) {
       const error = _e as S3ServiceException
       return err(new Error(`Could not create image '${filename}' in project '${projectUri}': ${error.message}`))
     }
@@ -58,16 +63,17 @@ export class ImageS3Repo implements IImageBucketRepo {
       await this.s3.send(new CopyObjectCommand({
         Bucket: this.bucketName,
         CopySource: `${this.bucketName}/${oldKey}`,
-        Key: newKey
+        Key: newKey,
       }))
 
       await this.s3.send(new DeleteObjectCommand({
         Bucket: this.bucketName,
-        Key: oldKey
+        Key: oldKey,
       }))
 
       return ok(undefined)
-    } catch (_e) {
+    }
+    catch (_e) {
       const error = _e as S3ServiceException
       return err(new Error(`Could not rename image '${oldFilename}' to '${newFilename}' in project '${projectUri}': ${error.message}`))
     }
@@ -79,7 +85,8 @@ export class ImageS3Repo implements IImageBucketRepo {
     try {
       await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: key }))
       return ok(undefined)
-    } catch (_e) {
+    }
+    catch (_e) {
       const error = _e as S3ServiceException
       return err(new Error(`Could not delete image '${filename}' in project '${projectUri}': ${error.message}`))
     }

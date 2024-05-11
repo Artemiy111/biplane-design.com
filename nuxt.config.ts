@@ -2,6 +2,7 @@
 import '@total-typescript/ts-reset'
 
 export default defineNuxtConfig({
+  ssr: false,
   telemetry: { enabled: false },
   devtools: {
     enabled: false,
@@ -32,6 +33,11 @@ export default defineNuxtConfig({
     prefix: '',
   },
   //
+  eslint: {
+    config: {
+      stylistic: true,
+    },
+  },
   app: { head: { htmlAttrs: { lang: 'ru' } } },
 
   imports: {
@@ -48,7 +54,7 @@ export default defineNuxtConfig({
     awsAccessKeyId: '',
     awsSecretAccessKey: '',
     endpointUrl: '',
-    region: ''
+    region: '',
   },
   image: {
     ipx: {

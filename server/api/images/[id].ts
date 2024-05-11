@@ -1,7 +1,6 @@
-import { getImageUseCase, updateImageUseCase, deleteImageUseCase } from '~/server/di'
 import { z } from 'zod'
+import { getImageUseCase, updateImageUseCase, deleteImageUseCase } from '~/server/di'
 import { HttpErrorCode, createHttpError } from '~/server/exceptions'
-
 
 export default defineEventHandler(async (event) => {
   const id = Number(event.context.params!.id! as string)
@@ -12,13 +11,13 @@ export default defineEventHandler(async (event) => {
       if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
       return res.value
     }
-    case "PUT": {
+    case 'PUT': {
       const Body = z.object({
         id: z.number(),
         projectId: z.number(),
         filename: z.string(),
         alt: z.string(),
-        order: z.number().min(1)
+        order: z.number().min(1),
       })
       const body = await readValidatedBody(event, Body.parse)
       const res = await updateImageUseCase.execute(body)
@@ -32,4 +31,3 @@ export default defineEventHandler(async (event) => {
     }
   }
 })
-

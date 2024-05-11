@@ -29,10 +29,10 @@ export interface IGroupRepo {
 }
 
 export interface IGroupDbRepo {
-  getOne: (id: GroupId) => Promise<Result<GroupDto, Error>>
-  getAll: () => Promise<Result<GroupDto[], Error>>
-  create: (dto: CreateGroupDto) => Promise<Result<GroupDto, Error>>
-  update: (dto: UpdateGroupDto) => Promise<Result<GroupDto, Error>>
+  getOne: (id: GroupId) => Promise<Result<GroupDbDto, Error>>
+  getAll: () => Promise<Result<GroupDbDto[], Error>>
+  create: (dto: CreateGroupDto) => Promise<Result<GroupDbDto, Error>>
+  update: (dto: UpdateGroupDto) => Promise<Result<GroupDbDto, Error>>
   delete: (id: GroupId) => Promise<Result<void, Error>>
 }
 
@@ -44,6 +44,10 @@ export interface GroupDto {
   order: number
   categories: CategoryDto[]
 }
+export type GroupDbDto = Omit<GroupDto, 'categories'> & {
+  categories: CategoryDbDto[]
+}
+
 export type CreateGroupDto = Omit<GroupDto, 'id' | 'order' | 'categories'>
 export type UpdateGroupDto = Omit<GroupDto, 'categories'>
 
@@ -61,14 +65,28 @@ export interface CategoryDto {
   order: number
   projects: ProjectDto[]
 }
+export type CategoryDbDto = Omit<CategoryDto, 'projects'> & {
+  projects: ProjectDbDto[]
+}
+
 export type CreateCategoryDto = Omit<CategoryDto, 'id' | 'order' | 'projects'>
 export type UpdateCategoryDto = Omit<CategoryDto, 'projects'>
 
-export interface ICategoryDbRepo {
+export interface ICategoryRepo {
   getOne: (id: CategoryId) => Promise<Result<CategoryDto, Error>>
+  getByGroupId: (groupId: GroupId) => Promise<Result<CategoryDto[], Error>>
   getAll: () => Promise<Result<CategoryDto[], Error>>
   create: (dto: CreateCategoryDto) => Promise<Result<CategoryDto, Error>>
   update: (dto: UpdateCategoryDto) => Promise<Result<CategoryDto, Error>>
+  delete: (id: CategoryId) => Promise<Result<void, Error>>
+}
+
+export interface ICategoryDbRepo {
+  getOne: (id: CategoryId) => Promise<Result<CategoryDbDto, Error>>
+  getByGroupId: (groupId: GroupId) => Promise<Result<CategoryDbDto[], Error>>
+  getAll: () => Promise<Result<CategoryDbDto[], Error>>
+  create: (dto: CreateCategoryDto) => Promise<Result<CategoryDbDto, Error>>
+  update: (dto: UpdateCategoryDto) => Promise<Result<CategoryDbDto, Error>>
   delete: (id: CategoryId) => Promise<Result<void, Error>>
 }
 
@@ -95,7 +113,8 @@ export type UpdateProjectDto = Omit<ProjectDto, 'images'>
 
 export interface IProjectRepo {
   getOne: (id: ProjectId) => Promise<Result<ProjectDto, Error>>
-  getByUri: (uri: string) => Promise<Result<ProjectDto, Error>>
+  getOneByUri: (uri: string) => Promise<Result<ProjectDto, Error>>
+  getByCategoryId: (categoryId: CategoryId) => Promise<Result<ProjectDto[], Error>>
   getAll: () => Promise<Result<ProjectDto[], Error>>
   create: (dto: CreateProjectDto) => Promise<Result<ProjectDto, Error>>
   update: (dto: UpdateProjectDto) => Promise<Result<ProjectDto, Error>>
@@ -104,7 +123,8 @@ export interface IProjectRepo {
 
 export interface IProjectDbRepo {
   getOne: (id: ProjectId) => Promise<Result<ProjectDbDto, Error>>
-  getByUri: (uri: string) => Promise<Result<ProjectDbDto, Error>>
+  getOneByUri: (uri: string) => Promise<Result<ProjectDbDto, Error>>
+  getByCategoryId: (categoryId: CategoryId) => Promise<Result<ProjectDbDto[], Error>>
   getAll: () => Promise<Result<ProjectDbDto[], Error>>
   create: (dto: CreateProjectDto) => Promise<Result<ProjectDbDto, Error>>
   update: (dto: UpdateProjectDto) => Promise<Result<ProjectDbDto, Error>>
@@ -166,7 +186,6 @@ export interface IImageFsRepo {
   renameImageFile: (projectUri: string, filename: string, newFilename: string) => Promise<Result<void, Error>>
   deleteImageFile: (projectUri: string, filename: string) => Promise<Result<void, Error>>
 }
-
 
 export interface IImageBucketRepo {
   isImageFileExist: (projectUri: string, filename: string) => Promise<Result<boolean, Error>>

@@ -2,7 +2,6 @@ import { z } from 'zod'
 import { createImageUseCase } from '~/server/di'
 import { HttpErrorCode, createHttpError } from '~/server/exceptions'
 
-
 export default defineEventHandler(async (event) => {
   switch (event.method) {
     case 'POST': {
@@ -10,7 +9,7 @@ export default defineEventHandler(async (event) => {
         projectId: z.number(),
         filename: z.string(),
         alt: z.string(),
-        data: z.instanceof(Buffer)
+        data: z.instanceof(Buffer),
       })
       const formData = await readMultipartFormData(event)
       if (!formData)

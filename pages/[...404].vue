@@ -14,7 +14,10 @@ useSeoMeta({
     <div class="flex flex-col items-center gap-1">
       <span class="text-[140px] leading-none lg:text-[120px] md:text-[100px]">404</span>
       <span>Страница не найдена</span>
-    </div>  <NuxtLink to="/projects" :class="buttonVariants()">
+    </div>  <NuxtLink
+      to="/projects"
+      :class="buttonVariants()"
+    >
       Смотреть проекты
     </NuxtLink>
   </main>

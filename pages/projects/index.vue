@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { LocationQuery } from 'vue-router'
+import { LoaderCircle } from 'lucide-vue-next'
 import { Carousel } from '~/components/ui/carousel'
 import type { CategoryDto, GroupDto } from '~/server/use-cases/types'
-import { LoaderCircle } from 'lucide-vue-next'
 
 useSeoMeta({
   title: 'Проекты',
@@ -14,13 +14,13 @@ useSeoMeta({
 
 const querySchema = z.object({
   group: z.string().min(3),
-  category: z.string().min(3)
+  category: z.string().min(3),
 })
 
 const route = useRoute()
 const router = useRouter()
 const { md } = useScreenSize()
-const { data: groups, pending, error: _error } = await useLazyFetch<GroupDto[]>('/api/groups')
+const { data: groups, pending, error: _error } = await useLazyFetch('/api/groups')
 
 const currentGroup = ref<GroupDto | null>(groups.value?.[0] || null)
 const currentCategory = ref<CategoryDto | null>(currentGroup.value?.categories[0] || null)
@@ -78,13 +78,24 @@ function changeCategory(category: CategoryDto) {
 </script>
 
 <template>
-  <main v-if="pending" class="container flex h-full flex-grow flex-col items-center justify-center">
-    <LoaderCircle :size="60" :stroke-width="1.5" class="animate-spin" />
+  <main
+    v-if="pending"
+    class="container flex h-full flex-grow flex-col items-center justify-center"
+  >
+    <LoaderCircle
+      :size="60"
+      :stroke-width="1.5"
+      class="animate-spin"
+    />
   </main>
-  <main v-else class="container flex h-full flex-grow flex-col">
+  <main
+    v-else
+    class="container flex h-full flex-grow flex-col"
+  >
     <section class="grid grid-cols-2 items-center divide-x text-3xl 2xl:text-2xl lg:text-xl md:text-lg sm:text-base">
       <h2
-        v-for="group in groups" :key="group.id"
+        v-for="group in groups"
+        :key="group.id"
         class="w-full cursor-pointer px-8 py-4 font-bold transition-colors hover:bg-secondary sm:px-4 sm:py-2"
         :class="[group === currentGroup ? 'bg-primary-foreground' : '']"
         tabindex="0"
@@ -96,20 +107,25 @@ function changeCategory(category: CategoryDto) {
     </section>
     <Separator />
     <section
-      v-if="currentGroup?.categories.length" class="relative mx-8 my-4 sm:mx-2 sm:my-2 sm:gap-2"
+      v-if="currentGroup?.categories.length"
+      class="relative mx-8 my-4 sm:mx-2 sm:my-2 sm:gap-2"
     >
       <div
         :class="[haveHiddenCategories ? 'opacity-100' : 'opacity-0']"
         class="pointer-events-none absolute right-0 top-0 z-50 h-full w-24 border-primary-foreground bg-gradient-to-r from-transparent to-white transition"
       />
       <Carousel
-        ref="categoriesCarouselRef" class="w-full" :opts="{
+        ref="categoriesCarouselRef"
+        class="w-full"
+        :opts="{
           dragFree: true,
         }"
       >
         <CarouselContent class="">
           <CarouselItem
-            v-for="c in currentGroup.categories" :key="c.id" class="w-fit shrink-0 basis-auto"
+            v-for="c in currentGroup.categories"
+            :key="c.id"
+            class="w-fit shrink-0 basis-auto"
           >
             <Button
               :size="md ? 'sm' : 'default'"
@@ -124,12 +140,28 @@ function changeCategory(category: CategoryDto) {
       </Carousel>
     </section>
     <Separator v-if="currentGroup?.categories.length" />
-    <section v-if="projectsWithImages?.length" class="grid grid-cols-2 gap-x-[2px] gap-y-[2px] lg:grid-cols-1">
-      <NuxtLink v-for="p in projectsWithImages" :key="p.id" :to="`/projects/${p.uri}`" class="flex flex-col transition-colors hover:bg-primary-foreground">
+    <section
+      v-if="projectsWithImages?.length"
+      class="grid grid-cols-2 gap-x-[2px] gap-y-[2px] lg:grid-cols-1"
+    >
+      <NuxtLink
+        v-for="p in projectsWithImages"
+        :key="p.id"
+        :to="`/projects/${p.uri}`"
+        class="flex flex-col transition-colors hover:bg-primary-foreground"
+      >
         <Carousel class="aspect-video w-full">
           <CarouselContent>
-            <CarouselItem v-for="img in p.images" :key="img.filename">
-              <NuxtImg format="avif,webp,png,jpg" :src="img.url" :alt="img.alt" class="aspect-video w-full object-cover" />
+            <CarouselItem
+              v-for="img in p.images"
+              :key="img.filename"
+            >
+              <NuxtImg
+                format="avif,webp,png,jpg"
+                :src="img.url"
+                :alt="img.alt"
+                class="aspect-video w-full object-cover"
+              />
             </CarouselItem>
           </CarouselContent>
         </Carousel>
@@ -139,7 +171,10 @@ function changeCategory(category: CategoryDto) {
         </div>
       </NuxtLink>
     </section>
-    <section v-else class="grid h-full flex-grow items-center justify-center">
+    <section
+      v-else
+      class="grid h-full flex-grow items-center justify-center"
+    >
       <span class="bg-primary-foreground p-8 text-lg md:text-base">Проектов пока нет</span>
     </section>
   </main>

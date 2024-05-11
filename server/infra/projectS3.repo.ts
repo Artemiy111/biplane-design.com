@@ -1,6 +1,8 @@
-import { S3ServiceException, S3Client, HeadObjectCommand, PutObjectCommand, CopyObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
-import { err, ok, Result } from '../shared/result'
-import { IProjectBucketRepo } from '../use-cases/types'
+import type { S3ServiceException, S3Client } from '@aws-sdk/client-s3'
+import { HeadObjectCommand, PutObjectCommand, CopyObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import type { Result } from '../shared/result'
+import { err, ok } from '../shared/result'
+import type { IProjectBucketRepo } from '../use-cases/types'
 
 export class ProjectS3Repo implements IProjectBucketRepo {
   constructor(private bucketName: string, private s3: S3Client) { }
@@ -11,7 +13,8 @@ export class ProjectS3Repo implements IProjectBucketRepo {
     try {
       await this.s3.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: key }))
       return ok(true)
-    } catch (_e) {
+    }
+    catch (_e) {
       const error = _e as S3ServiceException
       if (error.name === 'NotFound') {
         return ok(false)
@@ -34,7 +37,8 @@ export class ProjectS3Repo implements IProjectBucketRepo {
     try {
       await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key }))
       return ok(undefined)
-    } catch (_e) {
+    }
+    catch (_e) {
       const error = _e as S3ServiceException
       return err(new Error(`Error creating directory '${uri}': ${error.message}`))
     }
@@ -52,7 +56,8 @@ export class ProjectS3Repo implements IProjectBucketRepo {
       await this.s3.send(new CopyObjectCommand({ Bucket: this.bucketName, CopySource: `${this.bucketName}/${oldKey}`, Key: newKey }))
       await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: oldKey }))
       return ok(undefined)
-    } catch (_e) {
+    }
+    catch (_e) {
       const error = _e as S3ServiceException
       return err(new Error(`Error renaming directory '${uri}' to '${newUri}': ${error.message}`))
     }
@@ -64,7 +69,8 @@ export class ProjectS3Repo implements IProjectBucketRepo {
     try {
       await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: key }))
       return ok(undefined)
-    } catch (_e) {
+    }
+    catch (_e) {
       const error = _e as S3ServiceException
       return err(new Error(`Error deleting directory '${uri}': ${error.message}`))
     }

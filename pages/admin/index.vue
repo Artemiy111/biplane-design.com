@@ -145,7 +145,11 @@ function openProjectSheet(project: ProjectDto) {
 <template>
   <main class="container grid grid-cols-[300px,1fr]">
     <aside class="flex flex-col gap-4 p-4">
-      <li v-for="group in groups" :key="group.id" class="w-full list-none">
+      <li
+        v-for="group in groups"
+        :key="group.id"
+        class="w-full list-none"
+      >
         <ul class="flex w-full flex-col gap-2">
           <span class="w-full rounded-sm border-2 border-primary px-2 py-1 font-bold">{{
             group.title
@@ -241,12 +245,18 @@ function openProjectSheet(project: ProjectDto) {
                 @update:open="hoverCardIsOpen = $event"
               >
                 <HoverCardTrigger as-child>
-                  <Button variant="ghost" @click="hoverCardIsOpen = true">
+                  <Button
+                    variant="ghost"
+                    @click="hoverCardIsOpen = true"
+                  >
                     <EllipsisVertical />
                   </Button>
                 </HoverCardTrigger>
                 <HoverCardContent class="z-10 flex w-fit flex-col gap-4">
-                  <Button variant="outline" @click="openProjectSheet(project)">
+                  <Button
+                    variant="outline"
+                    @click="openProjectSheet(project)"
+                  >
                     Изменить
                   </Button>
                   <Button variant="destructiveOutline">

@@ -4,7 +4,7 @@ import { err, ok } from '../shared/result'
 import { categoryDbMapper } from './categoryDb.repo'
 import type {
   CreateGroupDto,
-  GroupDto,
+  GroupDbDto,
   GroupId,
   IGroupDbRepo,
   UpdateGroupDto,
@@ -14,13 +14,13 @@ import type { GroupDbCreate, GroupDbDeep, GroupDbUpdate } from '~/server/db/sche
 import { groups } from '~/server/db/schema'
 
 export const groupDbMapper = {
-  toDto(db: GroupDbDeep): GroupDto {
+  toDbDto(db: GroupDbDeep): GroupDbDto {
     return {
       id: db.id,
       title: db.title,
       uri: db.uri,
       order: db.order,
-      categories: db.categories.map(categoryDbMapper.toDto),
+      categories: db.categories.map(categoryDbMapper.toDbDto),
     }
   },
   toCreate(dto: CreateGroupDto, order: number): GroupDbCreate {
@@ -58,7 +58,7 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
-  private async updateOrder(dto: GroupDto, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: GroupDbDto, newOrder: number, tx?: DbTransaction) {
     if (dto.order === newOrder)
       return ok(undefined)
 
@@ -119,7 +119,7 @@ export class GroupDbRepo implements IGroupDbRepo {
       if (!group)
         return err(new Error(`Group with id \`${id}\ does not exist`))
 
-      return ok(groupDbMapper.toDto(group))
+      return ok(groupDbMapper.toDbDto(group))
     }
     catch (_e) {
       return err(new Error(`Could not get group with id \`${id}\``))
@@ -145,7 +145,7 @@ export class GroupDbRepo implements IGroupDbRepo {
         },
         orderBy: groups => groups.order,
       })
-      return ok(groups.map(groupDbMapper.toDto))
+      return ok(groups.map(groupDbMapper.toDbDto))
     }
     catch (_e) {
       return err(new Error(`Could not get groups`))
@@ -177,7 +177,7 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
-  async update(dto: UpdateGroupDto, tx?: DbTransaction): Promise<Result<GroupDto, Error>> {
+  async update(dto: UpdateGroupDto, tx?: DbTransaction) {
     const ctx = tx || this.db
 
     try {

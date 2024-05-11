@@ -69,7 +69,10 @@ async function uploadImages(images: File[]) {
 </script>
 
 <template>
-  <main v-if="project" class="container flex flex-col">
+  <main
+    v-if="project"
+    class="container flex flex-col"
+  >
     <section class="flex p-8">
       {{ project.title }}
       {{ project.uri }}
@@ -95,7 +98,10 @@ async function uploadImages(images: File[]) {
         </TableHeader>
         <TableBody class="transition-all [&>.row-leave-active]:absolute">
           <TransitionGroup name="row">
-            <TableRow v-for="(image, idx) in project.images" :key="image.filename">
+            <TableRow
+              v-for="(image, idx) in project.images"
+              :key="image.filename"
+            >
               <TableCell>{{ image.order }}</TableCell>
               <TableCell>
                 <NuxtImg
@@ -114,16 +120,21 @@ async function uploadImages(images: File[]) {
               <TableCell>
                 <div class="flex w-full flex-col items-center gap-2">
                   <Button
-                    v-if="idx !== 0" variant="ghost"
+                    v-if="idx !== 0"
+                    variant="ghost"
                     @click="updateImage({ ...image, order: image.order - 1 })"
                   >
                     <ArrowUp />
                   </Button>
-                  <Button variant="outline" @click="deleteImages([image.filename])">
+                  <Button
+                    variant="outline"
+                    @click="deleteImages([image.filename])"
+                  >
                     Удалить
                   </Button>
                   <Button
-                    v-if="idx !== project.images.length - 1" variant="ghost"
+                    v-if="idx !== project.images.length - 1"
+                    variant="ghost"
                     @click="updateImage({ ...image, order: image.order + 1 })"
                   >
                     <ArrowDown />

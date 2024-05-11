@@ -1,7 +1,7 @@
-import type { GroupId, IGroupDbRepo, IUseCase } from './types'
+import type { GroupId, IGroupRepo, IUseCase } from './types'
 
 export class GetGroupUseCase implements IUseCase {
-  constructor(private repo: IGroupDbRepo) {}
+  constructor(private repo: IGroupRepo) { }
 
   async execute(id: GroupId) {
     return this.repo.getOne(id)

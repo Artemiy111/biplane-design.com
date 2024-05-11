@@ -3,7 +3,7 @@ import type { Db, DbTransaction } from '../db'
 import { err, ok } from '../shared/result'
 import { imageDbMapper } from './imageDb.repo'
 import { type ProjectDbCreate, type ProjectDbDeep, type ProjectDbUpdate, projects } from '~/server/db/schema'
-import type { ProjectDbDto, CreateProjectDto, IProjectDbRepo, ProjectId, UpdateProjectDto } from '~/server/use-cases/types'
+import type { ProjectDbDto, CreateProjectDto, IProjectDbRepo, ProjectId, UpdateProjectDto, CategoryId } from '~/server/use-cases/types'
 
 export const projectDbMapper = {
   toDbDto(db: ProjectDbDeep): ProjectDbDto {
@@ -73,7 +73,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
           images: {
             orderBy: images => images.order,
           },
-        }
+        },
       }))
       if (!project)
         return err(new Error(`Project with id \`${id}\` is not found`))
@@ -85,7 +85,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async getByUri(uri: string, tx?: DbTransaction) {
+  async getOneByUri(uri: string, tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
       const project = (await ctx.query.projects.findFirst({
@@ -93,7 +93,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
           images: {
             orderBy: images => images.order,
           },
-        }
+        },
       }))
       if (!project)
         return err(new Error(`Project with uri \`${uri}\` is not found`))
@@ -102,6 +102,24 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
     catch (_e) {
       return err(new Error(`Could not get project by uri \`${uri}\``))
+    }
+  }
+
+  async getByCategoryId(categoryId: CategoryId, tx?: DbTransaction) {
+    const ctx = tx || this.db
+    try {
+      const projectsByCategoryId = (await ctx.query.projects.findMany({
+        where: eq(projects.categoryId, categoryId),
+        with: {
+          images: {
+            orderBy: images => images.order,
+          },
+        },
+      }))
+      return ok(projectsByCategoryId.map(projectDbMapper.toDbDto))
+    }
+    catch (_e) {
+      return err(new Error(`Could not get projects`))
     }
   }
 

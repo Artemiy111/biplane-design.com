@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import * as  z from 'zod'
+import * as z from 'zod'
 import { toTypedSchema } from '@vee-validate/zod'
 import { toast } from 'vue-sonner'
 import { Form } from '~/components/ui/form'
@@ -22,10 +22,10 @@ const supabase = useSupabaseClient()
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(6),
   newPassword: z.string().min(6),
-  repeatPassword: z.string().min(6)
+  repeatPassword: z.string().min(6),
 }).refine(data => data.newPassword === data.repeatPassword, {
   message: 'Пароли не совпадают',
-  path: ['repeatPassword']
+  path: ['repeatPassword'],
 })
 
 const initialValues: ChangePasswordSchema = {
@@ -65,10 +65,16 @@ async function changePassword(values: ChangePasswordSchema) {
     <h1 class="text-2xl font-bold">
       Аккаунт
     </h1>
-    <div v-if="user" class="grid grid-cols-[max-content,1fr] gap-4">
+    <div
+      v-if="user"
+      class="grid grid-cols-[max-content,1fr] gap-4"
+    >
       <span>Email</span>
       <span>{{ user.email }}</span>
-      <Dialog :open="isDialogOpen" @update:open="isDialogOpen = $event">
+      <Dialog
+        :open="isDialogOpen"
+        @update:open="isDialogOpen = $event"
+      >
         <DialogTrigger as-child>
           <Button variant="outline">
             Сменить пароль
@@ -87,29 +93,47 @@ async function changePassword(values: ChangePasswordSchema) {
             class="flex flex-col gap-4"
             @submit="changePassword($event as ChangePasswordSchema)"
           >
-            <FormField v-slot="{ field }" name="currentPassword">
+            <FormField
+              v-slot="{ field }"
+              name="currentPassword"
+            >
               <FormItem>
                 <FormLabel>Текущий пароль</FormLabel>
                 <FormControl>
-                  <Input :model-value="field.value" @change="field.onChange" />
+                  <Input
+                    :model-value="field.value"
+                    @change="field.onChange"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
-            <FormField v-slot="{ field }" name="newPassword">
+            <FormField
+              v-slot="{ field }"
+              name="newPassword"
+            >
               <FormItem>
                 <FormLabel>Новый пароль</FormLabel>
                 <FormControl>
-                  <Input :model-value="field.value" @change="field.onChange" />
+                  <Input
+                    :model-value="field.value"
+                    @change="field.onChange"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
-            <FormField v-slot="{ field }" name="repeatPassword">
+            <FormField
+              v-slot="{ field }"
+              name="repeatPassword"
+            >
               <FormItem>
                 <FormLabel>Повторите пароль</FormLabel>
                 <FormControl>
-                  <Input :model-value="field.value" @change="field.onChange" />
+                  <Input
+                    :model-value="field.value"
+                    @change="field.onChange"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

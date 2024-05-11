@@ -5,9 +5,9 @@ export const imageMapper = {
   toDto(dbDto: Omit<ImageDto, 'url'>, url: string) {
     return {
       ...dbDto,
-      url: url
+      url: url,
     }
-  }
+  },
 }
 
 export class ImageRepo implements IImageRepo {
@@ -40,7 +40,8 @@ export class ImageRepo implements IImageRepo {
         return imageMapper.toDto(img, url.value)
       }))
       return ok(res)
-    } catch (_e) {
+    }
+    catch (_e) {
       const error = _e as Error
       return err(error)
     }

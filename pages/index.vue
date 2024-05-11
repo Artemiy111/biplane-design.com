@@ -17,7 +17,14 @@ useHead({
 
 <template>
   <main class="container h-full font-bold">
-    <TresCanvas clear-color="#fff" class="h-full w-full" preset="realistic" window-size height="500" width="500">
+    <TresCanvas
+      clear-color="#fff"
+      class="h-full w-full"
+      preset="realistic"
+      window-size
+      height="500"
+      width="500"
+    >
       <OrbitControls />
       <!-- <TresMesh>
         <TresTorusGeometry :args="[1, 0.5, 16, 32]" />

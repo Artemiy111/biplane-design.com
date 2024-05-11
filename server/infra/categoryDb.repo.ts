@@ -3,10 +3,10 @@ import { err, ok } from '../shared/result'
 import type { Db, DbTransaction } from '../db'
 import { projectDbMapper } from './projectDb.repo'
 import { type CategoryDbCreate, type CategoryDbDeep, type CategoryDbUpdate, categories } from '~/server/db/schema'
-import type { CategoryDto, CategoryId, CreateCategoryDto, ICategoryDbRepo, UpdateCategoryDto } from '~/server/use-cases/types'
+import type { CategoryDto, CategoryDbDto, CategoryId, CreateCategoryDto, ICategoryDbRepo, UpdateCategoryDto, GroupId } from '~/server/use-cases/types'
 
 export const categoryDbMapper = {
-  toDto(db: CategoryDbDeep): CategoryDto {
+  toDbDto(db: CategoryDbDeep): CategoryDbDto {
     return {
       groupId: db.groupId,
       id: db.id,
@@ -42,10 +42,10 @@ export const categoryDbMapper = {
 export class CategoryDbRepo implements ICategoryDbRepo {
   constructor(private db: Db) { }
 
-  async getNextOrder(tx?: DbTransaction) {
+  async getNextOrder(groupId: GroupId, tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
-      const count = (await ctx.select().from(categories)).length
+      const count = (await ctx.select().from(categories).where(eq(categories.groupId, groupId))).length
       return ok(count + 1)
     }
     catch (_e) {
@@ -71,10 +71,34 @@ export class CategoryDbRepo implements ICategoryDbRepo {
       })
       if (!res)
         return err(new Error(`Could not find category with id \`${id}\``))
-      return ok(categoryDbMapper.toDto(res))
+      return ok(categoryDbMapper.toDbDto(res))
     }
     catch (_e) {
       return err(new Error(`Could not find category with id \`${id}\``))
+    }
+  }
+
+  async getByGroupId(groupId: GroupId) {
+    try {
+      const res = await this.db.query.categories.findMany({
+        where: eq(categories.groupId, groupId),
+        with: {
+          projects: {
+            with: {
+              images: {
+                orderBy: images => images.order,
+              },
+            },
+            orderBy: projects => projects.order,
+          },
+
+        },
+        orderBy: categories.order,
+      })
+      return ok(res.map(categoryDbMapper.toDbDto))
+    }
+    catch (_e) {
+      return err(new Error(`Could not get categories`))
     }
   }
 
@@ -94,7 +118,7 @@ export class CategoryDbRepo implements ICategoryDbRepo {
         },
         orderBy: categories.order,
       })
-      return ok(res.map(categoryDbMapper.toDto))
+      return ok(res.map(categoryDbMapper.toDbDto))
     }
     catch (_e) {
       return err(new Error(`Could not get categories`))
@@ -105,12 +129,11 @@ export class CategoryDbRepo implements ICategoryDbRepo {
     const ctx = tx || this.db
     try {
       return ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(tx)
+        const nextOrder = await this.getNextOrder(dto.groupId, tx)
         if (!nextOrder.ok)
           return tx.rollback()
 
         const toCreate = categoryDbMapper.toCreate(dto, nextOrder.value)
-
         const createdInDb = (await tx.insert(categories).values(toCreate).returning())[0]
         const created = await this.getOne(createdInDb.id, tx)
         if (!created.ok)
@@ -126,7 +149,7 @@ export class CategoryDbRepo implements ICategoryDbRepo {
     }
   }
 
-  private async updateOrder(dto: CategoryDto, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: CategoryDbDto, newOrder: number, tx?: DbTransaction) {
     if (dto.order === newOrder)
       return ok(undefined)
 
@@ -134,7 +157,7 @@ export class CategoryDbRepo implements ICategoryDbRepo {
 
     try {
       return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder()
+        const nextOrder = await this.getNextOrder(dto.groupId)
         if (!nextOrder.ok)
           return tx.rollback()
 
@@ -168,15 +191,15 @@ export class CategoryDbRepo implements ICategoryDbRepo {
 
     try {
       return await ctx.transaction(async (tx) => {
-        const group = await this.getOne(dto.id, tx)
-        if (!group.ok)
+        const category = await this.getOne(dto.id, tx)
+        if (!category.ok)
           return tx.rollback()
 
         await tx.update(categories)
           .set(categoryDbMapper.toUpdateWithoutOrder(categoryDbMapper.toUpdate(dto)))
           .where(eq(categories.id, dto.id))
 
-        await this.updateOrder(group.value, dto.order, tx)
+        await this.updateOrder(category.value, dto.order, tx)
 
         const updatedGroup = await this.getOne(dto.id, tx)
         if (!updatedGroup.ok)

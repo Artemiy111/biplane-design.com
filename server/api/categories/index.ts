@@ -2,7 +2,6 @@ import { z } from 'zod'
 import { HttpErrorCode, createHttpError } from '../../exceptions'
 import { createCategoryUseCase } from '~/server/di'
 
-
 export default defineEventHandler(async (event) => {
   switch (event.method) {
     case 'POST': {
