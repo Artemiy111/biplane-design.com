@@ -1,12 +1,7 @@
 {
-  "name": "biplane.design.com",
+  "name": "biplane-design.com",
   "type": "module",
   "private": true,
-  "packageManager": "^bun@1.0.0",
-  "engines": {
-    "node": ">=20",
-    "bun": ">=1"
-  },
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
