@@ -38,7 +38,7 @@ export class ProjectRepo implements IProjectRepo {
   }
 
   async getByCategoryId(categoryId: CategoryId) {
-    const projects = await this.dbRepo.getAll()
+    const projects = await this.dbRepo.getByCategoryId(categoryId)
     if (!projects.ok) return projects
 
     try {
@@ -77,8 +77,8 @@ export class ProjectRepo implements IProjectRepo {
     const createdInDb = await this.dbRepo.create(dto)
     if (!createdInDb.ok) return createdInDb
 
-    const createdInFs = await this.bucketRepo.createDir(dto.uri)
-    if (!createdInFs.ok) return createdInFs
+    const createdInBucket = await this.bucketRepo.createDir(dto.uri)
+    if (!createdInBucket.ok) return createdInBucket
 
     const images = await this.imageRepo.getAllByProjectId(createdInDb.value.id)
     if (!images.ok) return images
@@ -90,11 +90,11 @@ export class ProjectRepo implements IProjectRepo {
     const project = await this.dbRepo.getOne(dto.id)
     if (!project.ok) return project
 
+    const updatedInBucket = await this.bucketRepo.renameDir(project.value.uri, dto.uri)
+    if (!updatedInBucket.ok) return updatedInBucket
+
     const updatedInDb = await this.dbRepo.update(dto)
     if (!updatedInDb.ok) return updatedInDb
-
-    const updatedInFs = await this.bucketRepo.renameDir(project.value.uri, dto.uri)
-    if (!updatedInFs.ok) return updatedInFs
 
     const images = await this.imageRepo.getAllByProjectId(updatedInDb.value.id)
     if (!images.ok) return images
@@ -106,11 +106,11 @@ export class ProjectRepo implements IProjectRepo {
     const project = await this.dbRepo.getOne(id)
     if (!project.ok) return project
 
+    const deletedInBucket = await this.bucketRepo.deleteDir(project.value.uri)
+    if (!deletedInBucket.ok) return deletedInBucket
+
     const deletedInDb = await this.dbRepo.delete(project.value.id)
     if (!deletedInDb.ok) return deletedInDb
-
-    const deletedInFs = await this.bucketRepo.deleteDir(project.value.uri)
-    if (!deletedInFs.ok) return deletedInFs
 
     return ok(undefined)
   }

@@ -6,17 +6,17 @@ import { err, ok } from '../shared/result'
 export class ProjectFsRepo implements IProjectBucketRepo {
   constructor(private projectsDir: string) { }
 
-  getDir(uri: string) { return path.join(this.projectsDir, uri) }
+  getKey(uri: string) { return path.join(this.projectsDir, uri) }
 
-  async isDirExist(uri: string) {
-    const dir = this.getDir(uri)
+  async isDirExists(uri: string) {
+    const dir = this.getKey(uri)
     const exists = await fs.exists(dir)
     return ok(exists)
   }
 
   async createDir(uri: string) {
-    const dir = this.getDir(uri)
-    if (!(await this.isDirExist(uri)))
+    const dir = this.getKey(uri)
+    if (!(await this.isDirExists(uri)))
       return err(new Error(`Dir of project \`${uri}\` already exists`))
 
     try {
@@ -32,8 +32,8 @@ export class ProjectFsRepo implements IProjectBucketRepo {
     if (uri === newUri)
       return ok(undefined)
 
-    const dir = this.getDir(uri)
-    const newDir = this.getDir(newUri)
+    const dir = this.getKey(uri)
+    const newDir = this.getKey(newUri)
 
     try {
       await fs.rename(dir, newDir)
@@ -45,7 +45,7 @@ export class ProjectFsRepo implements IProjectBucketRepo {
   }
 
   async deleteDir(uri: string) {
-    const dir = this.getDir(uri)
+    const dir = this.getKey(uri)
     try {
       fs.unlink(dir)
       return ok(undefined)

@@ -30,7 +30,8 @@ const initialValues = ref<FormSchema>({
 const MIN_YEAR = 2000
 const MAX_YEAR = 2050
 
-export const formSchema = z.object({
+const formSchema = z.object({
+  id: z.number().optional(),
   title: z.string().trim().min(3, 'Минимум 3 символа'),
   categoryId: z.union([z.string(), z.number()]).transform(v => Number(v)),
   uri: z
@@ -75,12 +76,12 @@ const selectedGroup = computed<NonNullable<typeof props.groups>[number] | null>(
 )
 
 const title = computed(() => formRef.value?.values?.title as string || '')
-const urlFriendly = computed(() => toUrlFriendly(title.value))
+const uri = computed(() => toUri(title.value))
 
 watch(title, () => {
   if (!formRef.value)
     return
-  formRef.value.setFieldValue('urlFriendly', urlFriendly.value)
+  formRef.value.setFieldValue('uri', uri.value)
 })
 
 const isOpen = ref(false)
@@ -204,13 +205,13 @@ defineExpose({
             </Select>
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="urlFriendly">
+        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="uri">
           <FormItem>
             <FormLabel>Человекопонятная ссылка *</FormLabel>
             <FormControl>
               <Input
                 :model-value="componentField.modelValue" placeholder="my-new-house"
-                @change="handleChange(toUrlFriendly($event.target.value))"
+                @change="handleChange(toUri($event.target.value))"
                 @blur="handleBlur"
               />
             </FormControl>

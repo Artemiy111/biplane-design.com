@@ -42,20 +42,28 @@ import { GroupRepo } from './infra/group.repo'
 
 const PROJECTS_DIR = path.join(`/public/images/projects`)
 
-const s3 = new S3Client()
+const s3 = new S3Client({
+  forcePathStyle: true,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+  endpoint: process.env.ENDPOINT_URL!,
+  region: process.env.REGION!
+})
 
 export const userRepo = new UserRepo()
 
 export const projectDbRepo = new ProjectDbRepo(db)
 export const projectS3Repo = new ProjectS3Repo('biplane-design', s3)
-export const projectFsRepo = new ProjectFsRepo(PROJECTS_DIR)
+// export const projectFsRepo = new ProjectFsRepo(PROJECTS_DIR)
 
 export const imageDbRepo = new ImageDbRepo(db)
-export const imageFsRepo = new ImageFsRepo(projectFsRepo)
+// export const imageFsRepo = new ImageFsRepo(projectFsRepo)
 export const imageS3Repo = new ImageS3Repo('biplane-design', s3)
 export const imageRepo = new ImageRepo(imageDbRepo, imageS3Repo, projectDbRepo)
 
-export const projectRepo = new ProjectRepo(projectDbRepo, projectFsRepo, imageRepo)
+export const projectRepo = new ProjectRepo(projectDbRepo, projectS3Repo, imageRepo)
 
 export const categoryDbRepo = new CategoryDbRepo(db)
 export const categoryRepo = new CategoryRepo(categoryDbRepo, projectRepo)

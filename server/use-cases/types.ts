@@ -132,8 +132,8 @@ export interface IProjectDbRepo {
 }
 
 export interface IProjectBucketRepo {
-  getDir: (uri: string) => string
-  isDirExist: (uri: string) => Promise<Result<boolean, Error>>
+  getKey: (uri: string) => string
+  isDirExists: (uri: string) => Promise<Result<boolean, Error>>
   createDir: (uri: string) => Promise<Result<void, Error>>
   renameDir: (uri: string, newUri: string) => Promise<Result<void, Error>>
   deleteDir: (uri: string) => Promise<Result<void, Error>>

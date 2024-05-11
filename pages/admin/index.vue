@@ -17,24 +17,13 @@ useSeoMeta({
 })
 
 const { md } = useScreenSize()
-const { data, error: fetchError, refresh } = await useFetch('/api/groups', {
-  transform: (groups) => {
-    const categories = groups.flatMap(group => group.categories) ?? []
-    const projects = categories.flatMap(category => category.projects) ?? []
+const { data: _groups, error: fetchError, refresh } = await useFetch<GroupDto[]>('/api/groups')
 
-    return {
-      groups,
-      categories,
-      projects,
-    }
-  },
-})
-
-const groups = toRef(data.value?.groups || [])
+const groups = computed(() => _groups.value || [])
 const groupsMap = computed(() => new Map(groups.value.map(g => [g.id, g])))
-const categories = toRef(data.value?.categories || [])
+const categories = computed(() => groups.value.flatMap(g => g.categories) || [])
 const categoriesMap = computed(() => new Map(categories.value.map(c => [c.id, c])))
-const projects = toRef(data.value?.projects || [])
+const projects = computed(() => categories.value.flatMap(c => c.projects) || [])
 
 type SelectedGroupAndCategoryState = {
   group: GroupDto
@@ -87,7 +76,6 @@ watch(fetchError, () => {
   toast.error(fetchError.value.message)
 })
 
-const hoverCardIsOpen = ref(false)
 const projectSheetRef = ref<InstanceType<typeof ProjectSheet> | null>(null)
 async function onSubmit(values: FormSchema, prev: FormSchema | null) {
   if (!prev) {
@@ -99,29 +87,43 @@ async function onSubmit(values: FormSchema, prev: FormSchema | null) {
       projectSheetRef.value?.close()
       toast.success('Проект создан')
     }
-    catch (e) {
-      if (e instanceof Error)
-        toast.error(e.message)
-      else toast.error(String(e))
+    catch (_e) {
+      const e = _e as Error
+      toast.error(e.message)
     }
     refresh()
     return
   }
 
   try {
-    await $fetch(`/api/projects/${prev.uri}`, {
+    await $fetch(`/api/projects/${prev.id}`, {
       method: 'PUT',
       body: values,
     })
     projectSheetRef.value?.close()
     toast.success('Проект изменён')
   }
+  catch (_e) {
+    const e = _e as Error
+    toast.error(e.message)
+  }
+
+  refresh()
+}
+
+async function deleteProject(id: number) {
+  try {
+    await $fetch(`/api/projects/${id}`, {
+      method: 'DELETE',
+    })
+    projectSheetRef.value?.close()
+    toast.success('Проект удалён')
+  }
   catch (e) {
     if (e instanceof Error)
       toast.error(e.message)
     else toast.error(String(e))
   }
-
   refresh()
 }
 
@@ -136,7 +138,6 @@ function openProjectSheet(project: ProjectDto) {
     yearStart: project.yearStart,
     yearEnd: project.yearEnd,
     categoryId: project.categoryId,
-    order: project.order,
     images: [],
   })
 }
@@ -151,11 +152,11 @@ function openProjectSheet(project: ProjectDto) {
         class="w-full list-none"
       >
         <ul class="flex w-full flex-col gap-2">
-          <span class="w-full rounded-sm border-2 border-primary px-2 py-1 font-bold">{{
+          <span class="w-full text-slate-800 rounded-sm px-2 py-1 font-bold">{{
             group.title
           }}</span>
           <li
-            class="cursor-pointer px-2 py-1 hover:bg-primary-foreground"
+            class="cursor-pointer ml-2 px-2 py-1 hover:bg-primary-foreground"
             :class="
               selected.group.id === group.id && !selected.category
                 ? 'font-bold bg-primary-foreground'
@@ -168,7 +169,7 @@ function openProjectSheet(project: ProjectDto) {
           <li
             v-for="category in group.categories"
             :key="category.id"
-            class="cursor-pointer px-2 py-1 hover:bg-primary-foreground"
+            class="cursor-pointer ml-2 px-2 py-1 hover:bg-primary-foreground"
             :class="category.id === selected.category?.id ? 'font-bold bg-primary-foreground' : ''"
             @click="selectCategory(group, category)"
           >
@@ -239,31 +240,29 @@ function openProjectSheet(project: ProjectDto) {
             <TableCell>{{ project.status }}</TableCell>
             <TableCell>{{ project.location }}</TableCell>
             <TableCell @click.stop>
-              <HoverCard
-                :open-delay="0"
-                :open="hoverCardIsOpen"
-                @update:open="hoverCardIsOpen = $event"
+              <Popover
               >
-                <HoverCardTrigger as-child>
+                <PopoverTrigger as-child>
                   <Button
                     variant="ghost"
-                    @click="hoverCardIsOpen = true"
                   >
                     <EllipsisVertical />
                   </Button>
-                </HoverCardTrigger>
-                <HoverCardContent class="z-10 flex w-fit flex-col gap-4">
+                </PopoverTrigger>
+                <PopoverContent class="z-10 flex w-fit flex-col gap-4">
                   <Button
                     variant="outline"
                     @click="openProjectSheet(project)"
                   >
                     Изменить
                   </Button>
-                  <Button variant="destructiveOutline">
+                  <Button variant="destructiveOutline"
+                  @click="deleteProject(project.id)"
+                  >
                     Удалить
                   </Button>
-                </HoverCardContent>
-              </HoverCard>
+                </PopoverContent>
+              </Popover>
             </TableCell>
           </TableRow>
         </TableBody>

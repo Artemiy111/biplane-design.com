@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
 import { ArrowDown, ArrowUp } from 'lucide-vue-next'
-import type { UpdateImageDto } from '~/server/use-cases/types'
+import type { ImageDto, UpdateImageDto } from '~/server/use-cases/types'
 import Dropzone from '~/components/Dropzone.vue'
 
 const route = useRoute()
@@ -19,33 +19,37 @@ useSeoMeta({
   ogDescription: () => `Админ-панель | ${project.value?.title}`,
 })
 
-async function deleteImages(filenames: string[]) {
-  if (!project.value)
-    return
-  try {
-    await $fetch(`/api/projects/${uri}/images`, {
-      method: 'DELETE',
-      body: {
-        filenames,
-      },
-    })
-    toast.success(`Изображений удалено: ${filenames.length}`)
-  }
-  catch (e) {
-    toast.error(`Не удалось удалить изображений: ${filenames.length}`)
-  }
+async function deleteImages(ids: number[]) {
+  if (!project.value) return
+
+  await Promise.all(ids.map(async (id )=> {
+    try {
+      await $fetch(`/api/images`, {
+        method: 'DELETE',
+        body: {
+          id,
+        },
+      })
+      toast.success(`Изображение удалено`)
+    }
+    catch (_e) {
+      const e = _e as Error
+      toast.error(e.message)
+    }
+  } ))
   refreshImages()
 }
 
 async function updateImage(dto: UpdateImageDto) {
   try {
-    await $fetch(`/api/projects/${dto.projectUri}/images/${dto.filename}`, {
+    await $fetch(`/api/images/${dto.id}`, {
       method: 'PUT',
       body: dto,
     })
   }
-  catch (e) {
-    toast.error('Не удалось обновить изображение')
+  catch (_e) {
+    const e = _e as Error
+    toast.error(e)
   }
   refreshImages()
 }
@@ -55,15 +59,15 @@ async function uploadImages(images: File[]) {
   images.forEach((image, idx) => formData.append(`image-${idx}`, image))
 
   try {
-    const res = await $fetch(`/api/projects/${uri}/images`, {
+    const res = await $fetch<ImageDto[]>(`/api/images`, {
       method: 'POST',
       body: formData,
     })
-    toast.success(`Фотографий загружено: ${res.length}`)
+    toast.success(`Изображений загружено: ${res.length}`)
     refreshImages()
   }
   catch (e) {
-    toast.error(`Не удалось загрузить фотографий: ${images.length}`)
+    toast.error(`Не удалось загрузить изображений: ${images.length}`)
   }
 }
 </script>
@@ -128,7 +132,7 @@ async function uploadImages(images: File[]) {
                   </Button>
                   <Button
                     variant="outline"
-                    @click="deleteImages([image.filename])"
+                    @click="deleteImages([image.id])"
                   >
                     Удалить
                   </Button>

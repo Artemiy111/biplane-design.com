@@ -1,5 +1,5 @@
 import type { S3ServiceException, S3Client } from '@aws-sdk/client-s3'
-import { HeadObjectCommand, PutObjectCommand, CopyObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { HeadObjectCommand, PutObjectCommand, CopyObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
 import type { Result } from '../shared/result'
 import { err, ok } from '../shared/result'
 import type { IProjectBucketRepo } from '../use-cases/types'
@@ -7,32 +7,38 @@ import type { IProjectBucketRepo } from '../use-cases/types'
 export class ProjectS3Repo implements IProjectBucketRepo {
   constructor(private bucketName: string, private s3: S3Client) { }
 
-  async isDirExist(uri: string): Promise<Result<boolean, Error>> {
-    const key = this.getDir(uri)
+  async isDirExists(uri: string): Promise<Result<boolean, Error>> {
+    const key = this.getKey(uri)
 
     try {
-      await this.s3.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: key }))
+      const res = await this.s3.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: key }))
+      console.log(res)
       return ok(true)
     }
     catch (_e) {
       const error = _e as S3ServiceException
+      console.log('error')
+      console.log(error.message)
       if (error.name === 'NotFound') {
         return ok(false)
       }
-      return err(new Error(`Error checking existence of directory ${uri}: ${error.message}`))
+      return err(new Error(error.message))
     }
   }
 
-  getDir(uri: string) {
-    return uri
+  getKey(uri: string) {
+    return `${uri}/`
   }
 
   async createDir(uri: string): Promise<Result<void, Error>> {
-    const key = this.getDir(uri)
+    const key = this.getKey(uri)
 
-    if ((await this.isDirExist(uri)).ok) {
+    const isDirExists = await this.isDirExists(uri)
+    if (!isDirExists.ok) return isDirExists
+
+    if (isDirExists.value)
       return err(new Error(`Directory '${uri}' already exists`))
-    }
+
 
     try {
       await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key }))
@@ -49,8 +55,8 @@ export class ProjectS3Repo implements IProjectBucketRepo {
       return ok(undefined)
     }
 
-    const oldKey = this.getDir(uri)
-    const newKey = this.getDir(newUri)
+    const oldKey = this.getKey(uri)
+    const newKey = this.getKey(newUri)
 
     try {
       await this.s3.send(new CopyObjectCommand({ Bucket: this.bucketName, CopySource: `${this.bucketName}/${oldKey}`, Key: newKey }))
@@ -64,10 +70,22 @@ export class ProjectS3Repo implements IProjectBucketRepo {
   }
 
   async deleteDir(uri: string): Promise<Result<void, Error>> {
-    const key = await this.getDir(uri)
+    const key = this.getKey(uri)
+    const listObjectsResponse = await this.s3.send(new ListObjectsV2Command({ Bucket: this.bucketName, Prefix: key }))
 
     try {
-      await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: key }))
+      if (listObjectsResponse.Contents) {
+        const deletePromises = listObjectsResponse.Contents.map(async (object) => {
+          const deleteParams = {
+            Bucket: this.bucketName,
+            Key: object.Key!
+          }
+          await this.s3.send(new DeleteObjectCommand(deleteParams))
+        })
+
+        await Promise.all(deletePromises)
+      }
+
       return ok(undefined)
     }
     catch (_e) {

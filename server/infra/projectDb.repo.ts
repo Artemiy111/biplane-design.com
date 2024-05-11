@@ -115,6 +115,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
             orderBy: images => images.order,
           },
         },
+        orderBy: projects => projects.order
       }))
       return ok(projectsByCategoryId.map(projectDbMapper.toDbDto))
     }
@@ -132,6 +133,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
             orderBy: images => images.order,
           },
         },
+        orderBy: projects => projects.order
       }))
       return ok(projects.map(projectDbMapper.toDbDto))
     }

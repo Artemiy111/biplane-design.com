@@ -3,7 +3,8 @@ import { err, ok } from '../shared/result'
 import type { Db, DbTransaction } from '../db'
 import { projectDbMapper } from './projectDb.repo'
 import { type CategoryDbCreate, type CategoryDbDeep, type CategoryDbUpdate, categories } from '~/server/db/schema'
-import type { CategoryDto, CategoryDbDto, CategoryId, CreateCategoryDto, ICategoryDbRepo, UpdateCategoryDto, GroupId } from '~/server/use-cases/types'
+import type { CategoryDbDto, CategoryId, CreateCategoryDto, ICategoryDbRepo, UpdateCategoryDto, GroupId } from '~/server/use-cases/types'
+import { logger } from '../shared/logger'
 
 export const categoryDbMapper = {
   toDbDto(db: CategoryDbDeep): CategoryDbDto {
@@ -68,6 +69,7 @@ export class CategoryDbRepo implements ICategoryDbRepo {
             orderBy: projects => projects.order,
           },
         },
+        orderBy: categories => categories.order
       })
       if (!res)
         return err(new Error(`Could not find category with id \`${id}\``))

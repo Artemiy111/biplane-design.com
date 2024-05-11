@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   switch (event.method) {
     case 'GET': {
       const res = await getImageUseCase.execute(id)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
+      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }
     case 'PUT': {
@@ -21,12 +21,12 @@ export default defineEventHandler(async (event) => {
       })
       const body = await readValidatedBody(event, Body.parse)
       const res = await updateImageUseCase.execute(body)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
+      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }
     case 'DELETE': {
       const res = await deleteImageUseCase.execute(id)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
+      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }
   }

@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
       if (!body.success)
         throw createHttpError(HttpErrorCode.BadRequest)
       const res = await createImageUseCase.execute(body.data)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
+      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }
   }

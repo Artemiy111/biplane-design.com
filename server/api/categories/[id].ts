@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   switch (event.method) {
     case 'GET': {
       const res = await getCategoryUseCase.execute(id)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
+      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }
 
@@ -22,12 +22,12 @@ export default defineEventHandler(async (event) => {
       })
       const body = await readValidatedBody(event, Body.parse)
       const res = await updateCategoryUseCase.execute(body)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
+      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }
     case 'DELETE': {
       const res = await deleteCategoryUseCase.execute(id)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
+      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }
   }

@@ -54,7 +54,7 @@ async function changePassword(values: ChangePasswordSchema) {
   const res = await supabase.auth.updateUser({ password: values.newPassword })
   if (res.error) { toast.error('Не удaлось сменить пароль', { description: res.error.message }) }
   else {
-    toast.success('Пароль cменён')
+    toast.success('Пароль изменён')
     isDialogOpen.value = false
   }
 }

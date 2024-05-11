@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
       })
       const body = await readValidatedBody(event, Body.parse)
       const res = await createCategoryUseCase.execute(body)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError)
+      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }
   }
