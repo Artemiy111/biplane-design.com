@@ -49,7 +49,7 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
   endpoint: process.env.ENDPOINT_URL!,
-  region: process.env.REGION!
+  region: process.env.REGION!,
 })
 
 export const userRepo = new UserRepo()

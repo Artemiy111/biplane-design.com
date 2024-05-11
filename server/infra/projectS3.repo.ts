@@ -39,7 +39,6 @@ export class ProjectS3Repo implements IProjectBucketRepo {
     if (isDirExists.value)
       return err(new Error(`Directory '${uri}' already exists`))
 
-
     try {
       await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key }))
       return ok(undefined)
@@ -78,7 +77,7 @@ export class ProjectS3Repo implements IProjectBucketRepo {
         const deletePromises = listObjectsResponse.Contents.map(async (object) => {
           const deleteParams = {
             Bucket: this.bucketName,
-            Key: object.Key!
+            Key: object.Key!,
           }
           await this.s3.send(new DeleteObjectCommand(deleteParams))
         })

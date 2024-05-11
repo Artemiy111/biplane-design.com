@@ -23,8 +23,14 @@ async function singOut() {
 <template>
   <header class="container z-50 flex flex-col">
     <div class="z-50 flex items-center justify-between px-8 py-4 sm:px-4 sm:py-2">
-      <NuxtLink to="/" class="flex items-center gap-4">
-        <img src="/logo.svg" class="h-10 dark:invert-[70%] md:h-8">
+      <NuxtLink
+        to="/"
+        class="flex items-center gap-4"
+      >
+        <img
+          src="/logo.svg"
+          class="h-10 dark:invert-[70%] md:h-8"
+        >
         <span class="sm:hidden">Biplane-Design</span>
       </NuxtLink>
       <ClientOnly>
@@ -34,22 +40,35 @@ async function singOut() {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>
-              <NuxtLink to="/admin" class="w-full">
+              <NuxtLink
+                to="/admin"
+                class="w-full"
+              >
                 Админ панель
               </NuxtLink>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <NuxtLink to="/admin/account" class="w-full">
+              <NuxtLink
+                to="/admin/account"
+                class="w-full"
+              >
                 Аккаунт
               </NuxtLink>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <NuxtLink to="/admin/login" class="w-full">
+              <NuxtLink
+                to="/admin/login"
+                class="w-full"
+              >
                 Вход/Регистрация
               </NuxtLink>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <button variant="link" class="w-full text-start text-red-500" @click="singOut">
+              <button
+                variant="link"
+                class="w-full text-start text-red-500"
+                @click="singOut"
+              >
                 Выйти
               </button>
             </DropdownMenuItem>
@@ -58,7 +77,10 @@ async function singOut() {
       </ClientOnly>
       <NavigationMenu>
         <NavigationMenuList class="gap-4 sm:gap-2">
-          <NavigationMenuItem v-for="r in routes" :key="r.link">
+          <NavigationMenuItem
+            v-for="r in routes"
+            :key="r.link"
+          >
             <NuxtLink
               :to="r.link"
               class="cursor-pointer"

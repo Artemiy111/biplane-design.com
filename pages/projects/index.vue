@@ -20,11 +20,16 @@ const querySchema = z.object({
 const route = useRoute()
 const router = useRouter()
 const { md } = useScreenSize()
-const { data: groups, pending, error: _error } = await useLazyFetch('/api/groups')
+const { data: groups, pending, error: _error } = await useLazyFetch<GroupDto[]>('/api/groups')
 
 const currentGroup = ref<GroupDto | null>(groups.value?.[0] || null)
 const currentCategory = ref<CategoryDto | null>(currentGroup.value?.categories[0] || null)
 const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
+
+watch(groups, () => {
+  currentGroup.value = groups.value?.[0] || null
+  currentCategory.value = currentGroup.value?.categories?.[0] || null
+})
 
 function handleRouteQuery(query: LocationQuery) {
   const validatedQuery = querySchema.safeParse(query)

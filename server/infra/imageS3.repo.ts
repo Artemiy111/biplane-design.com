@@ -32,8 +32,11 @@ export class ImageS3Repo implements IImageBucketRepo {
     const key = this.getImageKey(projectUri, filename)
 
     try {
-      const params = { Bucket: this.bucketName, Key: key }
-      const url = await getSignedUrl(this.s3, new GetObjectCommand(params), { expiresIn: 3600 })
+      const hostname = (await this.s3.config.endpoint!()).hostname
+      const url = 'https://' + hostname + '/storage/v1/object/public/' + this.bucketName + '/' + projectUri + '/' + filename
+
+      // Пока не работает в supabase
+      // const url = await getSignedUrl(this.s3, new GetObjectCommand(params), { expiresIn: 3600 }) 
       return ok(url)
     }
     catch (_e) {
@@ -42,11 +45,11 @@ export class ImageS3Repo implements IImageBucketRepo {
     }
   }
 
-  async createImageFile(projectUri: string, filename: string, data: Buffer): Promise<Result<void, Error>> {
+  async createImageFile(projectUri: string, filename: string, type: string, data: Buffer): Promise<Result<void, Error>> {
     const key = this.getImageKey(projectUri, filename)
 
     try {
-      await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key, Body: data }))
+      await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key, Body: data, ContentType: type }))
       return ok(undefined)
     }
     catch (_e) {

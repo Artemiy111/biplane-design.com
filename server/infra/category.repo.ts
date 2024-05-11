@@ -28,7 +28,6 @@ export class CategoryRepo implements ICategoryRepo {
 
     try {
       const projects = await Promise.all(categories.value.map(async (category) => {
-
         const projects = await this.projectRepo.getByCategoryId(category.id)
         if (!projects.ok) throw projects.error
         return projects.value

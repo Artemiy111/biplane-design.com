@@ -159,6 +159,7 @@ export interface ImageFile {
 }
 export type CreateImageDto = Omit<ImageDto, 'id' | 'url' | 'order'> & {
   data: Buffer
+  type: string
 }
 export type UpdateImageDto = Omit<ImageDto, 'url'>
 
@@ -190,7 +191,7 @@ export interface IImageFsRepo {
 export interface IImageBucketRepo {
   isImageFileExist: (projectUri: string, filename: string) => Promise<Result<boolean, Error>>
   getImageUrl: (projectUri: string, filename: string) => Promise<Result<string, Error>>
-  createImageFile: (projectUri: string, filename: string, data: Buffer) => Promise<Result<void, Error>>
+  createImageFile: (projectUri: string, filename: string, type: string, data: Buffer) => Promise<Result<void, Error>>
   renameImageFile: (projectUri: string, filename: string, newFilename: string) => Promise<Result<void, Error>>
   deleteImageFile: (projectUri: string, filename: string) => Promise<Result<void, Error>>
 }

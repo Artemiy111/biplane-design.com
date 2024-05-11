@@ -202,7 +202,7 @@ function openProjectSheet(project: ProjectDto) {
           <TableRow>
             <TableHead>Превью</TableHead>
             <TableHead>Проект</TableHead>
-            <TableHead>URL Friendly</TableHead>
+            <TableHead>Uri</TableHead>
             <TableHead>Группа</TableHead>
             <TableHead>Категория</TableHead>
             <TableHead>Год начала</TableHead>
@@ -240,8 +240,7 @@ function openProjectSheet(project: ProjectDto) {
             <TableCell>{{ project.status }}</TableCell>
             <TableCell>{{ project.location }}</TableCell>
             <TableCell @click.stop>
-              <Popover
-              >
+              <Popover>
                 <PopoverTrigger as-child>
                   <Button
                     variant="ghost"
@@ -256,8 +255,9 @@ function openProjectSheet(project: ProjectDto) {
                   >
                     Изменить
                   </Button>
-                  <Button variant="destructiveOutline"
-                  @click="deleteProject(project.id)"
+                  <Button
+                    variant="destructiveOutline"
+                    @click="deleteProject(project.id)"
                   >
                     Удалить
                   </Button>

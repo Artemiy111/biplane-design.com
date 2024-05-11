@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
 import { ArrowDown, ArrowUp } from 'lucide-vue-next'
-import type { ImageDto, UpdateImageDto } from '~/server/use-cases/types'
+import type { ImageDto, ProjectDto, UpdateImageDto } from '~/server/use-cases/types'
 import Dropzone from '~/components/Dropzone.vue'
 
 const route = useRoute()
 const uri = route.params.uri as string
-const { data: project, error: _error, refresh: refreshImages } = await useFetch(`/api/projects/${uri}`)
+const { data: project, error: _error, refresh: refreshImages } = await useFetch<ProjectDto>(`/api/projects/?uri=${uri}`)
 
 definePageMeta({
   middleware: 'auth',
@@ -22,13 +22,10 @@ useSeoMeta({
 async function deleteImages(ids: number[]) {
   if (!project.value) return
 
-  await Promise.all(ids.map(async (id )=> {
+  await Promise.all(ids.map(async (id) => {
     try {
-      await $fetch(`/api/images`, {
+      await $fetch(`/api/images/${id}`, {
         method: 'DELETE',
-        body: {
-          id,
-        },
       })
       toast.success(`Изображение удалено`)
     }
@@ -36,7 +33,7 @@ async function deleteImages(ids: number[]) {
       const e = _e as Error
       toast.error(e.message)
     }
-  } ))
+  }))
   refreshImages()
 }
 
@@ -46,29 +43,37 @@ async function updateImage(dto: UpdateImageDto) {
       method: 'PUT',
       body: dto,
     })
+    toast.success(`Изображение обновлено`)
   }
   catch (_e) {
     const e = _e as Error
-    toast.error(e)
+    toast.error(e.message)
   }
   refreshImages()
 }
 
 async function uploadImages(images: File[]) {
-  const formData = new FormData()
-  images.forEach((image, idx) => formData.append(`image-${idx}`, image))
+  if (!project.value) return
+  images.forEach(async (image) => {
+    const formData = new FormData()
+    formData.append('data', image)
+    formData.append('projectId', String(project.value!.id))
+    formData.append('filename', image.name)
+    formData.append('alt', image.name)
+    formData.append('type', image.type)
 
-  try {
-    const res = await $fetch<ImageDto[]>(`/api/images`, {
-      method: 'POST',
-      body: formData,
-    })
-    toast.success(`Изображений загружено: ${res.length}`)
-    refreshImages()
-  }
-  catch (e) {
-    toast.error(`Не удалось загрузить изображений: ${images.length}`)
-  }
+    try {
+      const res = await $fetch<ImageDto[]>(`/api/images`, {
+        method: 'POST',
+        body: formData,
+      })
+      toast.success(`Изображение загружено`)
+      refreshImages()
+    }
+    catch (e) {
+      toast.error(`Не удалось загрузить изображение`)
+    }
+  })
 }
 </script>
 
@@ -108,7 +113,7 @@ async function uploadImages(images: File[]) {
             >
               <TableCell>{{ image.order }}</TableCell>
               <TableCell>
-                <NuxtImg
+                <img
                   format="avif,webp,png,jpg"
                   class="aspect-video w-[300px] object-contain"
                   :src="image.url"

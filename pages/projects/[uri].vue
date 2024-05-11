@@ -6,7 +6,7 @@ import type { ProjectDto } from '~/server/use-cases/types'
 
 const route = useRoute()
 const projectUri = route.params.uri! as string
-const { data: project, error: _error } = await useFetch<ProjectDto>(`/api/projects/${projectUri}`)
+const { data: project, error: _error } = await useLazyFetch<ProjectDto>(`/api/projects/?uri=${projectUri}`)
 
 const api = ref<CarouselApi | null>(null)
 const apiTumb = ref<CarouselApi | null>(null)

@@ -26,7 +26,6 @@ const initialValues = ref<FormSchema>({
   images: [],
 })
 
-
 const MIN_YEAR = 2000
 const MAX_YEAR = 2050
 
@@ -61,11 +60,10 @@ const formSchema = z.object({
 
     .nullable(),
   location: z.string().trim().min(3, 'Минимум 3 символа'),
-  
+
   groupId: z.union([z.string(), z.number()]).transform(v => Number(v)),
   images: z.array(z.string()),
 })
-
 
 export type FormSchema = z.infer<typeof formSchema>
 
@@ -121,7 +119,10 @@ defineExpose({
 </script>
 
 <template>
-  <Sheet :open="isOpen" @update:open="isOpen = $event">
+  <Sheet
+    :open="isOpen"
+    @update:open="isOpen = $event"
+  >
     <SheetContent
       :side="mode === 'create' ? 'left' : 'right'"
       class="w-full max-w-3xl overflow-auto"
@@ -142,12 +143,16 @@ defineExpose({
         @submit="emit('submit', $event as FormSchema, prev)"
       >
         {{ values }}
-        <FormField v-slot="{ field, handleChange, handleBlur }" name="title">
+        <FormField
+          v-slot="{ field, handleChange, handleBlur }"
+          name="title"
+        >
           <FormItem>
             <FormLabel>Название проекта *</FormLabel>
             <FormControl>
               <Input
-                :model-value="field.value" placeholder="Мой новый дом"
+                :model-value="field.value"
+                placeholder="Мой новый дом"
                 @change="handleChange"
                 @blur="handleBlur"
               />
@@ -155,7 +160,10 @@ defineExpose({
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ field, handleChange, handleBlur } " name="groupId">
+        <FormField
+          v-slot="{ field, handleChange, handleBlur } "
+          name="groupId"
+        >
           <FormItem>
             <FormLabel>Группа *</FormLabel>
             <Select
@@ -173,7 +181,11 @@ defineExpose({
               </FormControl>
               <SelectContent v-if="groups?.length">
                 <SelectGroup>
-                  <SelectItem v-for="group in groups" :key="group.id" :value="group.id.toString()">
+                  <SelectItem
+                    v-for="group in groups"
+                    :key="group.id"
+                    :value="group.id.toString()"
+                  >
                     {{ group.title }}
                   </SelectItem>
                 </SelectGroup>
@@ -181,11 +193,15 @@ defineExpose({
             </Select>
           </FormItem>
         </FormField>
-        <FormField v-slot="{ field, handleChange, handleBlur }" name="categoryId">
+        <FormField
+          v-slot="{ field, handleChange, handleBlur }"
+          name="categoryId"
+        >
           <FormItem>
             <FormLabel>Категория *</FormLabel>
             <Select
-              :model-value="String(field.value)" @update:model-value="(v) => {
+              :model-value="String(field.value)"
+              @update:model-value="(v) => {
                 handleChange(Number(v))
                 handleBlur()
               }"
@@ -197,7 +213,11 @@ defineExpose({
               </FormControl>
               <SelectContent v-if="selectedGroup?.categories.length">
                 <SelectGroup>
-                  <SelectItem v-for="c in selectedGroup.categories" :key="c.id" :value="c.id.toString()">
+                  <SelectItem
+                    v-for="c in selectedGroup.categories"
+                    :key="c.id"
+                    :value="c.id.toString()"
+                  >
                     {{ c.title }}
                   </SelectItem>
                 </SelectGroup>
@@ -205,12 +225,16 @@ defineExpose({
             </Select>
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="uri">
+        <FormField
+          v-slot="{ componentField, handleChange, handleBlur }"
+          name="uri"
+        >
           <FormItem>
             <FormLabel>Человекопонятная ссылка *</FormLabel>
             <FormControl>
               <Input
-                :model-value="componentField.modelValue" placeholder="my-new-house"
+                :model-value="componentField.modelValue"
+                placeholder="my-new-house"
                 @change="handleChange(toUri($event.target.value))"
                 @blur="handleBlur"
               />
@@ -218,12 +242,16 @@ defineExpose({
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="status">
+        <FormField
+          v-slot="{ componentField, handleChange, handleBlur }"
+          name="status"
+        >
           <FormItem>
             <FormLabel>Статус *</FormLabel>
             <FormControl>
               <Input
-                :model-value="componentField.modelValue" placeholder="Завершён"
+                :model-value="componentField.modelValue"
+                placeholder="Завершён"
                 @change="handleChange"
                 @blur="handleBlur"
               />
@@ -231,12 +259,17 @@ defineExpose({
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="yearStart">
+        <FormField
+          v-slot="{ componentField, handleChange, handleBlur }"
+          name="yearStart"
+        >
           <FormItem>
             <FormLabel>Год начала</FormLabel>
             <FormControl>
               <Input
-                :model-value="componentField.modelValue" type="number" placeholder=""
+                :model-value="componentField.modelValue"
+                type="number"
+                placeholder=""
                 @change="handleChange"
                 @blur="handleBlur"
               />
@@ -244,12 +277,17 @@ defineExpose({
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="yearEnd">
+        <FormField
+          v-slot="{ componentField, handleChange, handleBlur }"
+          name="yearEnd"
+        >
           <FormItem>
             <FormLabel>Год завершения</FormLabel>
             <FormControl>
               <Input
-                :model-value="componentField.modelValue" type="number" placeholder=""
+                :model-value="componentField.modelValue"
+                type="number"
+                placeholder=""
                 @change="handleChange"
                 @blur="handleBlur"
               />
@@ -257,12 +295,16 @@ defineExpose({
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField, handleChange, handleBlur }" name="location">
+        <FormField
+          v-slot="{ componentField, handleChange, handleBlur }"
+          name="location"
+        >
           <FormItem>
             <FormLabel>Расположение *</FormLabel>
             <FormControl>
               <Input
-                :model-value="componentField.modelValue" placeholder="Уфа"
+                :model-value="componentField.modelValue"
+                placeholder="Уфа"
                 @change="handleChange"
                 @blur="handleBlur"
               />
@@ -270,7 +312,11 @@ defineExpose({
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-if="values.images.length" v-slot="{ field, handleChange, handleBlur }" name="previewId">
+        <FormField
+          v-if="values.images.length"
+          v-slot="{ field, handleChange, handleBlur }"
+          name="previewId"
+        >
           <FormItem>
             <FormLabel>Превью</FormLabel>
             <FormControl>
@@ -285,7 +331,11 @@ defineExpose({
                   <SelectValue placeholder="Выберите превью" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="image in (values.images as ImageDto[])" :key="image.filename" :value="image.id.toString()">
+                  <SelectItem
+                    v-for="image in (values.images as ImageDto[])"
+                    :key="image.filename"
+                    :value="image.id.toString()"
+                  >
                     {{ image.filename }}
                   </SelectItem>
                 </SelectContent>

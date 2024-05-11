@@ -1,10 +1,10 @@
 import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import { err, ok } from '../shared/result'
 import type { Db, DbTransaction } from '../db'
+import { logger } from '../shared/logger'
 import { projectDbMapper } from './projectDb.repo'
 import { type CategoryDbCreate, type CategoryDbDeep, type CategoryDbUpdate, categories } from '~/server/db/schema'
 import type { CategoryDbDto, CategoryId, CreateCategoryDto, ICategoryDbRepo, UpdateCategoryDto, GroupId } from '~/server/use-cases/types'
-import { logger } from '../shared/logger'
 
 export const categoryDbMapper = {
   toDbDto(db: CategoryDbDeep): CategoryDbDto {
@@ -69,7 +69,7 @@ export class CategoryDbRepo implements ICategoryDbRepo {
             orderBy: projects => projects.order,
           },
         },
-        orderBy: categories => categories.order
+        orderBy: categories => categories.order,
       })
       if (!res)
         return err(new Error(`Could not find category with id \`${id}\``))

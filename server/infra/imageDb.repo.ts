@@ -123,7 +123,7 @@ export class ImageDbRepo implements IImageDbRepo {
       return await ctx.transaction(async (tx) => {
         const _image = await this.getOne(id, tx)
         if (!_image.ok)
-          return err(_image.error)
+          return _image
 
         const image = _image.value
 
@@ -132,10 +132,10 @@ export class ImageDbRepo implements IImageDbRepo {
 
         const nextOrder = await this.getNextOrder(image.projectId, tx)
         if (!nextOrder.ok)
-          return err(nextOrder.error)
+          return nextOrder
 
         if (newOrder > nextOrder.value)
-          return err('New order is out of range')
+          return err(new Error('New order is out of range'))
 
         if (newOrder > image.order) {
           await tx.update(images).set({ order: sql`(${images.order} - 1) * 1000` }).where(and(
@@ -154,6 +154,7 @@ export class ImageDbRepo implements IImageDbRepo {
 
         await tx.update(images).set({ order: image.order }).where(eq(images.id, image.id))
         await tx.update(images).set({ order: sql`${images.order} / 1000` }).where(gte(images.order, 1000))
+        return ok(undefined)
       })
     }
     catch (_e) {
@@ -166,14 +167,22 @@ export class ImageDbRepo implements IImageDbRepo {
 
     try {
       return await ctx.transaction(async (tx) => {
-        const _image = await this.getOne(dto.id, tx)
-        if (!_image.ok)
+        const image = await this.getOne(dto.id, tx)
+        if (!image.ok) {
+          console.log(image.error)
           return tx.rollback()
-        const image = _image.value
-        await this.updateOrder(image.id, dto.order, tx)
+        }
+        // !FIXME wtf order
+
+        const orderUpdated = await this.updateOrder(image.value.id, dto.order, tx)
+        if (!orderUpdated.ok) {
+          console.log(orderUpdated.error)
+          return tx.rollback()
+        }
+
 
         await tx.update(images)
-          .set(imageDbMapper.toUpdateWithoutOrder(imageDbMapper.toUpdate(dto)))
+          .set(imageDbMapper.toUpdateWithoutOrder(dto))
           .where(eq(images.id, dto.id))
         const updatedImage = await this.getOne(dto.id, tx)
         if (!updatedImage.ok)
@@ -182,8 +191,9 @@ export class ImageDbRepo implements IImageDbRepo {
         return ok(updatedImage.value)
       })
     }
-    catch (e) {
-      return err(new Error(`Could not update image with id \`${dto.id}\``))
+    catch (_e) {
+      const error = _e as Error
+      return err(new Error(`Could not update image with id \`${dto.id}\`: ${error.message}`))
     }
   }
 
