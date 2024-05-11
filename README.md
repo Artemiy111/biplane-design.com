@@ -4,6 +4,7 @@
 
 - ui с помощью `shadcn-vue`
 - бд на `supabase` и `drizzle` в качестве orm
+- хранение изображений в s3 compatible `supabase Storage`
 - формы с валидацией с помощью `vee-validate`
 - дашборд-таблица для управления проектами
 - регистрация администраторов сайта и управление аккаунтом
@@ -19,8 +20,6 @@
 - `use-cases` - use-кейсы
 - `use-cases/types` - интерфейсы репозиториев
 - `infra` - репозитории
-
-Изображения хранятся локально в public/images/projects/:projectUri/:filename
 
 ##### TODO
 

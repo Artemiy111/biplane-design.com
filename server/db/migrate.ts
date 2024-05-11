@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 
 import { client, db } from '.'

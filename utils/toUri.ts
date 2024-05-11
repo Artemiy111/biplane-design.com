@@ -49,6 +49,6 @@ export function toTransliterated(str: string) {
     .join('')
 }
 
-export function toUrlFriendly(str: string) {
+export function toUri(str: string) {
   return encodeURI(toTransliterated(str))
 }

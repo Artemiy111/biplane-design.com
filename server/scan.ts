@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import fs from 'node:fs'
 import path from 'node:path'
 import { cwd } from 'node:process'
@@ -47,7 +46,7 @@ dbProjects.forEach(async (project) => {
           .delete(images)
           .where(
             and(
-              eq(images.projectUrlFriendly, image.projectUrlFriendly),
+              eq(images.projectUri, image.projectUrlFriendly),
               eq(images.filename, image.filename),
             ),
           )

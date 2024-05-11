@@ -4,6 +4,6 @@ import { ProjectFsRepo } from './projectFs.repo'
 describe('projectFs.repo', () => {
   const repo = new ProjectFsRepo('/app')
   test('getProjectDir returns right path', () => {
-    expect(repo.getDir('haha')).toEndWith('/app/haha')
+    expect(repo.getKey('haha')).toEndWith('/app/haha')
   })
 })

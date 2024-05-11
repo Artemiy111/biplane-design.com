@@ -85,7 +85,11 @@ defineExpose({
 
       <div class="flex flex-col items-center justify-center gap-2">
         <template v-if="!props.images?.length">
-          <FolderUp v-if="props.showIcon" :size="50" :stroke-width="1" />
+          <FolderUp
+            v-if="props.showIcon"
+            :size="50"
+            :stroke-width="1"
+          />
           <span>Загрузить фото</span>
         </template>
         <template v-else>
@@ -102,14 +106,27 @@ defineExpose({
     </template>
     <template v-else>
       <ul v-if="!props.showImages">
-        <div v-for="file in files" :key="file.name">{{ file.name }}</div>
+        <div
+          v-for="file in files"
+          :key="file.name"
+        >{{ file.name }}</div>
       </ul>
-      <div v-for="file in files" v-else :key="file.name" class="flex h-full flex-col gap-2">
-        <NuxtImg class="aspect-video h-full w-full object-cover" :src="generateURL(file)" />
+      <div
+        v-for="file in files"
+        v-else
+        :key="file.name"
+        class="flex h-full flex-col gap-2"
+      >
+        <NuxtImg
+          class="aspect-video h-full w-full object-cover"
+          :src="generateURL(file)"
+        />
       </div>
     </template>
     <Input
-      ref="inputRef" type="file" :multiple="props.multiple"
+      ref="inputRef"
+      type="file"
+      :multiple="props.multiple"
       accept=".avif,.webp,.png,.jpg,.jpeg"
       class="absolute h-[1px] w-[1px] overflow-hidden opacity-0"
       @change="onChange"
