@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { S3Client } from '@aws-sdk/client-s3'
 import { db } from './db'
 
 import { GetProjectUseCase } from './use-cases/get-project.use-case'
@@ -34,32 +35,53 @@ import { ImageDbRepo } from './infra/imageDb.repo'
 import { ImageRepo } from './infra/image.repo'
 import { ImageFsRepo } from './infra/imageFs.repo'
 import { CategoryDbRepo } from './infra/categoryDb.repo'
+import { ImageS3Repo } from './infra/imageS3.repo'
+import { ProjectS3Repo } from './infra/projectS3.repo'
+import { CategoryRepo } from './infra/category.repo'
+import { GroupRepo } from './infra/group.repo'
 
 const PROJECTS_DIR = path.join(`/public/images/projects`)
 
+const s3 = new S3Client({
+  forcePathStyle: true,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+  endpoint: process.env.ENDPOINT_URL!,
+  region: process.env.REGION!,
+})
+
 export const userRepo = new UserRepo()
 
-export const groupDbRepo = new GroupDbRepo(db)
-export const categoryDbRepo = new CategoryDbRepo(db)
-
 export const projectDbRepo = new ProjectDbRepo(db)
-export const projectFsRepo = new ProjectFsRepo(PROJECTS_DIR)
-export const projectRepo = new ProjectRepo(projectDbRepo, projectFsRepo)
+export const projectS3Repo = new ProjectS3Repo('biplane-design', s3)
+// export const projectFsRepo = new ProjectFsRepo(PROJECTS_DIR)
 
-const imageDbRepo = new ImageDbRepo(db)
-const imageFsRepo = new ImageFsRepo(projectFsRepo)
-const imageRepo = new ImageRepo(imageDbRepo, imageFsRepo)
+export const imageDbRepo = new ImageDbRepo(db)
+// export const imageFsRepo = new ImageFsRepo(projectFsRepo)
+export const imageS3Repo = new ImageS3Repo('biplane-design', s3)
+export const imageRepo = new ImageRepo(imageDbRepo, imageS3Repo, projectDbRepo)
 
-export const getGroupUseCase = new GetGroupUseCase(groupDbRepo)
-export const getGroupsUseCase = new GetGroupsUseCase(groupDbRepo)
-export const createGroupUseCase = new CreateGroupUseCase(groupDbRepo, userRepo)
-export const updateGroupUseCase = new UpdateGroupUseCase(groupDbRepo, userRepo)
-export const deleteGroupUseCase = new DeleteGroupUseCase(groupDbRepo, userRepo)
+export const projectRepo = new ProjectRepo(projectDbRepo, projectS3Repo, imageRepo)
 
-export const getCategoryUseCase = new GetCategoryUseCase(categoryDbRepo)
-export const createCategoryUseCase = new CreateCategoryUseCase(categoryDbRepo, userRepo)
-export const updateCategoryUseCase = new UpdateCategoryUseCase(categoryDbRepo, userRepo)
-export const deleteCategoryUseCase = new DeleteCategoryUseCase(categoryDbRepo, userRepo)
+export const categoryDbRepo = new CategoryDbRepo(db)
+export const categoryRepo = new CategoryRepo(categoryDbRepo, projectRepo)
+
+export const groupDbRepo = new GroupDbRepo(db)
+export const groupRepo = new GroupRepo(groupDbRepo, categoryRepo)
+// use-cases
+
+export const getGroupUseCase = new GetGroupUseCase(groupRepo)
+export const getGroupsUseCase = new GetGroupsUseCase(groupRepo)
+export const createGroupUseCase = new CreateGroupUseCase(groupRepo, userRepo)
+export const updateGroupUseCase = new UpdateGroupUseCase(groupRepo, userRepo)
+export const deleteGroupUseCase = new DeleteGroupUseCase(groupRepo, userRepo)
+
+export const getCategoryUseCase = new GetCategoryUseCase(categoryRepo)
+export const createCategoryUseCase = new CreateCategoryUseCase(categoryRepo, userRepo)
+export const updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepo, userRepo)
+export const deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepo, userRepo)
 
 export const getProjectUseCase = new GetProjectUseCase(projectRepo)
 export const getProjectByUriUseCase = new GetProjectByUriUseCase(projectRepo)

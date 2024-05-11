@@ -4,7 +4,7 @@ import { err, ok } from '../shared/result'
 import { categoryDbMapper } from './categoryDb.repo'
 import type {
   CreateGroupDto,
-  GroupDto,
+  GroupDbDto,
   GroupId,
   IGroupDbRepo,
   UpdateGroupDto,
@@ -14,18 +14,18 @@ import type { GroupDbCreate, GroupDbDeep, GroupDbUpdate } from '~/server/db/sche
 import { groups } from '~/server/db/schema'
 
 export const groupDbMapper = {
-  toDto(db: GroupDbDeep): GroupDto {
+  toDbDto(db: GroupDbDeep): GroupDbDto {
     return {
       id: db.id,
       title: db.title,
-      uri: db.urlFriendly,
+      uri: db.uri,
       order: db.order,
-      categories: db.categories.map(categoryDbMapper.toDto),
+      categories: db.categories.map(categoryDbMapper.toDbDto),
     }
   },
   toCreate(dto: CreateGroupDto, order: number): GroupDbCreate {
     return {
-      urlFriendly: dto.uri,
+      uri: dto.uri,
       title: dto.title,
       order,
     }
@@ -35,7 +35,7 @@ export const groupDbMapper = {
       id: dto.id,
       order: dto.order,
       title: dto.title,
-      urlFriendly: dto.uri,
+      uri: dto.uri,
     }
   },
   toUpdateWithoutOrder(db: GroupDbUpdate): Omit<GroupDbUpdate, 'order'> {
@@ -45,7 +45,7 @@ export const groupDbMapper = {
 }
 
 export class GroupDbRepo implements IGroupDbRepo {
-  constructor(private db: Db) {}
+  constructor(private db: Db) { }
 
   private async getNextOrder(tx?: DbTransaction) {
     const ctx = tx || this.db
@@ -58,7 +58,7 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
-  private async updateOrder(dto: GroupDto, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: GroupDbDto, newOrder: number, tx?: DbTransaction) {
     if (dto.order === newOrder)
       return ok(undefined)
 
@@ -86,7 +86,7 @@ export class GroupDbRepo implements IGroupDbRepo {
           ))
         }
 
-        await tx.update(groups).set({ order: dto.order }).where(eq(groups.urlFriendly, dto.uri))
+        await tx.update(groups).set({ order: dto.order }).where(eq(groups.uri, dto.uri))
         await tx.update(groups).set({ order: sql`${groups.order} / 1000` }).where(gte(groups.order, 1000))
       })
     }
@@ -99,27 +99,27 @@ export class GroupDbRepo implements IGroupDbRepo {
     const ctx = tx || this.db
     try {
       const group
-      = (await ctx.query.groups.findFirst({
-        where: eq(groups.id, id),
-        with: {
-          categories: {
-            with: {
-              projects: {
-                with: {
-                  images: { orderBy: images => images.order },
+        = (await ctx.query.groups.findFirst({
+          where: eq(groups.id, id),
+          with: {
+            categories: {
+              with: {
+                projects: {
+                  with: {
+                    images: { orderBy: images => images.order },
+                  },
+                  orderBy: projects => projects.order,
                 },
-                orderBy: projects => projects.order,
               },
+              orderBy: categories => categories.order,
             },
-            orderBy: categories => categories.order,
           },
-        },
-        orderBy: groups => groups.order,
-      }))
+          orderBy: groups => groups.order,
+        }))
       if (!group)
         return err(new Error(`Group with id \`${id}\ does not exist`))
 
-      return ok(groupDbMapper.toDto(group))
+      return ok(groupDbMapper.toDbDto(group))
     }
     catch (_e) {
       return err(new Error(`Could not get group with id \`${id}\``))
@@ -145,7 +145,7 @@ export class GroupDbRepo implements IGroupDbRepo {
         },
         orderBy: groups => groups.order,
       })
-      return ok(groups.map(groupDbMapper.toDto))
+      return ok(groups.map(groupDbMapper.toDbDto))
     }
     catch (_e) {
       return err(new Error(`Could not get groups`))
@@ -177,7 +177,7 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
-  async update(dto: UpdateGroupDto, tx?: DbTransaction): Promise<Result<GroupDto, Error>> {
+  async update(dto: UpdateGroupDto, tx?: DbTransaction) {
     const ctx = tx || this.db
 
     try {

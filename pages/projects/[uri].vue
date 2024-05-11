@@ -6,7 +6,7 @@ import type { ProjectDto } from '~/server/use-cases/types'
 
 const route = useRoute()
 const projectUri = route.params.uri! as string
-const { data: project, error: _error } = await useFetch<ProjectDto>(`/api/projects/${projectUri}`)
+const { data: project, error: _error } = await useLazyFetch<ProjectDto>(`/api/projects/?uri=${projectUri}`)
 
 const api = ref<CarouselApi | null>(null)
 const apiTumb = ref<CarouselApi | null>(null)
@@ -43,7 +43,10 @@ function scrollToImage(index: number) {
 </script>
 
 <template>
-  <main v-if="project" class="container flex flex-col">
+  <main
+    v-if="project"
+    class="container flex flex-col"
+  >
     <section class="flex justify-between px-8 py-4 text-3xl 2xl:text-2xl lg:text-xl md:text-lg sm:py-2 sm:text-base">
       <h1 class="font-bold">
         {{ project.title }}

@@ -2,16 +2,16 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { Buffer } from 'node:buffer'
 import { err, ok } from '../shared/result'
-import type { IImageFsRepo, IProjectFsRepo } from './../use-cases/types'
+import type { IImageFsRepo, IProjectBucketRepo } from './../use-cases/types'
 
 const extNames = ['.avif', '.webp', '.png', '.jpg', '.jpeg']
 const extNamesSet = new Set(extNames)
 
 export class ImageFsRepo implements IImageFsRepo {
-  constructor(private projectFsRepo: IProjectFsRepo) { }
+  constructor(private projectFsRepo: IProjectBucketRepo) { }
 
   private getImageFilepath(projectUri: string, filename: string) {
-    const dir = this.projectFsRepo.getDir(projectUri)
+    const dir = this.projectFsRepo.getKey(projectUri)
     return path.join(dir, filename)
   }
 
@@ -36,8 +36,8 @@ export class ImageFsRepo implements IImageFsRepo {
   }
 
   async getImageFiles(projectUri: string) {
-    const dir = this.projectFsRepo.getDir(projectUri)
-    if (!(await this.projectFsRepo.isDirExist(projectUri)))
+    const dir = this.projectFsRepo.getKey(projectUri)
+    if (!(await this.projectFsRepo.isDirExists(projectUri)))
       return err(new Error(`Could not get images of project \`${projectUri}\`. Project dir does not exist`))
 
     try {
@@ -68,7 +68,7 @@ export class ImageFsRepo implements IImageFsRepo {
     const filepath = this.getImageFilepath(projectUri, filename)
 
     try {
-      if (!(await this.projectFsRepo.isDirExist(projectUri)))
+      if (!(await this.projectFsRepo.isDirExists(projectUri)))
         await this.projectFsRepo.createDir(projectUri)
 
       if ((await this.isImageFileExist(projectUri, filename)))

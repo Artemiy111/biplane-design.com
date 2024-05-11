@@ -37,9 +37,9 @@ export const httpErrors = {
   ),
 } as const
 
-export function createHttpError(statusCode: HttpErrorCode) {
+export function createHttpError(statusCode: HttpErrorCode, error?: Error) {
   return createError({
     statusCode,
-    message: httpErrorMessages[statusCode],
+    message: error?.message || httpErrorMessages[statusCode],
   })
 }
