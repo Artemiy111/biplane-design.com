@@ -44,7 +44,7 @@ export class ProjectRepo implements IProjectRepo {
     try {
       const images = await Promise.all(projects.value.map(async (project) => {
         const images = await this.imageRepo.getAllByProjectId(project.id)
-        if (!images.ok) throw new Error('oops')
+        if (!images.ok) throw new Error(`Could not get projects by category with id \`${categoryId}\``)
         return images.value
       }))
       const res = projects.value.map((project, idx) => projectMapper.toDto(project, images[idx]))
@@ -62,7 +62,7 @@ export class ProjectRepo implements IProjectRepo {
     try {
       const images = await Promise.all(projects.value.map(async (project) => {
         const images = await this.imageRepo.getAllByProjectId(project.id)
-        if (!images.ok) throw new Error('oops')
+        if (!images.ok) throw new Error(`Could not get all projects`)
         return images.value
       }))
       const res = projects.value.map((project, idx) => projectMapper.toDto(project, images[idx]))

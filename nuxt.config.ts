@@ -46,15 +46,15 @@ export default defineNuxtConfig({
   components: {
     dirs: [],
   },
-  runtimeConfig: {
-    databaseUrl: '',
-    supabaseUrl: '',
-    supabaseKey: '',
 
-    awsAccessKeyId: '',
-    awsSecretAccessKey: '',
-    endpointUrl: '',
-    region: '',
+  runtimeConfig: {
+    databaseUrl: process.env.DATABASE_URL,
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabaseKey: process.env.SUPABASE_KEY,
+    awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    endpointUrl: process.env.ENDPOINT_URL,
+    region: process.env.REGION,
   },
   image: {
     ipx: {

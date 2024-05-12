@@ -69,7 +69,7 @@ onMounted(() => {
   categoriesCarouselRef.value?.carouselApi?.on('scroll', setHiddenCategories)
 })
 
-function changeTheme(group: GroupDto) {
+function changeGroup(group: GroupDto) {
   if (group !== currentGroup.value) {
     currentGroup.value = group
     currentCategory.value = currentGroup.value.categories?.[0] || null
@@ -104,8 +104,8 @@ function changeCategory(category: CategoryDto) {
         class="w-full cursor-pointer px-8 py-4 font-bold transition-colors hover:bg-secondary sm:px-4 sm:py-2"
         :class="[group === currentGroup ? 'bg-primary-foreground' : '']"
         tabindex="0"
-        @keypress.enter.space="changeTheme(group)"
-        @click="changeTheme(group)"
+        @keypress.enter.space="changeGroup(group)"
+        @click="changeGroup(group)"
       >
         {{ group.title }}
       </h2>

@@ -1,3 +1,3 @@
-import { useLogger } from 'nuxt/kit'
-
-export const logger = useLogger()
+export const logger = {
+  log: console.log
+}

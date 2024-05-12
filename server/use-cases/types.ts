@@ -1,4 +1,5 @@
 import type { Buffer } from 'node:buffer'
+import { type H3Event, type EventHandlerRequest } from 'h3'
 import type { Result } from '../shared/result'
 import { ImageDb } from '../db/schema'
 
@@ -197,10 +198,15 @@ export interface IImageBucketRepo {
 }
 //
 
-export type UserId = number
+export type UserId = string
 export interface UserDto {
   id: UserId
   email: string
+}
+
+export interface LoginUserDto {
+  email: string,
+  password: string
 }
 
 export interface CreateUserDto {
@@ -208,7 +214,11 @@ export interface CreateUserDto {
   password: string
 }
 
+export interface UpdateUserDto {
+  password: string
+}
+
 export interface IUserRepo {
-  getUser: () => Promise<Result<UserDto, Error>>
+  getUser: (loginDto: LoginUserDto) => Promise<Result<UserDto, Error>>
   createUser: (dto: CreateUserDto) => Promise<Result<UserDto, Error>>
 }

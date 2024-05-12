@@ -3,6 +3,11 @@ import { createProjectUseCase, getProjectsUseCase, getProjectByUriUseCase } from
 import { HttpErrorCode, createHttpError } from '~/server/exceptions'
 
 export default defineEventHandler(async (event) => {
+  const dummyLogin = {
+    email: 'art@art.art',
+    password: 'artartart'
+  }
+
   switch (event.method) {
     case 'GET': {
       const QuerySchema = z.object({
@@ -30,7 +35,7 @@ export default defineEventHandler(async (event) => {
         status: z.string(),
       })
       const body = await readValidatedBody(event, Body.parse)
-      const res = await createProjectUseCase.execute(body)
+      const res = await createProjectUseCase.execute(body, dummyLogin)
       if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }

@@ -6,7 +6,7 @@ import Dropzone from '~/components/Dropzone.vue'
 
 const route = useRoute()
 const uri = route.params.uri as string
-const { data: project, error: _error, refresh: refreshImages } = await useFetch<ProjectDto>(`/api/projects/?uri=${uri}`)
+const { data: project, error: _error, refresh: refreshImages } = await useLazyFetch<ProjectDto>(`/api/projects/?uri=${uri}`)
 
 definePageMeta({
   middleware: 'auth',

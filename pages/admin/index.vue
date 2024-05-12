@@ -17,7 +17,7 @@ useSeoMeta({
 })
 
 const { md } = useScreenSize()
-const { data: _groups, error: fetchError, refresh } = await useFetch<GroupDto[]>('/api/groups')
+const { data: _groups, error: fetchError, refresh } = await useLazyFetch<GroupDto[]>('/api/groups')
 
 const groups = computed(() => _groups.value || [])
 const groupsMap = computed(() => new Map(groups.value.map(g => [g.id, g])))
@@ -26,6 +26,9 @@ const categoriesMap = computed(() => new Map(categories.value.map(c => [c.id, c]
 const projects = computed(() => categories.value.flatMap(c => c.projects) || [])
 
 type SelectedGroupAndCategoryState = {
+  group: null
+  category: null
+} | {
   group: GroupDto
   category: null
 } | {
@@ -41,8 +44,8 @@ function getGroupById(id: number) {
   return groupsMap.value.get(id)!
 }
 
-function useSelected(initial: SelectedGroupAndCategoryState) {
-  const selected = ref<SelectedGroupAndCategoryState>(initial)
+function useSelected() {
+  const selected = ref<SelectedGroupAndCategoryState>({group: null, category: null})
 
   const setSelected = (newSelected: SelectedGroupAndCategoryState) => { selected.value = newSelected }
 
@@ -52,7 +55,11 @@ function useSelected(initial: SelectedGroupAndCategoryState) {
   }
 }
 
-const { selected, setSelected } = useSelected({ group: groups.value![0], category: groups.value![0].categories[0] })
+const { selected, setSelected } = useSelected()
+watch(groups, () => {
+  if (!groups.value.length) return
+  setSelected({group: groups.value[0], category: null})
+}, {once: true})
 
 const selectedCategoryOrGroupProjects = computed(() =>
   projects.value.filter((project) => {
@@ -62,7 +69,7 @@ const selectedCategoryOrGroupProjects = computed(() =>
     const category = getCategoryById(project.categoryId)
     const group = getGroupById(category.groupId)
 
-    return group.id === selected.value.group.id
+    return group.id === selected.value.group?.id
   }),
 )
 
@@ -119,10 +126,9 @@ async function deleteProject(id: number) {
     projectSheetRef.value?.close()
     toast.success('Проект удалён')
   }
-  catch (e) {
-    if (e instanceof Error)
-      toast.error(e.message)
-    else toast.error(String(e))
+  catch (_e) {
+    const e = _e as Error
+    toast.error(e.message)
   }
   refresh()
 }
@@ -158,7 +164,7 @@ function openProjectSheet(project: ProjectDto) {
           <li
             class="cursor-pointer ml-2 px-2 py-1 hover:bg-primary-foreground"
             :class="
-              selected.group.id === group.id && !selected.category
+              selected.group?.id === group.id && !selected.category
                 ? 'font-bold bg-primary-foreground'
                 : ''
             "

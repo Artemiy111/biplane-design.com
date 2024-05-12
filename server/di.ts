@@ -39,17 +39,19 @@ import { ImageS3Repo } from './infra/imageS3.repo'
 import { ProjectS3Repo } from './infra/projectS3.repo'
 import { CategoryRepo } from './infra/category.repo'
 import { GroupRepo } from './infra/group.repo'
+import { logger } from './shared/logger'
 
 const PROJECTS_DIR = path.join(`/public/images/projects`)
+const config = useRuntimeConfig()
 
 const s3 = new S3Client({
   forcePathStyle: true,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    accessKeyId: config.awsAccessKeyId,
+    secretAccessKey: config.awsSecretAccessKey,
   },
-  endpoint: process.env.ENDPOINT_URL!,
-  region: process.env.REGION!,
+  endpoint: config.endpointUrl,
+  region: config.region,
 })
 
 export const userRepo = new UserRepo()
@@ -95,3 +97,5 @@ export const getImageUseCase = new GetImageUseCase(imageRepo)
 export const createImageUseCase = new CreateImageUseCase(imageRepo, userRepo)
 export const updateImageUseCase = new UpdateImageUseCase(imageRepo, userRepo)
 export const deleteImageUseCase = new DeleteImageUseCase(imageRepo, userRepo)
+
+logger.log('di phase done')

@@ -4,6 +4,11 @@ import { HttpErrorCode, createHttpError } from '~/server/exceptions'
 import { toUri } from '~/utils/toUri'
 
 export default defineEventHandler(async (event) => {
+  const dummyLogin = {
+    email: 'art@art.art',
+    password: 'artartart'
+  }
+
   switch (event.method) {
     case 'POST': {
       const FormData = z.object({
@@ -24,7 +29,7 @@ export default defineEventHandler(async (event) => {
       if (!body.success)
         throw createHttpError(HttpErrorCode.BadRequest, body.error)
 
-      const res = await createImageUseCase.execute(body.data)
+      const res = await createImageUseCase.execute(body.data, dummyLogin)
       if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
 
       return res.value

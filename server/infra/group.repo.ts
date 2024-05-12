@@ -13,6 +13,7 @@ const groupMapper = {
 
 export class GroupRepo implements IGroupRepo {
   constructor(private dbRepo: IGroupDbRepo, private categoryRepo: ICategoryRepo) { }
+
   async getOne(id: GroupId) {
     const group = await this.dbRepo.getOne(id)
     if (!group.ok) return group
