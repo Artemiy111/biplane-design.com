@@ -1,12 +1,7 @@
 {
-  "name": "biplane.design.com",
+  "name": "biplane-design.com",
   "type": "module",
   "private": true,
-  "packageManager": "^bun@1.0.0",
-  "engines": {
-    "node": ">=20",
-    "bun": ">=1"
-  },
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -24,6 +19,7 @@
     "@aws-sdk/client-s3": "^3.574.0",
     "@aws-sdk/s3-request-presigner": "^3.574.0",
     "@nuxtjs/supabase": "^1.2.2",
+    "@supabase/supabase-js": "^2.43.1",
     "@tanstack/vue-table": "^8.16.0",
     "@tresjs/cientos": "^3.9.0",
     "@tresjs/nuxt": "^2.1.2",
