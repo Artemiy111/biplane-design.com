@@ -1,12 +1,11 @@
-import { err } from '../shared/result'
-import type { IImageRepo, IUseCase, IUserRepo, UpdateImageDto } from './types'
+import type { IImageRepo, IUseCase, IUserRepo, LoginUserDto, UpdateImageDto } from './types'
 
 export class UpdateImageUseCase implements IUseCase {
-  constructor(private imageRepo: IImageRepo, private userRepo: IUserRepo) {}
+  constructor(private imageRepo: IImageRepo, private userRepo: IUserRepo) { }
 
-  async execute(dto: UpdateImageDto) {
-    if (!(await this.userRepo.getUser()))
-      return err(new Error(`Unauthorized`))
+  async execute(dto: UpdateImageDto, loginDto: LoginUserDto) {
+    const user = await this.userRepo.getUser(loginDto)
+    if (!user.ok) return user
 
     return await this.imageRepo.update(dto)
   }

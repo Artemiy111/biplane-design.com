@@ -78,6 +78,7 @@ async function singIn(values: SignFormSchema) {
                 <Input
                   :model-value="field.value"
                   placeholder="biplane-design@mail.ru"
+                  disabled
                   @change="handleChange"
                 />
               </FormControl>
@@ -94,13 +95,17 @@ async function singIn(values: SignFormSchema) {
                 <Input
                   :model-value="field.value"
                   type="password"
+                  disabled
                   @change="field.onChange"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
-          <Button class="w-max">
+          <Button
+            class="w-max"
+            disabled
+          >
             Зарегистрироваться
           </Button>
         </Form>

@@ -148,6 +148,8 @@ export class GroupDbRepo implements IGroupDbRepo {
       return ok(groups.map(groupDbMapper.toDbDto))
     }
     catch (_e) {
+      const e = _e as Error
+      console.log(e)
       return err(new Error(`Could not get groups`))
     }
   }
