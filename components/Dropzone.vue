@@ -90,7 +90,7 @@ defineExpose({
             :size="50"
             :stroke-width="1"
           />
-          <span>Загрузить фото</span>
+          <span>Загрузить изображение</span>
         </template>
         <template v-else>
           <NuxtImg

@@ -48,7 +48,7 @@ export class ImageRepo implements IImageRepo {
   }
 
   async create(dto: CreateImageDto) {
-    // !FIXME возможна дичь при коллизии названий файлов  
+    // !FIXME возможна дичь при коллизии названий файлов
     const project = await this.projectDbRepo.getOne(dto.projectId)
     if (!project.ok) return project
 

@@ -1,3 +1,3 @@
 export const logger = {
-  log: console.log
+  log: console.log,
 }

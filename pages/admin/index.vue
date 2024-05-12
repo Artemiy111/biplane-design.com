@@ -45,7 +45,7 @@ function getGroupById(id: number) {
 }
 
 function useSelected() {
-  const selected = ref<SelectedGroupAndCategoryState>({group: null, category: null})
+  const selected = ref<SelectedGroupAndCategoryState>({ group: null, category: null })
 
   const setSelected = (newSelected: SelectedGroupAndCategoryState) => { selected.value = newSelected }
 
@@ -58,8 +58,8 @@ function useSelected() {
 const { selected, setSelected } = useSelected()
 watch(groups, () => {
   if (!groups.value.length) return
-  setSelected({group: groups.value[0], category: null})
-}, {once: true})
+  setSelected({ group: groups.value[0], category: null })
+}, { once: true })
 
 const selectedCategoryOrGroupProjects = computed(() =>
   projects.value.filter((project) => {

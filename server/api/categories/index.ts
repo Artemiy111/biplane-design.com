@@ -5,7 +5,7 @@ import { createCategoryUseCase } from '~/server/di'
 export default defineEventHandler(async (event) => {
   const dummyLogin = {
     email: 'art@art.art',
-    password: 'artartart'
+    password: 'artartart',
   }
 
   switch (event.method) {

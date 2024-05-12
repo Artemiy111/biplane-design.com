@@ -205,7 +205,7 @@ export interface UserDto {
 }
 
 export interface LoginUserDto {
-  email: string,
+  email: string
   password: string
 }
 

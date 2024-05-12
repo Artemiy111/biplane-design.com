@@ -3,7 +3,6 @@ import type { CreateUserDto, IUserRepo, LoginUserDto, UserDto } from '~/server/u
 import { supabase } from '~/server/db/supabase'
 
 export class UserRepo implements IUserRepo {
-
   async getUser(loginDto: LoginUserDto) {
     // const { data: userData, error } = await supabase.auth.signInWithPassword({ email: loginDto.email, password: loginDto.password })
     // if (error) return err(new Error('Not authorized'))

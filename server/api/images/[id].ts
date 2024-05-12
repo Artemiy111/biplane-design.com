@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const id = Number(event.context.params!.id! as string)
   const dummyLogin = {
     email: 'art@art.art',
-    password: 'artartart'
+    password: 'artartart',
   }
 
   switch (event.method) {

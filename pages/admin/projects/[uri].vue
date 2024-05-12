@@ -100,7 +100,7 @@ async function uploadImages(images: File[]) {
         <TableHeader>
           <TableRow>
             <TableHead>Порядок</TableHead>
-            <TableHead>Картинка</TableHead>
+            <TableHead>Изображение</TableHead>
             <TableHead>Название файла</TableHead>
             <TableHead>Опции</TableHead>
           </TableRow>
@@ -118,7 +118,7 @@ async function uploadImages(images: File[]) {
                   class="aspect-video w-[300px] object-contain"
                   :src="image.url"
                   :alt="image.alt"
-                />
+                >
               </TableCell>
               <TableCell>
                 <Input

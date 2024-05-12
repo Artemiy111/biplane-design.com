@@ -5,7 +5,7 @@ import { HttpErrorCode, createHttpError } from '~/server/exceptions'
 export default defineEventHandler(async (event) => {
   const dummyLogin = {
     email: 'art@art.art',
-    password: 'artartart'
+    password: 'artartart',
   }
 
   switch (event.method) {

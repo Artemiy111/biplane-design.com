@@ -6,7 +6,7 @@ import { toUri } from '~/utils/toUri'
 export default defineEventHandler(async (event) => {
   const dummyLogin = {
     email: 'art@art.art',
-    password: 'artartart'
+    password: 'artartart',
   }
 
   switch (event.method) {
