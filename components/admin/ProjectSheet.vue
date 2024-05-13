@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
-import type { GroupDto, ImageDto } from '~/server/use-cases/types'
+import type { CreateProjectDto, GroupDto, ImageDto, UpdateProjectDto } from '~/server/use-cases/types'
 import { Form } from '~/components/ui/form'
 
 const props = defineProps<{
@@ -9,10 +9,10 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  submit: [values: FormSchema, prev: FormSchema | null ]
+  submit: [dto: CreateProjectDto | UpdateProjectDto, mode: SheetMode]
 }>()
-export type Mode = 'create' | 'update'
-const mode = ref<Mode>('create')
+export type SheetMode = 'create' | 'update'
+const mode = ref<SheetMode>('create')
 
 const initialValues = ref<FormSchema>({
   title: '',
@@ -24,15 +24,17 @@ const initialValues = ref<FormSchema>({
   yearEnd: null,
   location: '',
   images: [],
+  id: -1,
+  order: -1,
 })
 
 const MIN_YEAR = 2000
 const MAX_YEAR = 2050
 
 const formSchema = z.object({
-  id: z.number().optional(),
-  title: z.string().trim().min(3, 'Минимум 3 символа'),
   categoryId: z.union([z.string(), z.number()]).transform(v => Number(v)),
+  id: z.number(),
+  title: z.string().trim().min(3, 'Минимум 3 символа'),
   uri: z
     .string()
     .trim()
@@ -61,7 +63,8 @@ const formSchema = z.object({
   location: z.string().trim().min(3, 'Минимум 3 символа'),
 
   groupId: z.union([z.string(), z.number()]).transform(v => Number(v)),
-  images: z.array(z.string()),
+  images: z.array(z.object({ id: z.number() })),
+  order: z.number(),
 })
 
 export type FormSchema = z.infer<typeof formSchema>
@@ -89,8 +92,6 @@ function handleClose() {
   isOpen.value = false
 }
 
-const prev = ref<FormSchema | null>(null)
-
 async function open(initial?: FormSchema) {
   isOpen.value = true
   mode.value = 'update'
@@ -104,13 +105,27 @@ async function open(initial?: FormSchema) {
     formRef.value?.resetForm()
     mode.value = 'create'
   }
-  prev.value = initial || null
 }
 
 function close() {
   isOpen.value = false
-  prev.value = null
 }
+
+function submit(values: FormSchema) {
+  switch (mode.value) {
+    case 'create': {
+      const createDto: CreateProjectDto = values
+      emit('submit', createDto, mode.value)
+      break
+    }
+    case 'update': {
+      const updateDto: UpdateProjectDto = values
+      emit('submit', updateDto, mode.value)
+      break
+    }
+  }
+}
+
 defineExpose({
   open,
   close,
@@ -139,9 +154,8 @@ defineExpose({
         :initial-values="initialValues"
         :validation-schema="validationSchema"
         class="grid gap-4"
-        @submit="emit('submit', $event as FormSchema, prev)"
+        @submit="submit($event as FormSchema)"
       >
-        {{ values }}
         <FormField
           v-slot="{ field, handleChange, handleBlur }"
           name="title"

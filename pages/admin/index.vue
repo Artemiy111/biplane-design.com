@@ -2,9 +2,8 @@
 import { toast } from 'vue-sonner'
 import { EllipsisVertical, LoaderCircle } from 'lucide-vue-next'
 import ProjectSheet from '~/components/admin/ProjectSheet.vue'
-import type { FormSchema } from '~/components/admin/ProjectSheet.vue'
-import type { CategoryDto, GroupDto, ProjectDto } from '~/server/use-cases/types'
-import { useElementBounding, useElementSize } from '@vueuse/core'
+import type { SheetMode } from '~/components/admin/ProjectSheet.vue'
+import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~/server/use-cases/types'
 
 definePageMeta({
   middleware: 'auth',
@@ -48,7 +47,9 @@ function getGroupById(id: number) {
 function useSelected() {
   const selected = ref<SelectedGroupAndCategoryState>({ group: null, category: null })
 
-  const setSelected = (newSelected: SelectedGroupAndCategoryState) => { selected.value = newSelected }
+  const setSelected = (newSelected: SelectedGroupAndCategoryState) => {
+    selected.value = newSelected
+  }
 
   return {
     selected: readonly(selected),
@@ -85,38 +86,44 @@ watch(fetchError, () => {
 })
 
 const projectSheetRef = ref<InstanceType<typeof ProjectSheet> | null>(null)
-async function onSubmit(values: FormSchema, prev: FormSchema | null) {
-  if (!prev) {
-    try {
-      await $fetch('/api/projects', {
-        method: 'POST',
-        body: values,
-      })
-      projectSheetRef.value?.close()
-      toast.success('Проект создан')
+async function onSubmit(dto: CreateProjectDto | UpdateProjectDto, mode: SheetMode) {
+  switch (mode) {
+    case 'create': {
+      const createDto = dto as CreateProjectDto
+      try {
+        await $fetch('/api/projects', {
+          method: 'POST',
+          body: createDto,
+        })
+        projectSheetRef.value?.close()
+        toast.success('Проект создан')
+      }
+      catch (_e) {
+        const e = _e as Error
+        toast.error(e.message)
+      }
+      refresh()
+      break
     }
-    catch (_e) {
-      const e = _e as Error
-      toast.error(e.message)
+    case 'update': {
+      const updateDto = dto as UpdateProjectDto
+      try {
+        await $fetch(`/api/projects/${updateDto.id}`, {
+          method: 'PUT',
+          body: updateDto,
+        })
+        projectSheetRef.value?.close()
+        toast.success('Проект изменён')
+      }
+      catch (_e) {
+        const e = _e as Error
+        toast.error(e.message)
+      }
+
+      refresh()
+      break
     }
-    refresh()
-    return
   }
-
-  try {
-    await $fetch(`/api/projects/${prev.id}`, {
-      method: 'PUT',
-      body: values,
-    })
-    projectSheetRef.value?.close()
-    toast.success('Проект изменён')
-  }
-  catch (_e) {
-    const e = _e as Error
-    toast.error(e.message)
-  }
-
-  refresh()
 }
 
 async function deleteProject(id: number) {
@@ -145,20 +152,27 @@ function openProjectSheet(project: ProjectDto) {
     yearStart: project.yearStart,
     yearEnd: project.yearEnd,
     categoryId: project.categoryId,
-    images: [],
+    order: project.order,
+    images: project.images,
   })
 }
 </script>
 
 <template>
-  <main v-if="pending" class="container flex flex-grow flex-col items-center justify-center">
+  <main
+    v-if="pending"
+    class="container flex flex-grow flex-col items-center justify-center"
+  >
     <LoaderCircle
       :size="60"
       :stroke-width="1.5"
       class="animate-spin"
     />
   </main>
-  <main v-else class="container grid grid-cols-[300px,1fr] ">
+  <main
+    v-else
+    class="container grid grid-cols-[300px,1fr] "
+  >
     <aside class="flex flex-col gap-4 p-4">
       <li
         v-for="group in groups"
@@ -193,7 +207,10 @@ function openProjectSheet(project: ProjectDto) {
       </li>
     </aside>
 
-    <section v-if="groups?.length" class="flex flex-col grow-1 w-full">
+    <section
+      v-if="groups?.length"
+      class="flex flex-col grow-1 w-full"
+    >
       <ProjectSheet
         v-if="groups.length"
         ref="projectSheetRef"
@@ -212,77 +229,79 @@ function openProjectSheet(project: ProjectDto) {
         </Button>
       </section>
 
-      <ScrollArea class="w-full h-dvh" >
+      <ScrollArea class="w-full h-dvh">
         <Table class="grid grid-cols-1">
-        <TableHeader class="w-full">
-          <TableRow class="grid w-max grid-cols-[200px_200px_200px_200px_200px_140px_180px_200px_200px_100px]">
-            <TableHead>Превью</TableHead>
-            <TableHead>Проект</TableHead>
-            <TableHead>Uri</TableHead>
-            <TableHead>Группа</TableHead>
-            <TableHead>Категория</TableHead>
-            <TableHead>Год начала</TableHead>
-            <TableHead>Год завершения</TableHead>
-            <TableHead>Статус</TableHead>
-            <TableHead>Расположение</TableHead>
-            <TableHead />
-          </TableRow>
-        </TableHeader>
-        <TableBody  class="w-full" >
-          <TableRow
-            v-for="project in selectedCategoryOrGroupProjects"
-            :key="project.id"
-            class="cursor-pointer w-max grid grid-cols-[200px_200px_200px_200px_200px_140px_180px_200px_200px_100px]"
-            @click="navigateTo(`/admin/projects/${project.uri}`)"
-          >
-            <TableCell>
-              <NuxtImg
-                v-if="project.images.length"
-                format="avif,webp,png,jpg"
-                :src="project.images[0].url"
-                :alt="project.images[0].alt"
-                class="aspect-video w-full object-cover"
-              />
-            </TableCell>
-            <TableCell>
-              <NuxtLink :to="`/admin/projects/${project.uri}`" />
-              {{ project.title }}
-            </TableCell>
-            <TableCell>{{ project.uri }}</TableCell>
-            <TableCell>{{ getGroupById(getCategoryById(project.categoryId).groupId).title }}</TableCell>
-            <TableCell>{{ getCategoryById(project.categoryId).title }}</TableCell>
-            <TableCell>{{ project.yearStart }}</TableCell>
-            <TableCell>{{ project.yearEnd }}</TableCell>
-            <TableCell>{{ project.status }}</TableCell>
-            <TableCell>{{ project.location }}</TableCell>
-            <TableCell @click.stop>
-              <Popover>
-                <PopoverTrigger as-child>
-                  <Button
-                    variant="ghost"
-                  >
-                    <EllipsisVertical />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent class="z-10 flex w-fit flex-col gap-4">
-                  <Button
-                    variant="outline"
-                    @click="openProjectSheet(project)"
-                  >
-                    Изменить
-                  </Button>
-                  <Button
-                    variant="destructiveOutline"
-                    @click="deleteProject(project.id)"
-                  >
-                    Удалить
-                  </Button>
-                </PopoverContent>
-              </Popover>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+          <TableHeader class="w-full">
+            <TableRow class="grid w-max grid-cols-[40px_200px_200px_200px_200px_200px_140px_180px_200px_200px_100px]">
+              <TableHead>№</TableHead>
+              <TableHead>Превью</TableHead>
+              <TableHead>Проект</TableHead>
+              <TableHead>Uri</TableHead>
+              <TableHead>Группа</TableHead>
+              <TableHead>Категория</TableHead>
+              <TableHead>Год начала</TableHead>
+              <TableHead>Год завершения</TableHead>
+              <TableHead>Статус</TableHead>
+              <TableHead>Расположение</TableHead>
+              <TableHead />
+            </TableRow>
+          </TableHeader>
+          <TableBody class="w-full">
+            <TableRow
+              v-for="project in selectedCategoryOrGroupProjects"
+              :key="project.id"
+              class="cursor-pointer w-max grid grid-cols-[40px_200px_200px_200px_200px_200px_140px_180px_200px_200px_100px]"
+              @click="navigateTo(`/admin/projects/${project.uri}`)"
+            >
+              <TableCell>{{ project.order }}</TableCell>
+              <TableCell>
+                <NuxtImg
+                  v-if="project.images.length"
+                  format="avif,webp,png,jpg"
+                  :src="project.images[0].url"
+                  :alt="project.images[0].alt"
+                  class="aspect-video w-full object-cover"
+                />
+              </TableCell>
+              <TableCell>
+                <NuxtLink :to="`/admin/projects/${project.uri}`" />
+                {{ project.title }}
+              </TableCell>
+              <TableCell>{{ project.uri }}</TableCell>
+              <TableCell>{{ getGroupById(getCategoryById(project.categoryId).groupId).title }}</TableCell>
+              <TableCell>{{ getCategoryById(project.categoryId).title }}</TableCell>
+              <TableCell>{{ project.yearStart }}</TableCell>
+              <TableCell>{{ project.yearEnd }}</TableCell>
+              <TableCell>{{ project.status }}</TableCell>
+              <TableCell>{{ project.location }}</TableCell>
+              <TableCell @click.stop>
+                <Popover>
+                  <PopoverTrigger as-child>
+                    <Button
+                      variant="ghost"
+                    >
+                      <EllipsisVertical />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent class="z-10 flex w-fit flex-col gap-4">
+                    <Button
+                      variant="outline"
+                      @click="openProjectSheet(project)"
+                    >
+                      Изменить
+                    </Button>
+                    <Button
+                      variant="destructiveOutline"
+                      @click="deleteProject(project.id)"
+                    >
+                      Удалить
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </ScrollArea>
     </section>
   </main>
