@@ -71,7 +71,7 @@ export type CategoryDbDto = Omit<CategoryDto, 'projects'> & {
 }
 
 export type CreateCategoryDto = Omit<CategoryDto, 'id' | 'order' | 'projects'>
-export type UpdateCategoryDto = Omit<CategoryDto, 'projects'>
+export type UpdateCategoryDto = Omit<CategoryDto, 'projects' | 'groupId'>
 
 export interface ICategoryRepo {
   getOne: (id: CategoryId) => Promise<Result<CategoryDto, Error>>
@@ -162,7 +162,7 @@ export type CreateImageDto = Omit<ImageDto, 'id' | 'url' | 'order'> & {
   data: Buffer
   type: string
 }
-export type UpdateImageDto = Omit<ImageDto, 'url'>
+export type UpdateImageDto = Omit<ImageDto, 'url' | 'projectId'>
 
 export interface IImageRepo {
   getOne: (id: ProjectId) => Promise<Result<ImageDto, Error>>

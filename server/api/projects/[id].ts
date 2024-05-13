@@ -18,14 +18,14 @@ export default defineEventHandler(async (event) => {
 
     case 'PUT': {
       const Body = z.object({
-        id: z.number(),
         categoryId: z.number(),
+        id: z.number(),
         title: z.string(),
         uri: z.string(),
-        location: z.string(),
+        status: z.string(),
         yearStart: z.number().nullable(),
         yearEnd: z.number().nullable(),
-        status: z.string(),
+        location: z.string(),
         order: z.number().min(1),
       })
       const body = await readValidatedBody(event, Body.parse)

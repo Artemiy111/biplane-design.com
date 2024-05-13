@@ -29,10 +29,10 @@ export default defineEventHandler(async (event) => {
         categoryId: z.number(),
         title: z.string(),
         uri: z.string(),
-        location: z.string(),
+        status: z.string(),
         yearStart: z.number().nullable(),
         yearEnd: z.number().nullable(),
-        status: z.string(),
+        location: z.string(),
       })
       const body = await readValidatedBody(event, Body.parse)
       const res = await createProjectUseCase.execute(body, dummyLogin)

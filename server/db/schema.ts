@@ -1,4 +1,3 @@
-/* eslint-disable ts/no-use-before-define */
 import {
   integer,
   pgTable,
@@ -25,7 +24,6 @@ export const groups = pgTable('groups', {
 
 export type GroupDb = typeof groups.$inferSelect
 export type GroupDbCreate = Omit<WithoutDates<GroupDb>, 'id'>
-
 export type GroupDbUpdate = WithoutDates<GroupDb>
 
 export const groupsRelations = relations(groups, ({ many }) => ({
@@ -56,9 +54,7 @@ export const categories = pgTable(
 
 export type CategoryDb = typeof categories.$inferSelect
 export type CategoryDbCreate = Omit<WithoutDates<CategoryDb>, 'id'>
-export type CategoryDbUpdate = WithoutDates<CategoryDb>
-
-export type CategoryCreate = typeof categories.$inferSelect
+export type CategoryDbUpdate = Omit<WithoutDates<CategoryDb>, 'groupId'>
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   group: one(groups, {
@@ -98,8 +94,6 @@ export type ProjectDb = typeof projects.$inferSelect
 export type ProjectDbCreate = Omit<WithoutDates<ProjectDb>, 'id'>
 export type ProjectDbUpdate = WithoutDates<ProjectDb>
 
-export type ProjectCreate = typeof projects.$inferInsert
-
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   category: one(categories, {
     fields: [projects.categoryId],
@@ -137,10 +131,7 @@ export const images = pgTable(
 
 export type ImageDb = typeof images.$inferSelect
 export type ImageDbCreate = Omit<WithoutDates<ImageDb>, 'id'>
-export type ImageDbUpdate = WithoutDates<ImageDb>
-
-export type ImageCreate = typeof images.$inferInsert
-export type ImageUpdate = Partial<Pick<ImageDb, 'filename' | 'alt' | 'order'>>
+export type ImageDbUpdate = Omit<WithoutDates<ImageDb>, 'projectId'>
 
 export const imageRelations = relations(images, ({ one }) => ({
   project: one(projects, {
