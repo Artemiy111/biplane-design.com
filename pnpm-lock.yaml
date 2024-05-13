@@ -18,8 +18,8 @@ dependencies:
     specifier: ^2.43.1
     version: 2.43.1
   '@tanstack/vue-table':
-    specifier: ^8.16.0
-    version: 8.16.0(vue@3.4.27)
+    specifier: ^8.17.0
+    version: 8.17.0(vue@3.4.27)
   '@tresjs/cientos':
     specifier: ^3.9.0
     version: 3.9.0(@tresjs/core@3.9.0)(three@0.164.1)(tweakpane@4.0.3)(vue@3.4.27)
@@ -116,8 +116,8 @@ devDependencies:
     specifier: ^0.5.1
     version: 0.5.1
   '@types/bun':
-    specifier: ^1.1.1
-    version: 1.1.1
+    specifier: ^1.1.2
+    version: 1.1.2
   '@types/node':
     specifier: ^20.12.11
     version: 20.12.11
@@ -4087,8 +4087,8 @@ packages:
     resolution: {integrity: sha512-KnPRCkQTyqhanNC0K63GBG3wA8I+D1fQuVnAvcBF8f13akOKeQp1gSbu6f77zCxhEk727iV5oQnbHLYzHrECLg==}
     dev: false
 
-  /@tanstack/vue-table@8.16.0(vue@3.4.27):
-    resolution: {integrity: sha512-CsmX3sEjR1BMlNk9nBYlrnWlAOJR34pirbmpgLN0UZs7N1Z66U+nEqaqNm4FnvkEnauODuHWVbFv3QZuoJ0BXw==}
+  /@tanstack/vue-table@8.17.0(vue@3.4.27):
+    resolution: {integrity: sha512-9YaS1j2be59/lRVyy3tWPGfqGtSm40UIpzCmcwJPcw3KRNcHXj+RefhWu7SPvaH4Q6TV0qsZU9JPLlXfB9faGA==}
     engines: {node: '>=12'}
     peerDependencies:
       vue: '>=3.2'
@@ -4468,10 +4468,10 @@ packages:
     resolution: {integrity: sha512-kMCNaZCJugWI86xiEHaY338CU5JpD0B97p1j1IKNn/Zto8PgACjQx0UxbHjmOcLl/dDOBnItwD07KmCs75pxtQ==}
     dev: false
 
-  /@types/bun@1.1.1:
-    resolution: {integrity: sha512-lUe9rLMhgDCViciZtgDj5CMl2u7uTq/IP149kSZH/Si6FWkCioximABFf+baRQgbm8QlH4bzT0qJRteQFNqeGA==}
+  /@types/bun@1.1.2:
+    resolution: {integrity: sha512-pRBDD3EDqPf83qe95i3EpYu5G2J8bbb78a3736vnCm2K8YWtEE5cvJUq2jkKvJhW07YTfQtbImywIwRhWL8z3Q==}
     dependencies:
-      bun-types: 1.1.6
+      bun-types: 1.1.8
     dev: true
 
   /@types/draco3d@1.4.9:
@@ -4506,12 +4506,6 @@ packages:
     resolution: {integrity: sha512-LnwD+mUEfxWMa1QpDraczIn6k0Ee3SMicuYSSzS6ZYl2gKS09EClnJYGd8Du6rfc5r/GZEk5o1mRb8TaTj03sQ==}
     dependencies:
       '@types/unist': 2.0.10
-    dev: true
-
-  /@types/node@20.11.30:
-    resolution: {integrity: sha512-dHM6ZxwlmuZaRmUPfv1p+KrdD1Dci04FbdEm/9wEMouFqxYoFl5aMkt0VMAUtYRQDyYvD41WJLukhq/ha3YuTw==}
-    dependencies:
-      undici-types: 5.26.5
     dev: true
 
   /@types/node@20.12.11:
@@ -6379,10 +6373,10 @@ packages:
     resolution: {integrity: sha512-zhaCDicdLuWN5UbN5IMnFqNMhNfo919sH85y2/ea+5Yg9TsTkeZxpL+JLbp6cgYFS4sRLp3YV4S6yDuqVWHYOw==}
     engines: {node: '>=6'}
 
-  /bun-types@1.1.6:
-    resolution: {integrity: sha512-LK2aaJdBBTUkDyN+kRiJHLF3VGrAcdkEHrbBvbmTkccShPw6ZalxxKjWSBJwn4UkikhZdrdA87bZWmfUgkRUYg==}
+  /bun-types@1.1.8:
+    resolution: {integrity: sha512-dwhfuUKSGK8hm5Llcvb5+ejRh+4mIt8ibObJVKhZBsi0ScpXmt+AlaS1eDW6uRXCHj084Qt0kIqAJ08/7ZGC9Q==}
     dependencies:
-      '@types/node': 20.11.30
+      '@types/node': 20.12.11
       '@types/ws': 8.5.10
     dev: true
 

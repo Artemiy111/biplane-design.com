@@ -13,7 +13,7 @@ import type {
 } from '~/server/use-cases/types'
 
 export const imageDbMapper = {
-  toDbDto(db: ImageDb): ImageDbDto {
+  toDb(db: ImageDb): ImageDbDto {
     return {
       projectId: db.projectId,
       id: db.id,
@@ -22,7 +22,7 @@ export const imageDbMapper = {
       alt: db.alt,
     }
   },
-  toCreate(dto: CreateImageDto, order: number): ImageDbCreate {
+  toDbCreate(dto: CreateImageDto, order: number): ImageDbCreate {
     return {
       projectId: dto.projectId,
       filename: dto.filename,
@@ -30,16 +30,15 @@ export const imageDbMapper = {
       order,
     }
   },
-  toUpdate(dto: UpdateImageDto): ImageDbUpdate {
+  toDbUpdate(dto: UpdateImageDto): ImageDbUpdate {
     return {
       id: dto.id,
-      projectId: dto.projectId,
       filename: dto.filename,
       alt: dto.alt,
       order: dto.order,
     }
   },
-  toUpdateWithoutOrder(db: ImageDbCreate): Omit<ImageDbCreate, 'order'> {
+  toDbUpdateWithoutOrder(db: ImageDbUpdate): Omit<ImageDbUpdate, 'order'> {
     const { order: _order, ...toUpdate } = db
     return toUpdate
   },
@@ -63,7 +62,7 @@ export class ImageDbRepo implements IImageDbRepo {
 
   async getAll() {
     try {
-      const all = (await this.db.select().from(images).orderBy(images.order)).map(imageDbMapper.toDbDto)
+      const all = (await this.db.select().from(images).orderBy(images.order)).map(imageDbMapper.toDb)
       return ok(all)
     }
     catch (_e) {
@@ -73,7 +72,7 @@ export class ImageDbRepo implements IImageDbRepo {
 
   async getAllByProjectId(projectId: ProjectId) {
     try {
-      const all = (await this.db.select().from(images).orderBy(images.order).where(eq(images.projectId, projectId))).map(imageDbMapper.toDbDto)
+      const all = (await this.db.select().from(images).orderBy(images.order).where(eq(images.projectId, projectId))).map(imageDbMapper.toDb)
       return ok(all)
     }
     catch (_e) {
@@ -101,7 +100,7 @@ export class ImageDbRepo implements IImageDbRepo {
         if (!nextOrder.ok)
           return tx.rollback()
 
-        const toCreate = imageDbMapper.toCreate(dto, nextOrder.value)
+        const toCreate = imageDbMapper.toDbCreate(dto, nextOrder.value)
 
         const createdInDb = (await tx.insert(images).values(toCreate).returning())[0]
         const created = await this.getOne(createdInDb.id, tx)
@@ -116,47 +115,43 @@ export class ImageDbRepo implements IImageDbRepo {
     }
   }
 
-  private async updateOrder(id: ImageId, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: ImageDbDto, newOrder: number, tx?: DbTransaction) {
+    if (dto.order === newOrder)
+      return ok(undefined)
+
     const ctx = tx || this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const _image = await this.getOne(id, tx)
-        if (!_image.ok)
-          return _image
-
-        const image = _image.value
-
-        if (image.order === newOrder)
-          return ok(undefined)
-        const nextOrder = await this.getNextOrder(image.projectId, tx)
+        const nextOrder = await this.getNextOrder(dto.projectId, tx)
         if (!nextOrder.ok)
           return nextOrder
+
         if (newOrder > nextOrder.value)
           return err(new Error('New order is out of range'))
 
-        if (newOrder > image.order) {
+        if (newOrder > dto.order) {
           await tx.update(images).set({ order: sql`(${images.order} - 1) * 1000` }).where(and(
-            eq(images.projectId, image.projectId),
-            gt(images.order, image.order),
+            eq(images.projectId, dto.projectId),
+            gt(images.order, dto.order),
             lte(images.order, newOrder),
           ))
         }
-        else if (newOrder < image.order) {
+        else if (newOrder < dto.order) {
           await tx.update(images).set({ order: sql`(${images.order} + 1) * 1000` }).where(and(
-            eq(images.projectId, image.projectId),
+            eq(images.projectId, dto.projectId),
             gte(images.order, newOrder),
-            lt(images.order, image.order),
+            lt(images.order, dto.order),
           ))
         }
 
-        await tx.update(images).set({ order: newOrder }).where(eq(images.id, image.id))
+        await tx.update(images).set({ order: newOrder }).where(eq(images.id, dto.id))
         await tx.update(images).set({ order: sql`${images.order} / 1000` }).where(gte(images.order, 1000))
         return ok(undefined)
       })
     }
     catch (_e) {
-      return err(new Error(`Could not update order of image with id \`${id}\``))
+      return err(new Error(`Could not update order of image with id \`${dto.id}\``))
     }
   }
 
@@ -167,16 +162,16 @@ export class ImageDbRepo implements IImageDbRepo {
       return await ctx.transaction(async (tx) => {
         const image = await this.getOne(dto.id, tx)
         if (!image.ok) {
-          return tx.rollback()
+          return image
         }
 
-        const orderUpdated = await this.updateOrder(image.value.id, dto.order, tx)
+        const orderUpdated = await this.updateOrder(image.value, dto.order, tx)
         if (!orderUpdated.ok) {
           return tx.rollback()
         }
 
         await tx.update(images)
-          .set(imageDbMapper.toUpdateWithoutOrder(dto))
+          .set(imageDbMapper.toDbUpdateWithoutOrder(dto))
           .where(eq(images.id, dto.id))
         const updatedImage = await this.getOne(dto.id, tx)
         if (!updatedImage.ok)
