@@ -57,7 +57,6 @@ const formSchema = z.object({
     .number()
     .min(MIN_YEAR, `Год завершения не может быть меньше ${MIN_YEAR}`)
     .max(MAX_YEAR, `Год завершения не может быть больше ${MAX_YEAR}`)
-
     .nullable(),
   location: z.string().trim().min(3, 'Минимум 3 символа'),
 

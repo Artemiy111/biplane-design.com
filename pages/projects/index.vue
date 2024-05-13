@@ -155,17 +155,20 @@ function changeCategory(category: CategoryDto) {
         :to="`/projects/${p.uri}`"
         class="flex flex-col transition-colors hover:bg-primary-foreground"
       >
-        <Carousel class="aspect-video w-full">
+        <Carousel :opts="{active: false}" class="aspect-video w-full">
           <CarouselContent>
             <CarouselItem
-              v-for="img in p.images"
+              v-for="img in p.images.slice(0, 1)"
               :key="img.filename"
             >
               <NuxtImg
+                loading="lazy"
                 format="avif,webp,png,jpg"
+                :width="500"
+                :height="500"
                 :src="img.url"
                 :alt="img.alt"
-                class="aspect-video w-full object-cover"
+                class="aspect-video object-fill w-full bg-primary-foreground"
               />
             </CarouselItem>
           </CarouselContent>

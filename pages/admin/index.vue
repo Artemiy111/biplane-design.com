@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
-import { EllipsisVertical } from 'lucide-vue-next'
+import { EllipsisVertical, LoaderCircle } from 'lucide-vue-next'
 import ProjectSheet from '~/components/admin/ProjectSheet.vue'
 import type { FormSchema } from '~/components/admin/ProjectSheet.vue'
 import type { CategoryDto, GroupDto, ProjectDto } from '~/server/use-cases/types'
+import { useElementBounding, useElementSize } from '@vueuse/core'
 
 definePageMeta({
   middleware: 'auth',
@@ -17,7 +18,7 @@ useSeoMeta({
 })
 
 const { md } = useScreenSize()
-const { data: _groups, error: fetchError, refresh } = await useLazyFetch<GroupDto[]>('/api/groups')
+const { data: _groups, pending, error: fetchError, refresh } = await useLazyFetch<GroupDto[]>('/api/groups')
 
 const groups = computed(() => _groups.value || [])
 const groupsMap = computed(() => new Map(groups.value.map(g => [g.id, g])))
@@ -150,7 +151,14 @@ function openProjectSheet(project: ProjectDto) {
 </script>
 
 <template>
-  <main class="container grid grid-cols-[300px,1fr]">
+  <main v-if="pending" class="container flex flex-grow flex-col items-center justify-center">
+    <LoaderCircle
+      :size="60"
+      :stroke-width="1.5"
+      class="animate-spin"
+    />
+  </main>
+  <main v-else class="container grid grid-cols-[300px,1fr] ">
     <aside class="flex flex-col gap-4 p-4">
       <li
         v-for="group in groups"
@@ -185,7 +193,7 @@ function openProjectSheet(project: ProjectDto) {
       </li>
     </aside>
 
-    <section v-if="groups?.length">
+    <section v-if="groups?.length" class="flex flex-col grow-1 w-full">
       <ProjectSheet
         v-if="groups.length"
         ref="projectSheetRef"
@@ -197,15 +205,17 @@ function openProjectSheet(project: ProjectDto) {
         <Button
           :size="md ? 'sm' : 'default'"
           :variant="md ? 'secondary' : 'default'"
+          class="w-fit"
           @click="projectSheetRef?.open()"
         >
           Создать проект
         </Button>
       </section>
 
-      <Table class="">
-        <TableHeader>
-          <TableRow>
+      <ScrollArea class="w-full h-dvh" >
+        <Table class="grid grid-cols-1">
+        <TableHeader class="w-full">
+          <TableRow class="grid w-max grid-cols-[200px_200px_200px_200px_200px_140px_180px_200px_200px_100px]">
             <TableHead>Превью</TableHead>
             <TableHead>Проект</TableHead>
             <TableHead>Uri</TableHead>
@@ -218,11 +228,11 @@ function openProjectSheet(project: ProjectDto) {
             <TableHead />
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody  class="w-full" >
           <TableRow
             v-for="project in selectedCategoryOrGroupProjects"
             :key="project.id"
-            class="cursor-pointer"
+            class="cursor-pointer w-max grid grid-cols-[200px_200px_200px_200px_200px_140px_180px_200px_200px_100px]"
             @click="navigateTo(`/admin/projects/${project.uri}`)"
           >
             <TableCell>
@@ -231,7 +241,7 @@ function openProjectSheet(project: ProjectDto) {
                 format="avif,webp,png,jpg"
                 :src="project.images[0].url"
                 :alt="project.images[0].alt"
-                class="aspect-video max-h-[100px] w-fit object-cover"
+                class="aspect-video w-full object-cover"
               />
             </TableCell>
             <TableCell>
@@ -273,6 +283,7 @@ function openProjectSheet(project: ProjectDto) {
           </TableRow>
         </TableBody>
       </Table>
+      </ScrollArea>
     </section>
   </main>
 </template>
