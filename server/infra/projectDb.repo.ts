@@ -6,7 +6,7 @@ import { type ProjectDbCreate, type ProjectDbDeep, type ProjectDbUpdate, project
 import type { ProjectDbDto, CreateProjectDto, IProjectDbRepo, ProjectId, UpdateProjectDto, CategoryId } from '~/server/use-cases/types'
 
 export const projectDbMapper = {
-  toDbDto(db: ProjectDbDeep): ProjectDbDto {
+  toDb(db: ProjectDbDeep): ProjectDbDto {
     return {
       categoryId: db.categoryId,
       id: db.id,
@@ -17,10 +17,10 @@ export const projectDbMapper = {
       location: db.location,
       status: db.status,
       order: db.order,
-      images: db.images.map(imageDbMapper.toDbDto),
+      images: db.images.map(imageDbMapper.toDb),
     }
   },
-  toCreate(dto: CreateProjectDto, order: number): ProjectDbCreate {
+  toDbCreate(dto: CreateProjectDto, order: number): ProjectDbCreate {
     return {
       categoryId: dto.categoryId,
       title: dto.title,
@@ -32,7 +32,7 @@ export const projectDbMapper = {
       order,
     }
   },
-  toUpdate(dto: UpdateProjectDto): ProjectDbUpdate {
+  toDbUpdate(dto: UpdateProjectDto): ProjectDbUpdate {
     return {
       categoryId: dto.categoryId,
       id: dto.id,
@@ -45,7 +45,7 @@ export const projectDbMapper = {
       order: dto.order,
     }
   },
-  toUpdateWithoutOrder(db: ProjectDbUpdate): Omit<ProjectDbUpdate, 'order'> {
+  toDbUpdateWithoutOrder(db: ProjectDbUpdate): Omit<ProjectDbUpdate, 'order'> {
     const { order: _order, ...toUpdate } = db
     return toUpdate
   },
@@ -54,10 +54,10 @@ export const projectDbMapper = {
 export class ProjectDbRepo implements IProjectDbRepo {
   constructor(private db: Db) { }
 
-  async getNextOrder(tx?: DbTransaction) {
+  private async getNextOrder(categoryId: CategoryId, tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
-      const count = (await ctx.select().from(projects)).length
+      const count = (await ctx.select().from(projects).where(eq(projects.categoryId, categoryId))).length
       return ok(count + 1)
     }
     catch (e) {
@@ -78,7 +78,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
       if (!project)
         return err(new Error(`Project with id \`${id}\` is not found`))
 
-      return ok(projectDbMapper.toDbDto(project))
+      return ok(projectDbMapper.toDb(project))
     }
     catch (_e) {
       return err(new Error(`Could not get project`))
@@ -98,7 +98,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
       if (!project)
         return err(new Error(`Project with uri \`${uri}\` is not found`))
 
-      return ok(projectDbMapper.toDbDto(project))
+      return ok(projectDbMapper.toDb(project))
     }
     catch (_e) {
       return err(new Error(`Could not get project by uri \`${uri}\``))
@@ -117,7 +117,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
         },
         orderBy: projects => projects.order,
       }))
-      return ok(projectsByCategoryId.map(projectDbMapper.toDbDto))
+      return ok(projectsByCategoryId.map(projectDbMapper.toDb))
     }
     catch (_e) {
       return err(new Error(`Could not get projects`))
@@ -135,7 +135,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
         },
         orderBy: projects => projects.order,
       }))
-      return ok(projects.map(projectDbMapper.toDbDto))
+      return ok(projects.map(projectDbMapper.toDb))
     }
     catch (_e) {
       return err(new Error(`Could not get projects`))
@@ -147,11 +147,11 @@ export class ProjectDbRepo implements IProjectDbRepo {
 
     try {
       return ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(tx)
+        const nextOrder = await this.getNextOrder(dto.categoryId, tx)
         if (!nextOrder.ok)
           return tx.rollback()
 
-        const toCreate = projectDbMapper.toCreate(dto, nextOrder.value)
+        const toCreate = projectDbMapper.toDbCreate(dto, nextOrder.value)
 
         const createdInDb = (await tx.insert(projects).values(toCreate).returning())[0]
         const created = await this.getOne(createdInDb.id, tx)
@@ -166,7 +166,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  private async updateOrder(dto: ProjectDbDto, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: UpdateProjectDto, newOrder: number, tx?: DbTransaction) {
     if (dto.order === newOrder)
       return ok(undefined)
 
@@ -174,7 +174,7 @@ export class ProjectDbRepo implements IProjectDbRepo {
 
     try {
       return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(tx)
+        const nextOrder = await this.getNextOrder(dto.categoryId, tx)
         if (!nextOrder.ok)
           return err(nextOrder.error)
 
@@ -183,19 +183,22 @@ export class ProjectDbRepo implements IProjectDbRepo {
 
         if (newOrder > dto.order) {
           await tx.update(projects).set({ order: sql`(${projects.order} - 1) * 1000` }).where(and(
+            eq(projects.categoryId, dto.categoryId),
             gt(projects.order, dto.order),
-            lte(projects.order, dto.order),
+            lte(projects.order, newOrder),
           ))
         }
         else if (newOrder < dto.order) {
           await tx.update(projects).set({ order: sql`(${projects.order} + 1) * 1000` }).where(and(
+            eq(projects.categoryId, dto.categoryId),
             gte(projects.order, newOrder),
             lt(projects.order, dto.order),
           ))
         }
 
-        await tx.update(projects).set({ order: dto.order }).where(eq(projects.uri, dto.uri))
+        await tx.update(projects).set({ order: newOrder }).where(eq(projects.id, dto.id))
         await tx.update(projects).set({ order: sql`${projects.order} / 1000` }).where(gte(projects.order, 1000))
+        return ok(undefined)
       })
     }
     catch (_e) {
@@ -210,13 +213,33 @@ export class ProjectDbRepo implements IProjectDbRepo {
       return await ctx.transaction(async (tx) => {
         const project = await this.getOne(dto.id, tx)
         if (!project.ok)
-          return tx.rollback()
+          return project
 
-        await this.updateOrder(project.value, dto.order, tx)
+        const isProjectCategoryUpdated = dto.categoryId !== project.value.categoryId
+        if (isProjectCategoryUpdated) {
+          console.log(dto.categoryId, project.value.categoryId)
+          const tmpOrder = await this.getNextOrder(project.value.categoryId, tx)
+          if (!tmpOrder.ok)
+            return tmpOrder
+          console.log('tmp prder', tmpOrder)
+          await this.updateOrder(project.value, tmpOrder.value, tx)
 
-        await tx.update(projects)
-          .set(projectDbMapper.toUpdateWithoutOrder(projectDbMapper.toUpdate(dto)))
-          .where(eq(projects.id, dto.id))
+          await tx.update(projects)
+            .set(projectDbMapper.toDbUpdateWithoutOrder(dto))
+            .where(eq(projects.id, dto.id))
+
+          const newOrder = await this.getNextOrder(dto.categoryId, tx)
+          if (!newOrder.ok)
+            return tx.rollback()
+          console.log('new order', newOrder)
+          await this.updateOrder(dto, newOrder.value - 1, tx)
+        }
+        else {
+          await this.updateOrder(project.value, dto.order, tx)
+          await tx.update(projects)
+            .set(projectDbMapper.toDbUpdateWithoutOrder(dto))
+            .where(eq(projects.id, dto.id))
+        }
 
         const updatedProject = await this.getOne(dto.id, tx)
         if (!updatedProject.ok)

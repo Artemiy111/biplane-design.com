@@ -1,5 +1,4 @@
 import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
-import type { Result } from '../shared/result'
 import { err, ok } from '../shared/result'
 import { categoryDbMapper } from './categoryDb.repo'
 import type {
@@ -20,7 +19,7 @@ export const groupDbMapper = {
       title: db.title,
       uri: db.uri,
       order: db.order,
-      categories: db.categories.map(categoryDbMapper.toDbDto),
+      categories: db.categories.map(categoryDbMapper.toDb),
     }
   },
   toCreate(dto: CreateGroupDto, order: number): GroupDbCreate {
@@ -58,43 +57,6 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
-  private async updateOrder(dto: GroupDbDto, newOrder: number, tx?: DbTransaction) {
-    if (dto.order === newOrder)
-      return ok(undefined)
-
-    const ctx = tx || this.db
-
-    try {
-      return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder()
-        if (!nextOrder.ok)
-          return err(nextOrder.error)
-
-        if (newOrder > nextOrder.value)
-          return err('New order is out of range')
-
-        if (newOrder > dto.order) {
-          await tx.update(groups).set({ order: sql`(${groups.order} - 1) * 1000` }).where(and(
-            gt(groups.order, dto.order),
-            lte(groups.order, dto.order),
-          ))
-        }
-        else if (newOrder < dto.order) {
-          await tx.update(groups).set({ order: sql`(${groups.order} + 1) * 1000` }).where(and(
-            gte(groups.order, newOrder),
-            lt(groups.order, dto.order),
-          ))
-        }
-
-        await tx.update(groups).set({ order: dto.order }).where(eq(groups.uri, dto.uri))
-        await tx.update(groups).set({ order: sql`${groups.order} / 1000` }).where(gte(groups.order, 1000))
-      })
-    }
-    catch (_e) {
-      return err(new Error(`Could not update order of group with id \`${dto.id}\``))
-    }
-  }
-
   async getOne(id: GroupId, tx?: DbTransaction) {
     const ctx = tx || this.db
     try {
@@ -117,7 +79,7 @@ export class GroupDbRepo implements IGroupDbRepo {
           orderBy: groups => groups.order,
         }))
       if (!group)
-        return err(new Error(`Group with id \`${id}\ does not exist`))
+        return err(new Error(`Group with id \`${id}\` does not exist`))
 
       return ok(groupDbMapper.toDbDto(group))
     }
@@ -179,6 +141,44 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
+  private async updateOrder(dto: GroupDbDto, newOrder: number, tx?: DbTransaction) {
+    if (dto.order === newOrder)
+      return ok(undefined)
+
+    const ctx = tx || this.db
+
+    try {
+      return await ctx.transaction(async (tx) => {
+        const nextOrder = await this.getNextOrder(tx)
+        if (!nextOrder.ok)
+          return nextOrder
+
+        if (newOrder > nextOrder.value)
+          return err(new Error('New order is out of range'))
+
+        if (newOrder > dto.order) {
+          await tx.update(groups).set({ order: sql`(${groups.order} - 1) * 1000` }).where(and(
+            gt(groups.order, dto.order),
+            lte(groups.order, newOrder),
+          ))
+        }
+        else if (newOrder < dto.order) {
+          await tx.update(groups).set({ order: sql`(${groups.order} + 1) * 1000` }).where(and(
+            gte(groups.order, newOrder),
+            lt(groups.order, dto.order),
+          ))
+        }
+
+        await tx.update(groups).set({ order: newOrder }).where(eq(groups.uri, dto.uri))
+        await tx.update(groups).set({ order: sql`${groups.order} / 1000` }).where(gte(groups.order, 1000))
+        return ok(undefined)
+      })
+    }
+    catch (_e) {
+      return err(new Error(`Could not update order of group with id \`${dto.id}\``))
+    }
+  }
+
   async update(dto: UpdateGroupDto, tx?: DbTransaction) {
     const ctx = tx || this.db
 
@@ -186,7 +186,7 @@ export class GroupDbRepo implements IGroupDbRepo {
       return await ctx.transaction(async (tx) => {
         const group = await this.getOne(dto.id, tx)
         if (!group.ok)
-          return tx.rollback()
+          return group
 
         await tx.update(groups)
           .set(groupDbMapper.toUpdateWithoutOrder(groupDbMapper.toUpdate(dto)))
