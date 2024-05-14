@@ -11,8 +11,7 @@ export class ProjectS3Repo implements IProjectBucketRepo {
     const key = this.getKey(uri)
 
     try {
-      const res = await this.s3.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: key }))
-      console.log(res)
+      const _res = await this.s3.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: key }))
       return ok(true)
     }
     catch (_e) {

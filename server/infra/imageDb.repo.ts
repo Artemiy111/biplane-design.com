@@ -60,6 +60,19 @@ export class ImageDbRepo implements IImageDbRepo {
     }
   }
 
+  async getOneByFilename(filename: string, tx?: DbTransaction) {
+    const ctx = tx || this.db
+    try {
+      const image = await ctx.query.images.findFirst({ where: eq(images.filename, filename) })
+      if (!image)
+        return err(new Error(`Image with filename \`${filename}\` does not exist`))
+      return ok(image)
+    }
+    catch (_e) {
+      return err(new Error(`Could not get image with filename \`${filename}\``))
+    }
+  }
+
   async getAll() {
     try {
       const all = (await this.db.select().from(images).orderBy(images.order)).map(imageDbMapper.toDb)

@@ -217,12 +217,8 @@ export class ProjectDbRepo implements IProjectDbRepo {
 
         const isProjectCategoryUpdated = dto.categoryId !== project.value.categoryId
         if (isProjectCategoryUpdated) {
-          console.log(dto.categoryId, project.value.categoryId)
-          const tmpOrder = await this.getNextOrder(project.value.categoryId, tx)
-          if (!tmpOrder.ok)
-            return tmpOrder
-          console.log('tmp prder', tmpOrder)
-          await this.updateOrder(project.value, tmpOrder.value, tx)
+          const tmpOrder = 999
+          await this.updateOrder(project.value, tmpOrder, tx)
 
           await tx.update(projects)
             .set(projectDbMapper.toDbUpdateWithoutOrder(dto))
@@ -231,7 +227,6 @@ export class ProjectDbRepo implements IProjectDbRepo {
           const newOrder = await this.getNextOrder(dto.categoryId, tx)
           if (!newOrder.ok)
             return tx.rollback()
-          console.log('new order', newOrder)
           await this.updateOrder(dto, newOrder.value - 1, tx)
         }
         else {
