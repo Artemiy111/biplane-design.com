@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { GLTFModel, OrbitControls } from '@tresjs/cientos'
+import { useWindowSize } from '@vueuse/core'
+import { gsap } from 'gsap'
+import SplitType from 'split-type'
+import { buttonVariants } from '~/components/ui/button'
+import { cn } from '~/lib/utils'
 
 useSeoMeta({
   title: 'Biplane-Design',
@@ -8,36 +12,43 @@ useSeoMeta({
   ogDescription: 'Студия дизайна',
 })
 
-useHead({
-  htmlAttrs: {
-    lang: 'ru',
-  },
+const { height } = useWindowSize()
+const { height: headerHeight } = useHeaderSize()
+const mainScreenHeight = computed(() => height.value - headerHeight.value)
+
+const headingRef = ref<HTMLHeadingElement | null>(null)
+onMounted(() => {
+  if (!headingRef.value) return
+  const headingText = new SplitType(headingRef.value, { types: 'words' })
+  gsap.from(headingText.words, { y: 80, duration: 0.8, opacity: 0, stagger: 0.3 })
+  const descriptionText = new SplitType('.description', { types: 'words' })
 })
 </script>
 
 <template>
-  <main class="container h-full font-bold">
-    <TresCanvas
-      clear-color="#fff"
-      class="h-full w-full"
-      preset="realistic"
-      window-size
-      height="500"
-      width="500"
-    >
-      <OrbitControls />
-      <!-- <TresMesh>
-        <TresTorusGeometry :args="[1, 0.5, 16, 32]" />
-        <TresMeshBasicMaterial color="orange" />
-      </TresMesh> -->
-
-      <Suspense>
-        <GLTFModel path="/3d/biplane-medium.glb" />
-      </Suspense>
-      <TresDirectionalLight
-        :intensity="2"
-        :position="[3, 3, 3]"
-      />
-    </TresCanvas>
+  <main class="container relative justify-center flex flex-col flex-grow h-full">
+    <!-- <NuxtImg
+      class="-z-10 absolute w-full top-[60px] right-[200px] max-w-[700px]"
+      src="/plane.png"
+      alt="plane"
+    /> -->
+    <NuxtImg
+      src="/main.jpg"
+      :style="{ height: `${mainScreenHeight}px` }"
+      class="w-full object-cover"
+    />
+    <section class="absolute mx-4 flex gap-4 flex-col flex-grow pb-[200px]">
+      <h1
+        ref="headingRef"
+        class="text-[150px] xl:text-[120px] lg:text-[100px] md:text-[80px] sm:text-[60px] font-bold leading-none text-yellow-400"
+      >
+        Biplane<br>Design
+      </h1>
+      <span class="gsap-description font-medium pl-2 leading-[130%] md:text-xl sm:text-lg xs:text-base text-white text-3xl"><span>Первоклассные решения </span><span class="whitespace-nowrap">в архитектуре и дизайне</span> </span>
+      <NuxtLink
+        to="/projects"
+        :class="cn(buttonVariants({ variant: 'outline' }), 'w-fit ml-2')"
+      > Смотреть проекты</NuxtLink>
+    </section>
   </main>
 </template>
