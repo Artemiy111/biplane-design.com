@@ -17,9 +17,10 @@ useSeoMeta({
 })
 
 const { md } = useScreenSize()
-const { data: _groups, pending, error: fetchError, refresh } = await useLazyFetch<GroupDto[]>('/api/groups')
+const { data: groups, error: fetchError, refresh } = await useLazyFetch<GroupDto[]>('/api/groups', {
+  default: () => [] as GroupDto[],
+})
 
-const groups = computed(() => _groups.value || [])
 const groupsMap = computed(() => new Map(groups.value.map(g => [g.id, g])))
 const categories = computed(() => groups.value.flatMap(g => g.categories) || [])
 const categoriesMap = computed(() => new Map(categories.value.map(c => [c.id, c])))
@@ -160,7 +161,7 @@ function openProjectSheet(project: ProjectDto) {
 
 <template>
   <main
-    v-if="pending"
+    v-if="!groups"
     class="container flex flex-grow flex-col items-center justify-center"
   >
     <LoaderCircle
@@ -232,15 +233,15 @@ function openProjectSheet(project: ProjectDto) {
       <ScrollArea class="w-full h-dvh">
         <Table class="grid grid-cols-1">
           <TableHeader class="w-full">
-            <TableRow class="grid w-max grid-cols-[40px_200px_200px_200px_200px_200px_140px_180px_200px_200px_100px]">
+            <TableRow class="grid w-max grid-cols-[40px_200px_200px_200px_200px_180px_120px_140px_180px_180px_100px]">
               <TableHead>№</TableHead>
               <TableHead>Превью</TableHead>
               <TableHead>Проект</TableHead>
               <TableHead>Uri</TableHead>
               <TableHead>Группа</TableHead>
               <TableHead>Категория</TableHead>
-              <TableHead>Год начала</TableHead>
-              <TableHead>Год завершения</TableHead>
+              <TableHead>Начало</TableHead>
+              <TableHead>Завершение</TableHead>
               <TableHead>Статус</TableHead>
               <TableHead>Расположение</TableHead>
               <TableHead />
@@ -250,7 +251,7 @@ function openProjectSheet(project: ProjectDto) {
             <TableRow
               v-for="project in selectedCategoryOrGroupProjects"
               :key="project.id"
-              class="cursor-pointer w-max grid grid-cols-[40px_200px_200px_200px_200px_200px_140px_180px_200px_200px_100px]"
+              class="cursor-pointer w-max grid grid-cols-[40px_200px_200px_200px_200px_180px_120px_140px_180px_180px_100px]"
               @click="navigateTo(`/admin/projects/${project.uri}`)"
             >
               <TableCell>{{ project.order }}</TableCell>

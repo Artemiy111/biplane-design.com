@@ -21,7 +21,10 @@ async function singOut() {
 </script>
 
 <template>
-  <header class="container z-50 flex flex-col">
+  <header
+    id="header"
+    class="container z-50 flex flex-col"
+  >
     <div class="z-50 flex items-center justify-between px-8 py-4 sm:px-4 sm:py-2">
       <NuxtLink
         to="/"
@@ -76,7 +79,7 @@ async function singOut() {
         </DropdownMenu>
       </ClientOnly>
       <NavigationMenu>
-        <NavigationMenuList class="gap-4 sm:gap-2">
+        <NavigationMenuList class="gap-4 sm:gap-0 md:gap-2">
           <NavigationMenuItem
             v-for="r in routes"
             :key="r.link"

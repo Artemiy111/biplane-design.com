@@ -16,8 +16,8 @@
     "db:seed": "bun ./server/db/seed.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.574.0",
-    "@aws-sdk/s3-request-presigner": "^3.574.0",
+    "@aws-sdk/client-s3": "^3.575.0",
+    "@aws-sdk/s3-request-presigner": "^3.575.0",
     "@nuxtjs/supabase": "^1.2.2",
     "@supabase/supabase-js": "^2.43.1",
     "@tanstack/vue-table": "^8.17.0",
@@ -32,10 +32,12 @@
     "drizzle-zod": "^0.5.1",
     "embla-carousel": "8.0.4",
     "embla-carousel-vue": "8.0.4",
+    "gsap": "^3.12.5",
     "lucide-vue-next": "^0.378.0",
     "nuxt": "^3.11.2",
     "postgres": "^3.4.4",
     "radix-vue": "^1.7.4",
+    "split-type": "^0.3.4",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.164.1",
@@ -46,7 +48,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.17.0",
+    "@antfu/eslint-config": "^2.18.0",
     "@nuxt/eslint": "^0.3.12",
     "@nuxt/fonts": "^0.7.0",
     "@nuxt/image": "^1.7.0",
@@ -55,7 +57,7 @@
     "@tailwindcss/typography": "^0.5.13",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/bun": "^1.1.2",
-    "@types/node": "^20.12.11",
+    "@types/node": "^20.12.12",
     "dotenv": "^16.4.5",
     "drizzle-kit": "^0.21.1",
     "eslint": "^9.2.0",
