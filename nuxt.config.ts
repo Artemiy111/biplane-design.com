@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   ssr: false,
   telemetry: { enabled: false },
   devtools: {
-    enabled: false,
+    enabled: true,
     timeline: {
       enabled: true,
     },
