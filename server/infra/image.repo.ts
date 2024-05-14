@@ -1,5 +1,5 @@
 import { err, ok } from '../shared/result'
-import type { CreateImageDto, IImageBucketRepo, IImageDbRepo, IImageRepo, IProjectDbRepo, IProjectRepo, ImageDto, ImageId, ProjectId, UpdateImageDto } from '../use-cases/types'
+import type { CreateImageDto, IImageBucketRepo, IImageDbRepo, IImageRepo, IProjectDbRepo, ImageDto, ImageId, ProjectId, UpdateImageDto } from '../use-cases/types'
 
 export const imageMapper = {
   toDto(dbDto: Omit<ImageDto, 'url'>, url: string) {
@@ -47,19 +47,27 @@ export class ImageRepo implements IImageRepo {
     }
   }
 
+  private genFilename(filename: string) {
+    return filename + Date.now()
+  }
+
   async create(dto: CreateImageDto) {
-    // !FIXME возможна дичь при коллизии названий файлов
     const project = await this.projectDbRepo.getOne(dto.projectId)
     if (!project.ok) return project
+
+    let filename = dto.filename
+    const maybeCollisionFilename = await this.dbRepo.getOneByFilename(dto.filename)
+    if (maybeCollisionFilename.ok) filename = this.genFilename(dto.filename)
+    dto.filename = filename
 
     const createdInBucket = await this.bucketRepo.createImageFile(project.value.uri, dto.filename, dto.type, dto.data)
     if (!createdInBucket.ok) return createdInBucket
 
-    const url = await this.bucketRepo.getImageUrl(project.value.uri, dto.filename)
-    if (!url.ok) return url
-
     const createdInDb = await this.dbRepo.create(dto)
     if (!createdInDb.ok) return createdInDb
+
+    const url = await this.bucketRepo.getImageUrl(project.value.uri, dto.filename)
+    if (!url.ok) return url
 
     const res = imageMapper.toDto(createdInDb.value, url.value)
     return ok(res)
@@ -72,7 +80,6 @@ export class ImageRepo implements IImageRepo {
     const project = await this.projectDbRepo.getOne(image.value.projectId)
     if (!project.ok) return project
 
-    // !FIXME сделать перенос в другую папку при изменении projectUri
     if (dto.filename !== image.value.filename) {
       const updatedInBucket = await this.bucketRepo.renameImageFile(project.value.uri, image.value.filename, dto.filename)
       if (!updatedInBucket.ok) return err(updatedInBucket.error)
