@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { toast } from 'vue-sonner'
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '~/components/ui/navigation-menu'
 
-const supabase = useSupabaseClient()
-const user = useSupabaseUser()
+const user = useUser()
 const route = useRoute()
 
 const { md } = useScreenSize()
@@ -16,7 +16,13 @@ const routes = [{
 }]
 
 async function singOut() {
-  await supabase.auth.signOut()
+  try {
+    await $fetch('/api/auth/logout')
+    toast.success('Вы вышли из аккаунта')
+  }
+  catch (_e) {
+    toast.error('Не удалось выйти из аккаунта')
+  }
 }
 </script>
 
@@ -60,7 +66,7 @@ async function singOut() {
             </DropdownMenuItem>
             <DropdownMenuItem>
               <NuxtLink
-                to="/admin/login"
+                to="/admin/auth"
                 class="w-full"
               >
                 Вход/Регистрация

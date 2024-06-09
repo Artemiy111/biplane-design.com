@@ -6,7 +6,7 @@ import { Form } from '~/components/ui/form'
 import { Dialog } from '~/components/ui/dialog'
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: 'authed',
 })
 
 useSeoMeta({
@@ -16,8 +16,7 @@ useSeoMeta({
   ogDescription: 'Настройки аккаунта администратора',
 })
 
-const user = useSupabaseUser()
-const supabase = useSupabaseClient()
+const user = useUser()
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(6),
@@ -40,6 +39,7 @@ const isDialogOpen = ref(false)
 
 const formValidationSchema = toTypedSchema(changePasswordSchema)
 
+/*
 async function changePassword(values: ChangePasswordSchema) {
   if (!user.value)
     return
@@ -60,6 +60,7 @@ async function changePassword(values: ChangePasswordSchema) {
     isDialogOpen.value = false
   }
 }
+*/
 </script>
 
 <template>

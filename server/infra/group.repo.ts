@@ -1,4 +1,3 @@
-import { logger } from '../shared/logger'
 import { err, ok } from '../shared/result'
 import type { GroupDbDto, CategoryDto, GroupDto, IGroupRepo, IGroupDbRepo, ICategoryRepo, GroupId, CreateGroupDto, UpdateGroupDto } from '../use-cases/types'
 

@@ -1,9 +1,17 @@
-import { ImageDb } from '../db/schema'
 import { err, ok } from '../shared/result'
-import type { CreateProjectDto, IProjectDbRepo, IProjectBucketRepo, IProjectRepo, ProjectId, UpdateProjectDto, IImageRepo, IImageBucketRepo, ProjectDbDto, ProjectDto, ImageDto, CategoryId } from '../use-cases/types'
-import { imageMapper } from './image.repo'
-
-// Что делать если изменилось только в бд, но не в файловой системе?
+import type {
+  CreateProjectDto,
+  IProjectDbRepo,
+  IProjectBucketRepo,
+  IProjectRepo,
+  ProjectId,
+  UpdateProjectDto,
+  IImageRepo,
+  ProjectDbDto,
+  ProjectDto,
+  ImageDto,
+  CategoryId,
+} from '../use-cases/types'
 
 const projectMapper = {
   toDto(dbDto: ProjectDbDto, images: ImageDto[]): ProjectDto {

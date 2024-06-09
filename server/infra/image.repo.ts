@@ -48,7 +48,7 @@ export class ImageRepo implements IImageRepo {
   }
 
   private genFilename(filename: string) {
-    return filename + Date.now()
+    return filename + crypto.randomUUID().slice(0, 8)
   }
 
   async create(dto: CreateImageDto) {
@@ -56,7 +56,7 @@ export class ImageRepo implements IImageRepo {
     if (!project.ok) return project
 
     let filename = dto.filename
-    const maybeCollisionFilename = await this.dbRepo.getOneByFilename(dto.filename)
+    const maybeCollisionFilename = await this.dbRepo.getOneByFilename(dto.projectId, dto.filename)
     if (maybeCollisionFilename.ok) filename = this.genFilename(dto.filename)
     dto.filename = filename
 

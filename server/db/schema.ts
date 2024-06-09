@@ -6,25 +6,39 @@ import {
   timestamp,
   unique,
   uniqueIndex,
-  varchar,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
-type WithoutDates<T> = Omit<T, 'createdAt' | 'updatedAt'>
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  username: text('username').notNull(),
+  passwordHash: text('password_hash').notNull(),
+})
+
+export type UserDb = typeof users.$inferSelect
+export type CreateUserDb = typeof users.$inferInsert
+
+export const sessions = pgTable('sessions', {
+  id: text('id').primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  expiresAt: timestamp('expires_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
+})
 
 export const groups = pgTable('groups', {
   id: serial('id').primaryKey(),
-  title: varchar('title', { length: 128 }).notNull().unique(),
-  uri: varchar('uri', { length: 128 }).notNull().unique(),
+  title: text('title').notNull().unique(),
+  uri: text('uri').notNull().unique(),
   order: integer('order').notNull().unique(),
-
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
 export type GroupDb = typeof groups.$inferSelect
-export type GroupDbCreate = Omit<WithoutDates<GroupDb>, 'id'>
-export type GroupDbUpdate = WithoutDates<GroupDb>
+export type GroupDbCreate = Omit<GroupDb, 'id'>
+export type GroupDbUpdate = GroupDb
 
 export const groupsRelations = relations(groups, ({ many }) => ({
   categories: many(categories),
@@ -37,12 +51,9 @@ export const categories = pgTable(
       .notNull()
       .references(() => groups.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     id: serial('id').primaryKey(),
-    title: varchar('title', { length: 128 }).notNull().unique(),
-    uri: varchar('uri', { length: 128 }).notNull(),
+    title: text('title').notNull().unique(),
+    uri: text('uri').notNull(),
     order: integer('order').notNull(),
-
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (t) => {
     return {
@@ -53,8 +64,8 @@ export const categories = pgTable(
 )
 
 export type CategoryDb = typeof categories.$inferSelect
-export type CategoryDbCreate = Omit<WithoutDates<CategoryDb>, 'id'>
-export type CategoryDbUpdate = Omit<WithoutDates<CategoryDb>, 'groupId'>
+export type CategoryDbCreate = Omit<CategoryDb, 'id'>
+export type CategoryDbUpdate = Omit<CategoryDb, 'groupId'>
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   group: one(groups, {
@@ -72,16 +83,13 @@ export const projects = pgTable(
       .notNull()
       .references(() => categories.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     id: serial('id').primaryKey(),
-    title: varchar('title', { length: 200 }).notNull(),
-    uri: varchar('uri', { length: 200 }).notNull().unique(),
+    title: text('title').notNull(),
+    uri: text('uri').notNull().unique(),
     status: text('status').notNull(),
     yearStart: integer('year_start'),
     yearEnd: integer('year_end'),
     location: text('location').notNull(),
     order: integer('order').notNull(),
-
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (t) => {
     return {
@@ -91,8 +99,8 @@ export const projects = pgTable(
 )
 
 export type ProjectDb = typeof projects.$inferSelect
-export type ProjectDbCreate = Omit<WithoutDates<ProjectDb>, 'id'>
-export type ProjectDbUpdate = WithoutDates<ProjectDb>
+export type ProjectDbCreate = Omit<ProjectDb, 'id'>
+export type ProjectDbUpdate = ProjectDb
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   category: one(categories, {
@@ -108,12 +116,9 @@ export const images = pgTable(
   {
     projectId: integer('project_id').notNull().references(() => projects.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     id: serial('id').primaryKey(),
-    filename: varchar('filename', { length: 200 }).notNull(),
-    alt: varchar('alt', { length: 200 }).notNull(),
+    filename: text('filename').notNull(),
+    alt: text('alt').notNull(),
     order: integer('order').notNull(),
-
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (t) => {
     return {
@@ -130,8 +135,8 @@ export const images = pgTable(
 )
 
 export type ImageDb = typeof images.$inferSelect
-export type ImageDbCreate = Omit<WithoutDates<ImageDb>, 'id'>
-export type ImageDbUpdate = Omit<WithoutDates<ImageDb>, 'projectId'>
+export type ImageDbCreate = Omit<ImageDb, 'id'>
+export type ImageDbUpdate = Omit<ImageDb, 'projectId'>
 
 export const imageRelations = relations(images, ({ one }) => ({
   project: one(projects, {

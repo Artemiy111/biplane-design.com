@@ -4,10 +4,6 @@ import * as z from 'zod'
 import { toast } from 'vue-sonner'
 import { Form } from '~/components/ui/form'
 
-const supabase = useSupabaseClient()
-const user = useSupabaseUser()
-const router = useRouter()
-
 useSeoMeta({
   title: 'Вход/Регистрация',
   ogTitle: 'Вход/Регистрация',
@@ -15,70 +11,83 @@ useSeoMeta({
   ogDescription: 'Вход для администратора',
 })
 
-watch(user, () => {
-  if (user.value)
-    router.push('/admin')
-}, { immediate: false })
+const loginFormRef = ref<InstanceType<typeof Form> | null>(null)
+const registerFormRef = ref<InstanceType<typeof Form> | null>(null)
 
-const signUpFormRef = ref<InstanceType<typeof Form> | null>(null)
-const singInFormRef = ref<InstanceType<typeof Form> | null>(null)
-
-const signFormSchema = z.object({
-  email: z.string().email('Не действительный email'),
+const loginFormSchema = z.object({
+  username: z.string().min(3),
   password: z.string().min(6, 'Пароль должен содержать не менее 6 символов'),
 })
-const signFormValidationSchema = toTypedSchema(signFormSchema)
-type SignFormSchema = z.infer<typeof signFormSchema>
+type LoginForm = z.infer<typeof loginFormSchema>
+const loginValidationSchema = toTypedSchema(loginFormSchema)
 
-async function singUp(values: SignFormSchema) {
-  const res = await supabase.auth.signUp({ email: values.email, password: values.password })
-  if (!res.error) {
+const registerFormSchema = z.object({
+  username: z.string().min(3),
+  password: z.string().min(6, 'Пароль должен содержать не менее 6 символов'),
+  repeatPassword: z.string().min(6),
+}).refine(data => data.repeatPassword === data.password, {
+  message: 'Пароли не совпадают',
+  path: ['repeatPassword'],
+})
+type RegisterForm = z.infer<typeof registerFormSchema>
+const registerValidationSchema = toTypedSchema(registerFormSchema)
+
+async function register(data: RegisterForm) {
+  try {
+    await $fetch('/api/auth/register', { method: 'post', body: data })
+    loginFormRef.value?.resetForm()
     toast.success('Аккаунт успешно создан')
-    singInFormRef.value?.resetForm()
+    await navigateTo('/admin')
   }
-  else { toast.error('Не удалось создать аккаунт') }
+  catch (_e) {
+    toast.error('Не удалось создать аккаунт')
+  }
 }
 
-async function singIn(values: SignFormSchema) {
-  const res = await supabase.auth.signInWithPassword({ email: values.email, password: values.password })
-  if (!res.error)
+async function login(data: LoginForm) {
+  try {
+    await $fetch('/api/auth/login', { method: 'post', body: data })
+    loginFormRef.value?.resetForm()
     toast.success('Вход выполнен')
-  else toast.error('Не удалось войти в аккаунт')
+    await navigateTo('/admin')
+  }
+  catch (_e) {
+    toast.error('Не удалось войти в аккаунт')
+  }
 }
 </script>
 
 <template>
   <main class="container flex flex-col items-center justify-center px-8 py-4 sm:px-4">
     <Tabs
-      default-value="sign-up"
+      default-value="register"
       class="w-full max-w-[600px]"
     >
       <TabsList class="grid w-full grid-cols-2">
-        <TabsTrigger value="sign-up">
+        <TabsTrigger value="register">
           Регистрация
         </TabsTrigger>
-        <TabsTrigger value="sign-in">
+        <TabsTrigger value="login">
           Вход
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="sign-up">
+      <TabsContent value="register">
         <Form
-          ref="signUpFormRef"
+          ref="registerFormRef"
           class="flex flex-col gap-4"
-          :validation-schema="signFormValidationSchema"
-          @submit="singUp($event as SignFormSchema)"
+          :validation-schema="registerValidationSchema"
+          @submit="register($event as RegisterForm)"
         >
           <FormField
             v-slot="{ field, handleChange }"
-            name="email"
+            name="username"
           >
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Имя администратора</FormLabel>
               <FormControl>
                 <Input
                   :model-value="field.value"
-                  placeholder="biplane-design@mail.ru"
-                  disabled
+                  placeholder="admin"
                   @change="handleChange"
                 />
               </FormControl>
@@ -95,7 +104,22 @@ async function singIn(values: SignFormSchema) {
                 <Input
                   :model-value="field.value"
                   type="password"
-                  disabled
+                  @change="field.onChange"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+          <FormField
+            v-slot="{ field }"
+            name="repeatPassword"
+          >
+            <FormItem>
+              <FormLabel>Повторите пароль</FormLabel>
+              <FormControl>
+                <Input
+                  :model-value="field.value"
+                  type="password"
                   @change="field.onChange"
                 />
               </FormControl>
@@ -104,29 +128,28 @@ async function singIn(values: SignFormSchema) {
           </FormField>
           <Button
             class="w-max"
-            disabled
           >
             Зарегистрироваться
           </Button>
         </Form>
       </TabsContent>
-      <TabsContent value="sign-in">
+      <TabsContent value="login">
         <Form
-          ref="singInFormRef"
+          ref="loginFormRef"
           class="flex flex-col gap-4"
-          :validation-schema="signFormValidationSchema"
-          @submit="singIn($event as SignFormSchema)"
+          :validation-schema="loginValidationSchema"
+          @submit="login($event as LoginForm)"
         >
           <FormField
             v-slot="{ field }"
-            name="email"
+            name="username"
           >
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Имя администратора</FormLabel>
               <FormControl>
                 <Input
                   :model-value="field.value"
-                  placeholder="biplane-design@mail.ru"
+                  placeholder="admin"
                   @change="field.onChange"
                 />
               </FormControl>

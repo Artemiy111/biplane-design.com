@@ -6,7 +6,7 @@ import type { SheetMode } from '~/components/admin/ProjectSheet.vue'
 import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~/server/use-cases/types'
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: 'authed',
 })
 
 useSeoMeta({

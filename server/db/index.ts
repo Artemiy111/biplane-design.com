@@ -7,4 +7,3 @@ export const client = postgres(env.DATABASE_URL, { prepare: false })
 export const db = drizzle(client, { schema: schema })
 
 export type Db = typeof db
-export type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
