@@ -1,7 +1,5 @@
 import type { Buffer } from 'node:buffer'
-import { type H3Event, type EventHandlerRequest } from 'h3'
 import type { Result } from '../shared/result'
-import { ImageDb } from '../db/schema'
 
 //
 export interface IUseCase {
@@ -174,7 +172,7 @@ export interface IImageRepo {
 
 export interface IImageDbRepo {
   getOne: (id: ImageId) => Promise<Result<ImageDbDto, Error>>
-  getOneByFilename: (filename: string) => Promise<Result<ImageDbDto, Error>>
+  getOneByFilename: (projectId: ProjectId, filename: string) => Promise<Result<ImageDbDto, Error>>
   getAll: () => Promise<Result<ImageDbDto[], Error>>
   getAllByProjectId: (id: ProjectId) => Promise<Result<ImageDbDto[], Error>>
   create: (dto: CreateImageDto) => Promise<Result<ImageDbDto, Error>>

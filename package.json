@@ -10,9 +10,9 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "db:generate": "drizzle-kit generate:pg",
+    "db:generate": "drizzle-kit generate",
     "db:migrate": "bun ./server/db/migrate.ts",
-    "db:push": "drizzle-kit push:pg",
+    "db:push": "drizzle-kit push",
     "db:seed": "bun ./server/db/seed.ts"
   },
   "dependencies": {

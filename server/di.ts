@@ -26,32 +26,31 @@ import { CreateGroupUseCase } from './use-cases/create-group.use-case'
 import { UpdateGroupUseCase } from './use-cases/update-group.use-case'
 import { DeleteGroupUseCase } from './use-cases/delete-group.use-case'
 
-import { ProjectFsRepo } from './infra/projectFs.repo'
+// import { ProjectFsRepo } from './infra/projectFs.repo'
 import { UserRepo } from './infra/user.repo'
 import { GroupDbRepo } from './infra/groupDb.repo'
 import { ProjectRepo } from './infra/project.repo'
 import { ProjectDbRepo } from './infra/projectDb.repo'
 import { ImageDbRepo } from './infra/imageDb.repo'
 import { ImageRepo } from './infra/image.repo'
-import { ImageFsRepo } from './infra/imageFs.repo'
+// import { ImageFsRepo } from './infra/imageFs.repo'
 import { CategoryDbRepo } from './infra/categoryDb.repo'
 import { ImageS3Repo } from './infra/imageS3.repo'
 import { ProjectS3Repo } from './infra/projectS3.repo'
 import { CategoryRepo } from './infra/category.repo'
 import { GroupRepo } from './infra/group.repo'
 import { logger } from './shared/logger'
+import { env } from './env'
 
-const PROJECTS_DIR = path.join(`/public/images/projects`)
-const config = useRuntimeConfig()
-
+const _PROJECTS_DIR = path.join(`/public/images/projects`)
 const s3 = new S3Client({
   forcePathStyle: true,
   credentials: {
-    accessKeyId: config.awsAccessKeyId,
-    secretAccessKey: config.awsSecretAccessKey,
+    accessKeyId: env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
   },
-  endpoint: config.endpointUrl,
-  region: config.region,
+  endpoint: env.ENDPOINT_URL,
+  region: env.REGION,
 })
 
 export const userRepo = new UserRepo()
