@@ -1,4 +1,4 @@
-import { useUser } from '~/composables/useUser'
+import { useUser } from '~/composables/auth'
 
 export default defineNuxtRouteMiddleware(async () => {
   const user = useUser()

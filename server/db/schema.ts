@@ -115,17 +115,12 @@ export const images = pgTable(
   'images',
   {
     projectId: integer('project_id').notNull().references(() => projects.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
-    id: serial('id').primaryKey(),
-    filename: text('filename').notNull(),
+    id: text('id').primaryKey().notNull(),
     alt: text('alt').notNull(),
     order: integer('order').notNull(),
   },
   (t) => {
     return {
-      uniqueIdxFilenameForProject: uniqueIndex('unique_idx_filename_for_project').on(
-        t.projectId,
-        t.filename,
-      ),
       uniqueOrderForProject: uniqueIndex('unique_order_for_project').on(
         t.projectId,
         t.order,
@@ -135,7 +130,7 @@ export const images = pgTable(
 )
 
 export type ImageDb = typeof images.$inferSelect
-export type ImageDbCreate = Omit<ImageDb, 'id'>
+export type ImageDbCreate = typeof images.$inferInsert
 export type ImageDbUpdate = Omit<ImageDb, 'projectId'>
 
 export const imageRelations = relations(images, ({ one }) => ({

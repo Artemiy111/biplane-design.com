@@ -5,14 +5,12 @@ export const useHeaderSize = () => {
   const onResize = () => {
     if (!header.value) return
     const rect = header.value.getBoundingClientRect()
-    console.log(rect)
     width.value = rect.width
     height.value = rect.height
   }
 
   onMounted(() => {
     header.value = document.querySelector<HTMLElement>('#header')
-    console.log(header.value)
     if (!header.value) return
     const rect = header.value.getBoundingClientRect()
     width.value = rect.width

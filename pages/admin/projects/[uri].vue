@@ -10,7 +10,7 @@ const { data: project, error: _error, refresh: refreshImages }
 = await useLazyFetch<ProjectDto>(`/api/projects/?uri=${uri}`)
 
 definePageMeta({
-  middleware: 'authed',
+  middleware: 'authenticated',
 })
 
 useSeoMeta({
@@ -40,7 +40,7 @@ async function deleteImages(ids: number[]) {
 
 async function updateImage(dto: UpdateImageDto) {
   try {
-    await $fetch(`/api/images/${dto.id}`, {
+    await $fetch(`/api/images/${dto.filename}`, {
       method: 'PUT',
       body: dto,
     })
@@ -110,7 +110,7 @@ async function uploadImages(images: File[]) {
           <TransitionGroup name="row">
             <TableRow
               v-for="(image, idx) in project.images"
-              :key="image.filename"
+              :key="image.id"
             >
               <TableCell>{{ image.order }}</TableCell>
               <TableCell>
@@ -122,10 +122,7 @@ async function uploadImages(images: File[]) {
                 >
               </TableCell>
               <TableCell>
-                <Input
-                  :model-value="image.filename"
-                  @change="updateImage({ ...image, filename: $event.target.value })"
-                />
+                {{ image.id }}
               </TableCell>
               <TableCell>
                 <div class="flex w-full flex-col items-center gap-2">

@@ -1,12 +1,9 @@
-import type { IProjectRepo, IUseCase, IUserRepo, LoginUserDto, ProjectId } from './types'
+import type { IProjectRepo, IUseCase, ProjectId } from './types'
 
 export class DeleteProjectUseCase implements IUseCase {
-  constructor(private projectRepo: IProjectRepo, private userRepo: IUserRepo) { }
+  constructor(private projectRepo: IProjectRepo) { }
 
-  async execute(id: ProjectId, loginDto: LoginUserDto) {
-    const user = await this.userRepo.getUser(loginDto)
-    if (!user.ok) return user
-
+  async execute(id: ProjectId) {
     return await this.projectRepo.delete(id)
   }
 }

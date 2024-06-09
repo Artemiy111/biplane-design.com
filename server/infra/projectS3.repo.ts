@@ -2,9 +2,8 @@ import type { S3ServiceException, S3Client } from '@aws-sdk/client-s3'
 import { HeadObjectCommand, PutObjectCommand, CopyObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
 import type { Result } from '../shared/result'
 import { err, ok } from '../shared/result'
-import type { IProjectBucketRepo } from '../use-cases/types'
 
-export class ProjectS3Repo implements IProjectBucketRepo {
+export class ProjectS3Repo {
   constructor(private bucketName: string, private s3: S3Client) { }
 
   async isDirExists(uri: string): Promise<Result<boolean, Error>> {
@@ -16,8 +15,6 @@ export class ProjectS3Repo implements IProjectBucketRepo {
     }
     catch (_e) {
       const error = _e as S3ServiceException
-      console.log('error')
-      console.log(error.message)
       if (error.name === 'NotFound') {
         return ok(false)
       }

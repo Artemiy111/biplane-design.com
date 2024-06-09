@@ -1,17 +1,16 @@
 import { err, ok } from '../shared/result'
 import type {
   CreateProjectDto,
-  IProjectDbRepo,
-  IProjectBucketRepo,
-  IProjectRepo,
   ProjectId,
   UpdateProjectDto,
-  IImageRepo,
   ProjectDbDto,
   ProjectDto,
   ImageDto,
   CategoryId,
 } from '../use-cases/types'
+import type { ImageRepo } from './image.repo'
+import type { ProjectDbRepo } from './projectDb.repo'
+import type { ProjectS3Repo } from './projectS3.repo'
 
 const projectMapper = {
   toDto(dbDto: ProjectDbDto, images: ImageDto[]): ProjectDto {
@@ -22,8 +21,8 @@ const projectMapper = {
   },
 }
 
-export class ProjectRepo implements IProjectRepo {
-  constructor(private dbRepo: IProjectDbRepo, private bucketRepo: IProjectBucketRepo, private imageRepo: IImageRepo) { }
+export class ProjectRepo {
+  constructor(private dbRepo: ProjectDbRepo, private bucketRepo: ProjectS3Repo, private imageRepo: ImageRepo) { }
 
   async getOne(id: ProjectId) {
     const project = await this.dbRepo.getOne(id)
