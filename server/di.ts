@@ -1,5 +1,4 @@
 import path from 'node:path'
-import { S3Client } from '@aws-sdk/client-s3'
 import { db } from './db'
 
 import { GetProjectUseCase } from './use-cases/get-project.use-case'
@@ -40,21 +39,13 @@ import { ProjectS3Repo } from './infra/projectS3.repo'
 import { CategoryRepo } from './infra/category.repo'
 import { GroupRepo } from './infra/group.repo'
 import { logger } from './shared/logger'
-import { env } from './env'
+import { s3 } from './s3'
+import { AuthRepo } from './infra/auth.repo'
 
 const _PROJECTS_DIR = path.join(`/public/images/projects`)
-const s3 = new S3Client({
-  forcePathStyle: true,
-  credentials: {
-    accessKeyId: env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-  },
-  endpoint: env.ENDPOINT_URL,
-  region: env.REGION,
-})
 
+export const authRepo = new AuthRepo()
 export const userRepo = new UserRepo()
-
 export const projectDbRepo = new ProjectDbRepo(db)
 export const projectS3Repo = new ProjectS3Repo('biplane-design', s3)
 // export const projectFsRepo = new ProjectFsRepo(PROJECTS_DIR)
@@ -75,26 +66,26 @@ export const groupRepo = new GroupRepo(groupDbRepo, categoryRepo)
 
 export const getGroupUseCase = new GetGroupUseCase(groupRepo)
 export const getGroupsUseCase = new GetGroupsUseCase(groupRepo)
-export const createGroupUseCase = new CreateGroupUseCase(groupRepo, userRepo)
-export const updateGroupUseCase = new UpdateGroupUseCase(groupRepo, userRepo)
-export const deleteGroupUseCase = new DeleteGroupUseCase(groupRepo, userRepo)
+export const createGroupUseCase = new CreateGroupUseCase(groupRepo, authRepo)
+export const updateGroupUseCase = new UpdateGroupUseCase(groupRepo, authRepo)
+export const deleteGroupUseCase = new DeleteGroupUseCase(groupRepo, authRepo)
 
 export const getCategoryUseCase = new GetCategoryUseCase(categoryRepo)
-export const createCategoryUseCase = new CreateCategoryUseCase(categoryRepo, userRepo)
-export const updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepo, userRepo)
-export const deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepo, userRepo)
+export const createCategoryUseCase = new CreateCategoryUseCase(categoryRepo, authRepo)
+export const updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepo, authRepo)
+export const deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepo, authRepo)
 
 export const getProjectUseCase = new GetProjectUseCase(projectRepo)
 export const getProjectByUriUseCase = new GetProjectByUriUseCase(projectRepo)
 export const getProjectsUseCase = new GetProjectsUseCase(projectRepo)
-export const createProjectUseCase = new CreateProjectUseCase(projectRepo, userRepo)
-export const updateProjectUseCase = new UpdateProjectUseCase(projectRepo, userRepo)
-export const deleteProjectUseCase = new DeleteProjectUseCase(projectRepo, userRepo)
+export const createProjectUseCase = new CreateProjectUseCase(projectRepo, authRepo)
+export const updateProjectUseCase = new UpdateProjectUseCase(projectRepo, authRepo)
+export const deleteProjectUseCase = new DeleteProjectUseCase(projectRepo, authRepo)
 
 export const getImagesByProjectUriUseCase = new GetImagesByProjectUriUseCase(imageRepo)
 export const getImageUseCase = new GetImageUseCase(imageRepo)
-export const createImageUseCase = new CreateImageUseCase(imageRepo, userRepo)
-export const updateImageUseCase = new UpdateImageUseCase(imageRepo, userRepo)
-export const deleteImageUseCase = new DeleteImageUseCase(imageRepo, userRepo)
+export const createImageUseCase = new CreateImageUseCase(imageRepo, authRepo)
+export const updateImageUseCase = new UpdateImageUseCase(imageRepo, authRepo)
+export const deleteImageUseCase = new DeleteImageUseCase(imageRepo, authRepo)
 
 logger.log('di phase done')

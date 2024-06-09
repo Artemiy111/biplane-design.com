@@ -1,5 +1,5 @@
 import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
-import type { Db, DbTransaction } from '../db'
+import type { Db } from '../db'
 import { err, ok } from '../shared/result'
 import { imageDbMapper } from './imageDb.repo'
 import { type ProjectDbCreate, type ProjectDbDeep, type ProjectDbUpdate, projects } from '~/server/db/schema'
@@ -54,8 +54,8 @@ export const projectDbMapper = {
 export class ProjectDbRepo implements IProjectDbRepo {
   constructor(private db: Db) { }
 
-  private async getNextOrder(categoryId: CategoryId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  private async getNextOrder(categoryId: CategoryId) {
+    const ctx = this.db
     try {
       const count = (await ctx.select().from(projects).where(eq(projects.categoryId, categoryId))).length
       return ok(count + 1)
@@ -65,8 +65,8 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async getOne(id: ProjectId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async getOne(id: ProjectId) {
+    const ctx = this.db
     try {
       const project = (await ctx.query.projects.findFirst({
         where: eq(projects.id, id), with: {
@@ -85,8 +85,8 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async getOneByUri(uri: string, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async getOneByUri(uri: string) {
+    const ctx = this.db
     try {
       const project = (await ctx.query.projects.findFirst({
         where: eq(projects.uri, uri), with: {
@@ -105,8 +105,8 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async getByCategoryId(categoryId: CategoryId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async getByCategoryId(categoryId: CategoryId) {
+    const ctx = this.db
     try {
       const projectsByCategoryId = (await ctx.query.projects.findMany({
         where: eq(projects.categoryId, categoryId),
@@ -124,8 +124,8 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async getAll(tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async getAll() {
+    const ctx = this.db
     try {
       const projects = (await ctx.query.projects.findMany({
         with: {
@@ -142,19 +142,19 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async create(dto: CreateProjectDto, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async create(dto: CreateProjectDto) {
+    const ctx = this.db
 
     try {
       return ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.categoryId, tx)
+        const nextOrder = await this.getNextOrder(dto.categoryId)
         if (!nextOrder.ok)
           return tx.rollback()
 
         const toCreate = projectDbMapper.toDbCreate(dto, nextOrder.value)
 
         const createdInDb = (await tx.insert(projects).values(toCreate).returning())[0]
-        const created = await this.getOne(createdInDb.id, tx)
+        const created = await this.getOne(createdInDb.id)
         if (!created.ok)
           return tx.rollback()
 
@@ -166,15 +166,15 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  private async updateOrder(dto: UpdateProjectDto, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: UpdateProjectDto, newOrder: number) {
     if (dto.order === newOrder)
       return ok(undefined)
 
-    const ctx = tx || this.db
+    const ctx = this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.categoryId, tx)
+        const nextOrder = await this.getNextOrder(dto.categoryId)
         if (!nextOrder.ok)
           return err(nextOrder.error)
 
@@ -206,37 +206,37 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async update(dto: UpdateProjectDto, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async update(dto: UpdateProjectDto) {
+    const ctx = this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const project = await this.getOne(dto.id, tx)
+        const project = await this.getOne(dto.id)
         if (!project.ok)
           return project
 
         const isProjectCategoryUpdated = dto.categoryId !== project.value.categoryId
         if (isProjectCategoryUpdated) {
           const tmpOrder = 999
-          await this.updateOrder(project.value, tmpOrder, tx)
+          await this.updateOrder(project.value, tmpOrder)
 
           await tx.update(projects)
             .set(projectDbMapper.toDbUpdateWithoutOrder(dto))
             .where(eq(projects.id, dto.id))
 
-          const newOrder = await this.getNextOrder(dto.categoryId, tx)
+          const newOrder = await this.getNextOrder(dto.categoryId)
           if (!newOrder.ok)
             return tx.rollback()
-          await this.updateOrder(dto, newOrder.value - 1, tx)
+          await this.updateOrder(dto, newOrder.value - 1)
         }
         else {
-          await this.updateOrder(project.value, dto.order, tx)
+          await this.updateOrder(project.value, dto.order)
           await tx.update(projects)
             .set(projectDbMapper.toDbUpdateWithoutOrder(dto))
             .where(eq(projects.id, dto.id))
         }
 
-        const updatedProject = await this.getOne(dto.id, tx)
+        const updatedProject = await this.getOne(dto.id)
         if (!updatedProject.ok)
           return tx.rollback()
 
@@ -248,8 +248,8 @@ export class ProjectDbRepo implements IProjectDbRepo {
     }
   }
 
-  async delete(id: ProjectId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async delete(id: ProjectId) {
+    const ctx = this.db
     try {
       return await ctx.transaction(async (tx) => {
         await this.db.delete(projects).where(eq(projects.id, id))

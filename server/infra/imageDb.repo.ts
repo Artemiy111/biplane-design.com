@@ -1,6 +1,6 @@
 import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import { err, ok } from '../shared/result'
-import type { Db, DbTransaction } from '~/server/db'
+import type { Db } from '~/server/db'
 import type { ImageDb, ImageDbCreate, ImageDbUpdate } from '~/server/db/schema'
 import { images } from '~/server/db/schema'
 import type {
@@ -47,8 +47,8 @@ export const imageDbMapper = {
 export class ImageDbRepo implements IImageDbRepo {
   constructor(private db: Db) { }
 
-  async getOne(id: ImageId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async getOne(id: ImageId) {
+    const ctx = this.db
     try {
       const image = await ctx.query.images.findFirst({ where: eq(images.id, id) })
       if (!image)
@@ -60,8 +60,8 @@ export class ImageDbRepo implements IImageDbRepo {
     }
   }
 
-  async getOneByFilename(projectId: ProjectId, filename: string, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async getOneByFilename(projectId: ProjectId, filename: string) {
+    const ctx = this.db
     try {
       const image = await ctx.query.images.findFirst({
         where: and(
@@ -98,8 +98,8 @@ export class ImageDbRepo implements IImageDbRepo {
     }
   }
 
-  async getNextOrder(projectId: ProjectId, tx: DbTransaction) {
-    const ctx = tx || this.db
+  async getNextOrder(projectId: ProjectId) {
+    const ctx = this.db
     try {
       const count = (await ctx.select().from(images).where(eq(images.projectId, projectId))).length
       return ok(count + 1)
@@ -109,19 +109,19 @@ export class ImageDbRepo implements IImageDbRepo {
     }
   }
 
-  async create(dto: CreateImageDto, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async create(dto: CreateImageDto) {
+    const ctx = this.db
 
     try {
       return ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.projectId, tx)
+        const nextOrder = await this.getNextOrder(dto.projectId)
         if (!nextOrder.ok)
           return tx.rollback()
 
         const toCreate = imageDbMapper.toDbCreate(dto, nextOrder.value)
 
         const createdInDb = (await tx.insert(images).values(toCreate).returning())[0]
-        const created = await this.getOne(createdInDb.id, tx)
+        const created = await this.getOne(createdInDb.id)
         if (!created.ok)
           return tx.rollback()
 
@@ -133,15 +133,15 @@ export class ImageDbRepo implements IImageDbRepo {
     }
   }
 
-  private async updateOrder(dto: ImageDbDto, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: ImageDbDto, newOrder: number) {
     if (dto.order === newOrder)
       return ok(undefined)
 
-    const ctx = tx || this.db
+    const ctx = this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.projectId, tx)
+        const nextOrder = await this.getNextOrder(dto.projectId)
         if (!nextOrder.ok)
           return nextOrder
 
@@ -173,17 +173,17 @@ export class ImageDbRepo implements IImageDbRepo {
     }
   }
 
-  async update(dto: UpdateImageDto, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async update(dto: UpdateImageDto) {
+    const ctx = this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const image = await this.getOne(dto.id, tx)
+        const image = await this.getOne(dto.id)
         if (!image.ok) {
           return image
         }
 
-        const orderUpdated = await this.updateOrder(image.value, dto.order, tx)
+        const orderUpdated = await this.updateOrder(image.value, dto.order)
         if (!orderUpdated.ok) {
           return tx.rollback()
         }
@@ -191,7 +191,7 @@ export class ImageDbRepo implements IImageDbRepo {
         await tx.update(images)
           .set(imageDbMapper.toDbUpdateWithoutOrder(dto))
           .where(eq(images.id, dto.id))
-        const updatedImage = await this.getOne(dto.id, tx)
+        const updatedImage = await this.getOne(dto.id)
         if (!updatedImage.ok)
           return tx.rollback()
 
@@ -204,12 +204,12 @@ export class ImageDbRepo implements IImageDbRepo {
     }
   }
 
-  async delete(id: ImageId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async delete(id: ImageId) {
+    const ctx = this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const imageToDelete = await this.getOne(id, tx)
+        const imageToDelete = await this.getOne(id)
         if (!imageToDelete.ok)
           throw tx.rollback()
 

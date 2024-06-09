@@ -33,10 +33,9 @@ export class ImageS3Repo implements IImageBucketRepo {
 
     try {
       const hostname = (await this.s3.config.endpoint!()).hostname
+      // !FIXME
       const url = 'https://' + hostname + '/storage/v1/object/public/' + this.bucketName + '/' + key
 
-      // Пока не работает в supabase
-      // const url = await getSignedUrl(this.s3, new GetObjectCommand(params), { expiresIn: 3600 })
       return ok(url)
     }
     catch (_e) {

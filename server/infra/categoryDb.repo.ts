@@ -1,6 +1,6 @@
 import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import { err, ok } from '../shared/result'
-import type { Db, DbTransaction } from '../db'
+import type { Db } from '../db'
 import { projectDbMapper } from './projectDb.repo'
 import { type CategoryDbCreate, type CategoryDbDeep, type CategoryDbUpdate, categories } from '~/server/db/schema'
 import type { CategoryDbDto, CategoryId, CreateCategoryDto, ICategoryDbRepo, UpdateCategoryDto, GroupId } from '~/server/use-cases/types'
@@ -41,8 +41,8 @@ export const categoryDbMapper = {
 export class CategoryDbRepo implements ICategoryDbRepo {
   constructor(private db: Db) { }
 
-  async getNextOrder(groupId: GroupId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async getNextOrder(groupId: GroupId) {
+    const ctx = this.db
     try {
       const count = (await ctx.select().from(categories).where(eq(categories.groupId, groupId))).length
       return ok(count + 1)
@@ -52,8 +52,8 @@ export class CategoryDbRepo implements ICategoryDbRepo {
     }
   }
 
-  async getOne(id: CategoryId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async getOne(id: CategoryId) {
+    const ctx = this.db
     try {
       const res = await ctx.query.categories.findFirst({
         where: eq(categories.id, id),
@@ -125,17 +125,17 @@ export class CategoryDbRepo implements ICategoryDbRepo {
     }
   }
 
-  async create(dto: CreateCategoryDto, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async create(dto: CreateCategoryDto) {
+    const ctx = this.db
     try {
       return ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.groupId, tx)
+        const nextOrder = await this.getNextOrder(dto.groupId)
         if (!nextOrder.ok)
           return tx.rollback()
 
         const toCreate = categoryDbMapper.toDbCreate(dto, nextOrder.value)
         const createdInDb = (await tx.insert(categories).values(toCreate).returning())[0]
-        const created = await this.getOne(createdInDb.id, tx)
+        const created = await this.getOne(createdInDb.id)
         if (!created.ok)
           return tx.rollback()
 
@@ -149,15 +149,15 @@ export class CategoryDbRepo implements ICategoryDbRepo {
     }
   }
 
-  private async updateOrder(dto: CategoryDbDto, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: CategoryDbDto, newOrder: number) {
     if (dto.order === newOrder)
       return ok(undefined)
 
-    const ctx = tx || this.db
+    const ctx = this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.groupId, tx)
+        const nextOrder = await this.getNextOrder(dto.groupId)
         if (!nextOrder.ok)
           return newOrder
 
@@ -189,12 +189,12 @@ export class CategoryDbRepo implements ICategoryDbRepo {
     }
   }
 
-  async update(dto: UpdateCategoryDto, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async update(dto: UpdateCategoryDto) {
+    const ctx = this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const category = await this.getOne(dto.id, tx)
+        const category = await this.getOne(dto.id)
         if (!category.ok)
           return category
 
@@ -202,9 +202,9 @@ export class CategoryDbRepo implements ICategoryDbRepo {
           .set(categoryDbMapper.toDbUpdateWithoutOrder(categoryDbMapper.toDbUpdate(dto)))
           .where(eq(categories.id, dto.id))
 
-        await this.updateOrder(category.value, dto.order, tx)
+        await this.updateOrder(category.value, dto.order)
 
-        const updatedGroup = await this.getOne(dto.id, tx)
+        const updatedGroup = await this.getOne(dto.id)
         if (!updatedGroup.ok)
           return tx.rollback()
 
@@ -216,8 +216,8 @@ export class CategoryDbRepo implements ICategoryDbRepo {
     }
   }
 
-  async delete(id: CategoryId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async delete(id: CategoryId) {
+    const ctx = this.db
     try {
       return await ctx.transaction(async (tx) => {
         const toDelete = await tx.query.groups.findFirst({ where: eq(categories.id, id) })

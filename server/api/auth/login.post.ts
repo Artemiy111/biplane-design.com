@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { verify } from '@node-rs/argon2'
-import { userRepo } from '~/server/di'
+import { authRepo } from '~/server/di'
 import { lucia } from '~/utils/auth'
 
 const loginScema = z.object({
@@ -11,7 +11,7 @@ const loginScema = z.object({
 export default defineEventHandler(async (event) => {
   const data = await readValidatedBody(event, loginScema.parse)
 
-  const existingUser = await userRepo.getUserByUsername(data.username)
+  const existingUser = await authRepo.getUserByUsername(data.username)
   if (!existingUser) throw createError({
     message: 'Incorrect username or password',
     statusCode: 400,
