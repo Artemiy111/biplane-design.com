@@ -11,7 +11,6 @@ export default defineNuxtConfig({
     },
   },
   modules: [
-    '@nuxtjs/supabase',
     '@nuxtjs/tailwindcss',
     '@nuxtjs/partytown',
     '@nuxt/image',
@@ -60,8 +59,5 @@ export default defineNuxtConfig({
     ipx: {
     },
     format: ['avif', 'webp', 'png', 'jpg'],
-  },
-  supabase: {
-    redirect: false,
   },
 })
