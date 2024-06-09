@@ -1,9 +1,9 @@
-import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
+import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import { err, ok } from '../shared/result'
-import type { Db, DbTransaction } from '../db'
+import type { Db } from '../db'
 import { projectDbMapper } from './projectDb.repo'
 import { type CategoryDbCreate, type CategoryDbDeep, type CategoryDbUpdate, categories } from '~/server/db/schema'
-import type { CategoryDbDto, CategoryId, CreateCategoryDto, ICategoryDbRepo, UpdateCategoryDto, GroupId } from '~/server/use-cases/types'
+import type { CategoryDbDto, CategoryId, CreateCategoryDto, UpdateCategoryDto, GroupId } from '~/server/use-cases/types'
 
 export const categoryDbMapper = {
   toDb(db: CategoryDbDeep): CategoryDbDto {
@@ -38,22 +38,11 @@ export const categoryDbMapper = {
   },
 }
 
-export class CategoryDbRepo implements ICategoryDbRepo {
+export class CategoryDbRepo {
   constructor(private db: Db) { }
 
-  async getNextOrder(groupId: GroupId, tx?: DbTransaction) {
-    const ctx = tx || this.db
-    try {
-      const count = (await ctx.select().from(categories).where(eq(categories.groupId, groupId))).length
-      return ok(count + 1)
-    }
-    catch (_e) {
-      return err(new Error(`Cannot get order of new category`))
-    }
-  }
-
-  async getOne(id: CategoryId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async getOne(id: CategoryId) {
+    const ctx = this.db
     try {
       const res = await ctx.query.categories.findFirst({
         where: eq(categories.id, id),
@@ -125,23 +114,16 @@ export class CategoryDbRepo implements ICategoryDbRepo {
     }
   }
 
-  async create(dto: CreateCategoryDto, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async create(dto: CreateCategoryDto) {
+    const ctx = this.db
     try {
       return ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.groupId, tx)
-        if (!nextOrder.ok)
-          return tx.rollback()
-
-        const toCreate = categoryDbMapper.toDbCreate(dto, nextOrder.value)
+        const [curOrder] = await tx.select({ value: count() }).from(categories)
+        const toCreate = categoryDbMapper.toDbCreate(dto, curOrder.value + 1)
         const createdInDb = (await tx.insert(categories).values(toCreate).returning())[0]
-        const created = await this.getOne(createdInDb.id, tx)
-        if (!created.ok)
-          return tx.rollback()
-
-        return ok(created.value!)
+        return ok(createdInDb)
       }, {
-        isolationLevel: 'read committed',
+        isolationLevel: 'read uncommitted',
       })
     }
     catch (e) {
@@ -149,19 +131,16 @@ export class CategoryDbRepo implements ICategoryDbRepo {
     }
   }
 
-  private async updateOrder(dto: CategoryDbDto, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: CategoryDbDto, newOrder: number) {
     if (dto.order === newOrder)
       return ok(undefined)
 
-    const ctx = tx || this.db
+    const ctx = this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.groupId, tx)
-        if (!nextOrder.ok)
-          return newOrder
-
-        if (newOrder > nextOrder.value)
+        const [curOrder] = await tx.select({ value: count() }).from(categories)
+        if (newOrder > curOrder.value + 1)
           return err(new Error('New order is out of range'))
 
         if (newOrder > dto.order) {
@@ -189,12 +168,12 @@ export class CategoryDbRepo implements ICategoryDbRepo {
     }
   }
 
-  async update(dto: UpdateCategoryDto, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async update(dto: UpdateCategoryDto) {
+    const ctx = this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const category = await this.getOne(dto.id, tx)
+        const category = await this.getOne(dto.id)
         if (!category.ok)
           return category
 
@@ -202,9 +181,9 @@ export class CategoryDbRepo implements ICategoryDbRepo {
           .set(categoryDbMapper.toDbUpdateWithoutOrder(categoryDbMapper.toDbUpdate(dto)))
           .where(eq(categories.id, dto.id))
 
-        await this.updateOrder(category.value, dto.order, tx)
+        await this.updateOrder(category.value, dto.order)
 
-        const updatedGroup = await this.getOne(dto.id, tx)
+        const updatedGroup = await this.getOne(dto.id)
         if (!updatedGroup.ok)
           return tx.rollback()
 
@@ -216,8 +195,8 @@ export class CategoryDbRepo implements ICategoryDbRepo {
     }
   }
 
-  async delete(id: CategoryId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async delete(id: CategoryId) {
+    const ctx = this.db
     try {
       return await ctx.transaction(async (tx) => {
         const toDelete = await tx.query.groups.findFirst({ where: eq(categories.id, id) })

@@ -1,12 +1,10 @@
-import type { IProjectRepo, IUseCase, IUserRepo, LoginUserDto, UpdateProjectDto } from './types'
+import { type ProjectRepo } from '../infra/project.repo'
+import type { IUseCase, UpdateProjectDto } from './types'
 
 export class UpdateProjectUseCase implements IUseCase {
-  constructor(private projectRepo: IProjectRepo, private userRepo: IUserRepo) { }
+  constructor(private projectRepo: ProjectRepo) { }
 
-  async execute(dto: UpdateProjectDto, loginDto: LoginUserDto) {
-    const user = await this.userRepo.getUser(loginDto)
-    if (!user.ok) return user
-
+  async execute(dto: UpdateProjectDto) {
     return await this.projectRepo.update(dto)
   }
 }

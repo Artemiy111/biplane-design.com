@@ -1,12 +1,9 @@
-import type { GroupId, IGroupRepo, IUseCase, IUserRepo, LoginUserDto } from './types'
+import type { GroupId, IGroupRepo, IUseCase } from './types'
 
 export class DeleteGroupUseCase implements IUseCase {
-  constructor(private groupRepo: IGroupRepo, private userRepo: IUserRepo) { }
+  constructor(private groupRepo: IGroupRepo) { }
 
-  async execute(id: GroupId, loginDto: LoginUserDto) {
-    const user = await this.userRepo.getUser(loginDto)
-    if (!user.ok) return user
-
+  async execute(id: GroupId) {
     return await this.groupRepo.delete(id)
   }
 }

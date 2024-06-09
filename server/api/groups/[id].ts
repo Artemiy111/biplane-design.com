@@ -1,13 +1,9 @@
 import { z } from 'zod'
-import { getGroupUseCase, updateGroupUseCase, deleteGroupUseCase } from '~/server/di'
+import { getGroupUseCase, updateGroupUseCase, deleteGroupUseCase, authRepo } from '~/server/di'
 import { HttpErrorCode, createHttpError } from '~/server/exceptions'
 
 export default defineEventHandler(async (event) => {
   const id = Number(event.context.params!.id! as string)
-  const dummyLogin = {
-    email: 'art@art.art',
-    password: 'artartart',
-  }
 
   switch (event.method) {
     case 'GET': {
@@ -23,13 +19,14 @@ export default defineEventHandler(async (event) => {
         uri: z.string(),
         order: z.number().min(1),
       })
+      authRepo.assertAuthenticated(event)
       const body = await readValidatedBody(event, Body.parse)
-      const res = await updateGroupUseCase.execute(body, dummyLogin)
+      const res = await updateGroupUseCase.execute(body)
       if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }
     case 'DELETE': {
-      const res = await deleteGroupUseCase.execute(id, dummyLogin)
+      const res = await deleteGroupUseCase.execute(id)
       if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }

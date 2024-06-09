@@ -1,5 +1,7 @@
 import { err, ok } from '../shared/result'
-import type { IProjectRepo, CategoryId, ICategoryRepo, ICategoryDbRepo, CategoryDbDto, CategoryDto, CreateCategoryDto, UpdateCategoryDto, ProjectDto, GroupId } from '../use-cases/types'
+import type { CategoryId, CategoryDbDto, CategoryDto, CreateCategoryDto, UpdateCategoryDto, ProjectDto, GroupId } from '../use-cases/types'
+import type { CategoryDbRepo } from './categoryDb.repo'
+import type { ProjectRepo } from './project.repo'
 
 const categoryMapper = {
   toDto(dbDto: CategoryDbDto, projects: ProjectDto[]): CategoryDto {
@@ -9,8 +11,8 @@ const categoryMapper = {
     }
   },
 }
-export class CategoryRepo implements ICategoryRepo {
-  constructor(private dbRepo: ICategoryDbRepo, private projectRepo: IProjectRepo) { }
+export class CategoryRepo {
+  constructor(private dbRepo: CategoryDbRepo, private projectRepo: ProjectRepo) { }
   async getOne(id: CategoryId) {
     const category = await this.dbRepo.getOne(id)
     if (!category.ok) return category

@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
-import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '~/components/ui/navigation-menu'
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from '~/components/ui/navigation-menu'
 
 const user = useUser()
 const route = useRoute()
@@ -45,7 +50,7 @@ async function singOut() {
       <ClientOnly>
         <DropdownMenu>
           <DropdownMenuTrigger v-if="user">
-            {{ user.email }}
+            {{ user.username }}
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>

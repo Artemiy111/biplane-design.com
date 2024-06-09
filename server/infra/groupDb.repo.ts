@@ -1,14 +1,13 @@
-import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
+import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import { err, ok } from '../shared/result'
 import { categoryDbMapper } from './categoryDb.repo'
 import type {
   CreateGroupDto,
   GroupDbDto,
   GroupId,
-  IGroupDbRepo,
   UpdateGroupDto,
 } from '~/server/use-cases/types'
-import type { Db, DbTransaction } from '~/server/db'
+import type { Db } from '~/server/db'
 import type { GroupDbCreate, GroupDbDeep, GroupDbUpdate } from '~/server/db/schema'
 import { groups } from '~/server/db/schema'
 
@@ -43,22 +42,11 @@ export const groupDbMapper = {
   },
 }
 
-export class GroupDbRepo implements IGroupDbRepo {
+export class GroupDbRepo {
   constructor(private db: Db) { }
 
-  private async getNextOrder(tx?: DbTransaction) {
-    const ctx = tx || this.db
-    try {
-      const count = (await ctx.select().from(groups)).length
-      return ok(count + 1)
-    }
-    catch (e) {
-      return err(new Error(`Could not get next order of group`))
-    }
-  }
-
-  async getOne(id: GroupId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async getOne(id: GroupId) {
+    const ctx = this.db
     try {
       const group
         = (await ctx.query.groups.findFirst({
@@ -88,8 +76,8 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
-  async getAll(tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async getAll() {
+    const ctx = this.db
     try {
       const groups = await ctx.query.groups.findMany({
         with: {
@@ -110,30 +98,20 @@ export class GroupDbRepo implements IGroupDbRepo {
       return ok(groups.map(groupDbMapper.toDbDto))
     }
     catch (_e) {
-      const e = _e as Error
-      console.log(e)
       return err(new Error(`Could not get groups`))
     }
   }
 
-  async create(dto: CreateGroupDto, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async create(dto: CreateGroupDto) {
+    const ctx = this.db
     try {
       return ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(tx)
-        if (!nextOrder.ok)
-          return tx.rollback()
-
-        const toCreate = groupDbMapper.toCreate(dto, nextOrder.value)
-
+        const [curOrder] = await tx.select({ value: count() }).from(groups)
+        const toCreate = groupDbMapper.toCreate(dto, curOrder.value + 1)
         const createdInDb = (await tx.insert(groups).values(toCreate).returning())[0]
-        const created = await this.getOne(createdInDb.id, tx)
-        if (!created.ok)
-          return tx.rollback()
-
-        return ok(created.value!)
+        return ok(createdInDb)
       }, {
-        isolationLevel: 'read committed',
+        isolationLevel: 'read uncommitted',
       })
     }
     catch (e) {
@@ -141,19 +119,17 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
-  private async updateOrder(dto: GroupDbDto, newOrder: number, tx?: DbTransaction) {
+  private async updateOrder(dto: GroupDbDto, newOrder: number) {
     if (dto.order === newOrder)
       return ok(undefined)
 
-    const ctx = tx || this.db
+    const ctx = this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(tx)
-        if (!nextOrder.ok)
-          return nextOrder
+        const [curOrder] = await tx.select({ value: count() }).from(groups)
 
-        if (newOrder > nextOrder.value)
+        if (newOrder > curOrder.value + 1)
           return err(new Error('New order is out of range'))
 
         if (newOrder > dto.order) {
@@ -179,12 +155,12 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
-  async update(dto: UpdateGroupDto, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async update(dto: UpdateGroupDto) {
+    const ctx = this.db
 
     try {
       return await ctx.transaction(async (tx) => {
-        const group = await this.getOne(dto.id, tx)
+        const group = await this.getOne(dto.id)
         if (!group.ok)
           return group
 
@@ -192,9 +168,9 @@ export class GroupDbRepo implements IGroupDbRepo {
           .set(groupDbMapper.toUpdateWithoutOrder(groupDbMapper.toUpdate(dto)))
           .where(eq(groups.id, dto.id))
 
-        await this.updateOrder(group.value, dto.order, tx)
+        await this.updateOrder(group.value, dto.order)
 
-        const updatedGroup = await this.getOne(dto.id, tx)
+        const updatedGroup = await this.getOne(dto.id)
         if (!updatedGroup.ok)
           return tx.rollback()
 
@@ -206,8 +182,8 @@ export class GroupDbRepo implements IGroupDbRepo {
     }
   }
 
-  async delete(id: GroupId, tx?: DbTransaction) {
-    const ctx = tx || this.db
+  async delete(id: GroupId) {
+    const ctx = this.db
     try {
       return await ctx.transaction(async (tx) => {
         const toDelete = await tx.query.groups.findFirst({ where: eq(groups.id, id) })
