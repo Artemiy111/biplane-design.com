@@ -1,11 +1,10 @@
-import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
+import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import { err, ok } from '../shared/result'
 import { categoryDbMapper } from './categoryDb.repo'
 import type {
   CreateGroupDto,
   GroupDbDto,
   GroupId,
-  IGroupDbRepo,
   UpdateGroupDto,
 } from '~/server/use-cases/types'
 import type { Db } from '~/server/db'
@@ -43,19 +42,8 @@ export const groupDbMapper = {
   },
 }
 
-export class GroupDbRepo implements IGroupDbRepo {
+export class GroupDbRepo {
   constructor(private db: Db) { }
-
-  private async getNextOrder() {
-    const ctx = this.db
-    try {
-      const count = (await ctx.select().from(groups)).length
-      return ok(count + 1)
-    }
-    catch (e) {
-      return err(new Error(`Could not get next order of group`))
-    }
-  }
 
   async getOne(id: GroupId) {
     const ctx = this.db
@@ -110,8 +98,6 @@ export class GroupDbRepo implements IGroupDbRepo {
       return ok(groups.map(groupDbMapper.toDbDto))
     }
     catch (_e) {
-      const e = _e as Error
-      console.log(e)
       return err(new Error(`Could not get groups`))
     }
   }
@@ -120,20 +106,12 @@ export class GroupDbRepo implements IGroupDbRepo {
     const ctx = this.db
     try {
       return ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder()
-        if (!nextOrder.ok)
-          return tx.rollback()
-
-        const toCreate = groupDbMapper.toCreate(dto, nextOrder.value)
-
+        const [curOrder] = await tx.select({ value: count() }).from(groups)
+        const toCreate = groupDbMapper.toCreate(dto, curOrder.value + 1)
         const createdInDb = (await tx.insert(groups).values(toCreate).returning())[0]
-        const created = await this.getOne(createdInDb.id)
-        if (!created.ok)
-          return tx.rollback()
-
-        return ok(created.value!)
+        return ok(createdInDb)
       }, {
-        isolationLevel: 'read committed',
+        isolationLevel: 'read uncommitted',
       })
     }
     catch (e) {
@@ -149,11 +127,9 @@ export class GroupDbRepo implements IGroupDbRepo {
 
     try {
       return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder()
-        if (!nextOrder.ok)
-          return nextOrder
+        const [curOrder] = await tx.select({ value: count() }).from(groups)
 
-        if (newOrder > nextOrder.value)
+        if (newOrder > curOrder.value + 1)
           return err(new Error('New order is out of range'))
 
         if (newOrder > dto.order) {

@@ -1,11 +1,10 @@
-import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
+import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import { err, ok } from '../shared/result'
 import type { Db } from '~/server/db'
 import type { ImageDb, ImageDbCreate, ImageDbUpdate } from '~/server/db/schema'
 import { images } from '~/server/db/schema'
 import type {
   CreateImageDto,
-  IImageDbRepo,
   ImageDbDto,
   ImageId,
   ProjectId,
@@ -17,23 +16,21 @@ export const imageDbMapper = {
     return {
       projectId: db.projectId,
       id: db.id,
-      filename: db.filename,
       order: db.order,
       alt: db.alt,
     }
   },
   toDbCreate(dto: CreateImageDto, order: number): ImageDbCreate {
     return {
+      id: dto.filename,
       projectId: dto.projectId,
-      filename: dto.filename,
       alt: dto.alt,
       order,
     }
   },
   toDbUpdate(dto: UpdateImageDto): ImageDbUpdate {
     return {
-      id: dto.id,
-      filename: dto.filename,
+      id: dto.filename,
       alt: dto.alt,
       order: dto.order,
     }
@@ -44,7 +41,7 @@ export const imageDbMapper = {
   },
 }
 
-export class ImageDbRepo implements IImageDbRepo {
+export class ImageDbRepo {
   constructor(private db: Db) { }
 
   async getOne(id: ImageId) {
@@ -57,24 +54,6 @@ export class ImageDbRepo implements IImageDbRepo {
     }
     catch (_e) {
       return err(new Error(`Could not get image with id \`${id}\``))
-    }
-  }
-
-  async getOneByFilename(projectId: ProjectId, filename: string) {
-    const ctx = this.db
-    try {
-      const image = await ctx.query.images.findFirst({
-        where: and(
-          eq(images.projectId, projectId),
-          eq(images.filename, filename),
-        ),
-      })
-      if (!image)
-        return err(new Error(`Image with filename \`${filename}\` does not exist`))
-      return ok(image)
-    }
-    catch (_e) {
-      return err(new Error(`Could not get image with filename \`${filename}\``))
     }
   }
 
@@ -98,34 +77,15 @@ export class ImageDbRepo implements IImageDbRepo {
     }
   }
 
-  async getNextOrder(projectId: ProjectId) {
-    const ctx = this.db
-    try {
-      const count = (await ctx.select().from(images).where(eq(images.projectId, projectId))).length
-      return ok(count + 1)
-    }
-    catch (e) {
-      return err(new Error(`Could not get next order of image`))
-    }
-  }
-
   async create(dto: CreateImageDto) {
     const ctx = this.db
 
     try {
       return ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.projectId)
-        if (!nextOrder.ok)
-          return tx.rollback()
-
-        const toCreate = imageDbMapper.toDbCreate(dto, nextOrder.value)
-
+        const [curOrder] = await ctx.select({ value: count() }).from(images).where(eq(images.projectId, dto.projectId))
+        const toCreate = imageDbMapper.toDbCreate(dto, curOrder.value + 1)
         const createdInDb = (await tx.insert(images).values(toCreate).returning())[0]
-        const created = await this.getOne(createdInDb.id)
-        if (!created.ok)
-          return tx.rollback()
-
-        return ok(created.value!)
+        return ok(createdInDb)
       })
     }
     catch (e) {
@@ -141,11 +101,8 @@ export class ImageDbRepo implements IImageDbRepo {
 
     try {
       return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.projectId)
-        if (!nextOrder.ok)
-          return nextOrder
-
-        if (newOrder > nextOrder.value)
+        const [curOrder] = await ctx.select({ value: count() }).from(images).where(eq(images.projectId, dto.projectId))
+        if (newOrder > curOrder.value + 1)
           return err(new Error('New order is out of range'))
 
         if (newOrder > dto.order) {
@@ -178,7 +135,7 @@ export class ImageDbRepo implements IImageDbRepo {
 
     try {
       return await ctx.transaction(async (tx) => {
-        const image = await this.getOne(dto.id)
+        const image = await this.getOne(dto.filename)
         if (!image.ok) {
           return image
         }
@@ -188,19 +145,16 @@ export class ImageDbRepo implements IImageDbRepo {
           return tx.rollback()
         }
 
-        await tx.update(images)
-          .set(imageDbMapper.toDbUpdateWithoutOrder(dto))
-          .where(eq(images.id, dto.id))
-        const updatedImage = await this.getOne(dto.id)
-        if (!updatedImage.ok)
-          return tx.rollback()
+        const [updatedInDb] = await tx.update(images)
+          .set(imageDbMapper.toDbUpdateWithoutOrder(imageDbMapper.toDbUpdate(dto)))
+          .where(eq(images.id, dto.filename)).returning()
 
-        return ok(updatedImage.value)
+        return ok(updatedInDb)
       })
     }
     catch (_e) {
       const error = _e as Error
-      return err(new Error(`Could not update image with id \`${dto.id}\`: ${error.message}`))
+      return err(new Error(`Could not update image with id \`${dto.filename}\`: ${error.message}`))
     }
   }
 

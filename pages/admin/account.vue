@@ -6,7 +6,7 @@ import { Form } from '~/components/ui/form'
 import { Dialog } from '~/components/ui/dialog'
 
 definePageMeta({
-  middleware: 'authed',
+  middleware: 'authenticated',
 })
 
 useSeoMeta({
@@ -16,21 +16,21 @@ useSeoMeta({
   ogDescription: 'Настройки аккаунта администратора',
 })
 
-const user = useUser()
+const user = useAuthenticatedUser()
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(6),
   newPassword: z.string().min(6),
-  repeatPassword: z.string().min(6),
-}).refine(data => data.newPassword === data.repeatPassword, {
+  repeatNewPassword: z.string().min(6),
+}).refine(data => data.newPassword === data.repeatNewPassword, {
   message: 'Пароли не совпадают',
-  path: ['repeatPassword'],
+  path: ['repeatNewPassword'],
 })
 
 const initialValues: ChangePasswordSchema = {
   currentPassword: '',
   newPassword: '',
-  repeatPassword: '',
+  repeatNewPassword: '',
 }
 type ChangePasswordSchema = z.infer<typeof changePasswordSchema>
 
@@ -39,28 +39,20 @@ const isDialogOpen = ref(false)
 
 const formValidationSchema = toTypedSchema(changePasswordSchema)
 
-/*
-async function changePassword(values: ChangePasswordSchema) {
-  if (!user.value)
-    return
-  const isCurrentPassword = await supabase.auth.signInWithPassword({
-    email: user.value.email as string,
-    password: values.currentPassword,
-  })
-  if (isCurrentPassword.error) {
-    formRef.value?.setFieldError('currentPassword', 'Неверный пароль')
-    return
-  }
-  const res = await supabase.auth.updateUser({ password: values.newPassword })
-  if (res.error) {
-    toast.error('Не удaлось сменить пароль', { description: res.error.message })
-  }
-  else {
+async function changePassword(data: ChangePasswordSchema) {
+  try {
+    await $fetch('/api/user/change-password', {
+      method: 'post',
+      body: {
+        newPassword: data.newPassword,
+      } })
     toast.success('Пароль изменён')
     isDialogOpen.value = false
   }
+  catch (_e) {
+    toast.error('Не удaлось сменить пароль')
+  }
 }
-*/
 </script>
 
 <template>
@@ -72,8 +64,8 @@ async function changePassword(values: ChangePasswordSchema) {
       v-if="user"
       class="grid grid-cols-[max-content,1fr] gap-4"
     >
-      <span>Email</span>
-      <span>{{ user.email }}</span>
+      <span>Имя администратора</span>
+      <span>{{ user.username }}</span>
       <Dialog
         :open="isDialogOpen"
         @update:open="isDialogOpen = $event"
@@ -128,7 +120,7 @@ async function changePassword(values: ChangePasswordSchema) {
             </FormField>
             <FormField
               v-slot="{ field }"
-              name="repeatPassword"
+              name="repeatNewPassword"
             >
               <FormItem>
                 <FormLabel>Повторите пароль</FormLabel>

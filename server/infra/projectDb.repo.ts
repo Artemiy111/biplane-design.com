@@ -1,9 +1,9 @@
-import { and, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
+import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import type { Db } from '../db'
 import { err, ok } from '../shared/result'
 import { imageDbMapper } from './imageDb.repo'
 import { type ProjectDbCreate, type ProjectDbDeep, type ProjectDbUpdate, projects } from '~/server/db/schema'
-import type { ProjectDbDto, CreateProjectDto, IProjectDbRepo, ProjectId, UpdateProjectDto, CategoryId } from '~/server/use-cases/types'
+import type { ProjectDbDto, CreateProjectDto, ProjectId, UpdateProjectDto, CategoryId } from '~/server/use-cases/types'
 
 export const projectDbMapper = {
   toDb(db: ProjectDbDeep): ProjectDbDto {
@@ -51,19 +51,8 @@ export const projectDbMapper = {
   },
 }
 
-export class ProjectDbRepo implements IProjectDbRepo {
+export class ProjectDbRepo {
   constructor(private db: Db) { }
-
-  private async getNextOrder(categoryId: CategoryId) {
-    const ctx = this.db
-    try {
-      const count = (await ctx.select().from(projects).where(eq(projects.categoryId, categoryId))).length
-      return ok(count + 1)
-    }
-    catch (e) {
-      return err(new Error(`Could not get next order of project`))
-    }
-  }
 
   async getOne(id: ProjectId) {
     const ctx = this.db
@@ -147,18 +136,10 @@ export class ProjectDbRepo implements IProjectDbRepo {
 
     try {
       return ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.categoryId)
-        if (!nextOrder.ok)
-          return tx.rollback()
-
-        const toCreate = projectDbMapper.toDbCreate(dto, nextOrder.value)
-
+        const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, dto.categoryId))
+        const toCreate = projectDbMapper.toDbCreate(dto, curOrder.value + 1)
         const createdInDb = (await tx.insert(projects).values(toCreate).returning())[0]
-        const created = await this.getOne(createdInDb.id)
-        if (!created.ok)
-          return tx.rollback()
-
-        return ok(created.value!)
+        return ok(createdInDb)
       })
     }
     catch (e) {
@@ -174,11 +155,8 @@ export class ProjectDbRepo implements IProjectDbRepo {
 
     try {
       return await ctx.transaction(async (tx) => {
-        const nextOrder = await this.getNextOrder(dto.categoryId)
-        if (!nextOrder.ok)
-          return err(nextOrder.error)
-
-        if (newOrder > nextOrder.value)
+        const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, dto.categoryId))
+        if (newOrder > curOrder.value + 1)
           return err('New order is out of range')
 
         if (newOrder > dto.order) {
@@ -224,10 +202,8 @@ export class ProjectDbRepo implements IProjectDbRepo {
             .set(projectDbMapper.toDbUpdateWithoutOrder(dto))
             .where(eq(projects.id, dto.id))
 
-          const newOrder = await this.getNextOrder(dto.categoryId)
-          if (!newOrder.ok)
-            return tx.rollback()
-          await this.updateOrder(dto, newOrder.value - 1)
+          const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, dto.categoryId))
+          await this.updateOrder(dto, curOrder.value)
         }
         else {
           await this.updateOrder(project.value, dto.order)

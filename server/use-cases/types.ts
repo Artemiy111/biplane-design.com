@@ -7,33 +7,7 @@ export interface IUseCase {
   execute: (...params: any[]) => void
 }
 
-export interface IProjectSyncRepo {
-  getDirsNotExistingInDb: () => string[]
-  getDbProjectsExistingInFs: () => ProjectDto[]
-}
-
-export interface IImageSyncRepo {
-  getFilesNotExistingInDb: () => ImageFile[]
-  getDbImagesNotExistingInFs: () => ImageDto[]
-}
-
 //
-
-export interface IGroupRepo {
-  getOne: (id: GroupId) => Promise<Result<GroupDto, Error>>
-  getAll: () => Promise<Result<GroupDto[], Error>>
-  create: (dto: CreateGroupDto) => Promise<Result<GroupDto, Error>>
-  update: (dto: UpdateGroupDto) => Promise<Result<GroupDto, Error>>
-  delete: (id: GroupId) => Promise<Result<void, Error>>
-}
-
-export interface IGroupDbRepo {
-  getOne: (id: GroupId) => Promise<Result<GroupDbDto, Error>>
-  getAll: () => Promise<Result<GroupDbDto[], Error>>
-  create: (dto: CreateGroupDto) => Promise<Result<GroupDbDto, Error>>
-  update: (dto: UpdateGroupDto) => Promise<Result<GroupDbDto, Error>>
-  delete: (id: GroupId) => Promise<Result<void, Error>>
-}
 
 export type GroupId = number
 export interface GroupDto {
@@ -49,8 +23,6 @@ export type GroupDbDto = Omit<GroupDto, 'categories'> & {
 
 export type CreateGroupDto = Omit<GroupDto, 'id' | 'order' | 'categories'>
 export type UpdateGroupDto = Omit<GroupDto, 'categories'>
-
-// export type GetGroupNextOrder = () => Promise<Result<number, Error>>
 
 export type ChangeGroupOrder = (id: GroupId, order: number) => Promise<void>
 //
@@ -70,24 +42,6 @@ export type CategoryDbDto = Omit<CategoryDto, 'projects'> & {
 
 export type CreateCategoryDto = Omit<CategoryDto, 'id' | 'order' | 'projects'>
 export type UpdateCategoryDto = Omit<CategoryDto, 'projects' | 'groupId'>
-
-export interface ICategoryRepo {
-  getOne: (id: CategoryId) => Promise<Result<CategoryDto, Error>>
-  getByGroupId: (groupId: GroupId) => Promise<Result<CategoryDto[], Error>>
-  getAll: () => Promise<Result<CategoryDto[], Error>>
-  create: (dto: CreateCategoryDto) => Promise<Result<CategoryDto, Error>>
-  update: (dto: UpdateCategoryDto) => Promise<Result<CategoryDto, Error>>
-  delete: (id: CategoryId) => Promise<Result<void, Error>>
-}
-
-export interface ICategoryDbRepo {
-  getOne: (id: CategoryId) => Promise<Result<CategoryDbDto, Error>>
-  getByGroupId: (groupId: GroupId) => Promise<Result<CategoryDbDto[], Error>>
-  getAll: () => Promise<Result<CategoryDbDto[], Error>>
-  create: (dto: CreateCategoryDto) => Promise<Result<CategoryDbDto, Error>>
-  update: (dto: UpdateCategoryDto) => Promise<Result<CategoryDbDto, Error>>
-  delete: (id: CategoryId) => Promise<Result<void, Error>>
-}
 
 //
 
@@ -110,41 +64,12 @@ export type ProjectDbDto = Omit<ProjectDto, 'images'> & { images: ImageDbDto[] }
 export type CreateProjectDto = Omit<ProjectDto, 'id' | 'order' | 'images'>
 export type UpdateProjectDto = Omit<ProjectDto, 'images'>
 
-export interface IProjectRepo {
-  getOne: (id: ProjectId) => Promise<Result<ProjectDto, Error>>
-  getOneByUri: (uri: string) => Promise<Result<ProjectDto, Error>>
-  getByCategoryId: (categoryId: CategoryId) => Promise<Result<ProjectDto[], Error>>
-  getAll: () => Promise<Result<ProjectDto[], Error>>
-  create: (dto: CreateProjectDto) => Promise<Result<ProjectDto, Error>>
-  update: (dto: UpdateProjectDto) => Promise<Result<ProjectDto, Error>>
-  delete: (id: ProjectId) => Promise<Result<void, Error>>
-}
-
-export interface IProjectDbRepo {
-  getOne: (id: ProjectId) => Promise<Result<ProjectDbDto, Error>>
-  getOneByUri: (uri: string) => Promise<Result<ProjectDbDto, Error>>
-  getByCategoryId: (categoryId: CategoryId) => Promise<Result<ProjectDbDto[], Error>>
-  getAll: () => Promise<Result<ProjectDbDto[], Error>>
-  create: (dto: CreateProjectDto) => Promise<Result<ProjectDbDto, Error>>
-  update: (dto: UpdateProjectDto) => Promise<Result<ProjectDbDto, Error>>
-  delete: (id: ProjectId) => Promise<Result<void, Error>>
-}
-
-export interface IProjectBucketRepo {
-  getKey: (uri: string) => string
-  isDirExists: (uri: string) => Promise<Result<boolean, Error>>
-  createDir: (uri: string) => Promise<Result<void, Error>>
-  renameDir: (uri: string, newUri: string) => Promise<Result<void, Error>>
-  deleteDir: (uri: string) => Promise<Result<void, Error>>
-}
-
 //
 
-export type ImageId = number
+export type ImageId = string
 export interface ImageDto {
   projectId: ProjectId
   id: ImageId
-  filename: string
   url: string
   alt: string
   order: number
@@ -157,50 +82,22 @@ export interface ImageFile {
   file: File
 }
 export type CreateImageDto = Omit<ImageDto, 'id' | 'url' | 'order'> & {
+  filename: string
   data: Buffer
   type: string
 }
-export type UpdateImageDto = Omit<ImageDto, 'url' | 'projectId'>
-
-export interface IImageRepo {
-  getOne: (id: ProjectId) => Promise<Result<ImageDto, Error>>
-  getAllByProjectId: (id: ProjectId) => Promise<Result<ImageDto[], Error>>
-  create: (dto: CreateImageDto) => Promise<Result<ImageDto, Error>>
-  update: (dto: UpdateImageDto) => Promise<Result<ImageDto, Error>>
-  delete: (id: ImageId) => Promise<Result<void, Error>>
+export type UpdateImageDto = {
+  filename: string
+  alt: string
+  order: number
 }
 
-export interface IImageDbRepo {
-  getOne: (id: ImageId) => Promise<Result<ImageDbDto, Error>>
-  getOneByFilename: (projectId: ProjectId, filename: string) => Promise<Result<ImageDbDto, Error>>
-  getAll: () => Promise<Result<ImageDbDto[], Error>>
-  getAllByProjectId: (id: ProjectId) => Promise<Result<ImageDbDto[], Error>>
-  create: (dto: CreateImageDto) => Promise<Result<ImageDbDto, Error>>
-  update: (dto: UpdateImageDto) => Promise<Result<ImageDbDto, Error>>
-  delete: (id: ImageId) => Promise<Result<void, Error>>
-}
-
-export interface IImageFsRepo {
-  isImageFileExist: (projectUri: string, filename: string) => Promise<Result<boolean, Error>>
-  getImageFile: (projectUri: string, filename: string) => Promise<Result<File, Error>>
-  createImageFile: (projectUri: string, filename: string, data: Buffer) => Promise<Result<void, Error>>
-  renameImageFile: (projectUri: string, filename: string, newFilename: string) => Promise<Result<void, Error>>
-  deleteImageFile: (projectUri: string, filename: string) => Promise<Result<void, Error>>
-}
-
-export interface IImageBucketRepo {
-  isImageFileExist: (projectUri: string, filename: string) => Promise<Result<boolean, Error>>
-  getImageUrl: (projectUri: string, filename: string) => Promise<Result<string, Error>>
-  createImageFile: (projectUri: string, filename: string, type: string, data: Buffer) => Promise<Result<void, Error>>
-  renameImageFile: (projectUri: string, filename: string, newFilename: string) => Promise<Result<void, Error>>
-  deleteImageFile: (projectUri: string, filename: string) => Promise<Result<void, Error>>
-}
 //
 
-export type UserId = string
+export type UserId = number
 export interface UserDto {
   id: UserId
-  email: string
+  username: string
 }
 
 export interface LoginUserDto {

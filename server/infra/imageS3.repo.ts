@@ -1,19 +1,24 @@
 import type { S3ServiceException, S3Client } from '@aws-sdk/client-s3'
-import { HeadObjectCommand, PutObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3'
+import { HeadObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 // import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import type { Result } from '../shared/result'
 import { err, ok } from '../shared/result'
-import type { IImageBucketRepo } from '../use-cases/types'
+import { env } from '~/server/shared/env'
 
-export class ImageS3Repo implements IImageBucketRepo {
+export class ImageS3Repo {
   constructor(private bucketName: string, private s3: S3Client) { }
 
-  getImageKey(projectUri: string, filename: string): string {
+  getKey(projectUri: string, filename: string): string {
     return `${projectUri}/${filename}`
   }
 
+  getUrl(projectUri: string, filename: string) {
+    const key = this.getKey(projectUri, filename)
+    return env.ENDPOINT_URL + '/' + this.bucketName + '/' + key
+  }
+
   async isImageFileExist(projectUri: string, filename: string): Promise<Result<boolean, Error>> {
-    const key = this.getImageKey(projectUri, filename)
+    const key = this.getKey(projectUri, filename)
 
     try {
       await this.s3.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: key }))
@@ -28,27 +33,12 @@ export class ImageS3Repo implements IImageBucketRepo {
     }
   }
 
-  async getImageUrl(projectUri: string, filename: string): Promise<Result<string, Error>> {
-    const key = this.getImageKey(projectUri, filename)
-
+  async createImageFile(projectUri: string, filename: string, data: Buffer): Promise<Result<void, Error>> {
+    const key = this.getKey(projectUri, filename)
+    const mimeType = 'image/' + filename.split('.').at(-1)
+    console.log(key, mimeType)
     try {
-      const hostname = (await this.s3.config.endpoint!()).hostname
-      // !FIXME
-      const url = 'https://' + hostname + '/storage/v1/object/public/' + this.bucketName + '/' + key
-
-      return ok(url)
-    }
-    catch (_e) {
-      const error = _e as S3ServiceException
-      return err(new Error(`Could not get URL for image '${filename}' in project '${projectUri}': ${error.message}`))
-    }
-  }
-
-  async createImageFile(projectUri: string, filename: string, type: string, data: Buffer): Promise<Result<void, Error>> {
-    const key = this.getImageKey(projectUri, filename)
-
-    try {
-      await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key, Body: data, ContentType: type }))
+      await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key, Body: data, ContentType: mimeType }))
       return ok(undefined)
     }
     catch (_e) {
@@ -57,32 +47,8 @@ export class ImageS3Repo implements IImageBucketRepo {
     }
   }
 
-  async renameImageFile(projectUri: string, oldFilename: string, newFilename: string): Promise<Result<void, Error>> {
-    const oldKey = this.getImageKey(projectUri, oldFilename)
-    const newKey = this.getImageKey(projectUri, newFilename)
-
-    try {
-      await this.s3.send(new CopyObjectCommand({
-        Bucket: this.bucketName,
-        CopySource: `${this.bucketName}/${oldKey}`,
-        Key: newKey,
-      }))
-
-      await this.s3.send(new DeleteObjectCommand({
-        Bucket: this.bucketName,
-        Key: oldKey,
-      }))
-
-      return ok(undefined)
-    }
-    catch (_e) {
-      const error = _e as S3ServiceException
-      return err(new Error(`Could not rename image '${oldFilename}' to '${newFilename}' in project '${projectUri}': ${error.message}`))
-    }
-  }
-
   async deleteImageFile(projectUri: string, filename: string): Promise<Result<void, Error>> {
-    const key = this.getImageKey(projectUri, filename)
+    const key = this.getKey(projectUri, filename)
 
     try {
       await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: key }))

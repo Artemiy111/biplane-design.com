@@ -5,7 +5,7 @@ export const useUser = () => {
   return user
 }
 
-export const useAuthedUser = () => {
+export const useAuthenticatedUser = () => {
   const user = useUser()
   return computed(() => {
     const userValue = unref(user)

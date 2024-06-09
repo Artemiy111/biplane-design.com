@@ -1,5 +1,7 @@
 import { err, ok } from '../shared/result'
-import type { GroupDbDto, CategoryDto, GroupDto, IGroupRepo, IGroupDbRepo, ICategoryRepo, GroupId, CreateGroupDto, UpdateGroupDto } from '../use-cases/types'
+import type { GroupDbDto, CategoryDto, GroupDto, GroupId, CreateGroupDto, UpdateGroupDto } from '../use-cases/types'
+import type { CategoryRepo } from './category.repo'
+import type { GroupDbRepo } from './groupDb.repo'
 
 const groupMapper = {
   toDto(dbDto: GroupDbDto, categories: CategoryDto[]): GroupDto {
@@ -10,8 +12,8 @@ const groupMapper = {
   },
 }
 
-export class GroupRepo implements IGroupRepo {
-  constructor(private dbRepo: IGroupDbRepo, private categoryRepo: ICategoryRepo) { }
+export class GroupRepo {
+  constructor(private dbRepo: GroupDbRepo, private categoryRepo: CategoryRepo) { }
 
   async getOne(id: GroupId) {
     const group = await this.dbRepo.getOne(id)
@@ -47,7 +49,6 @@ export class GroupRepo implements IGroupRepo {
   async create(dto: CreateGroupDto) {
     const created = await this.dbRepo.create(dto)
     if (!created.ok) return created
-
     return this.getOne(created.value.id)
   }
 
