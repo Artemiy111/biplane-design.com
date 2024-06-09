@@ -1,11 +1,9 @@
-import type { CreateImageDto, IImageRepo, IUseCase, IUserRepo, LoginUserDto } from './types'
+import type { CreateImageDto, IImageRepo, IUseCase } from './types'
 
 export class CreateImageUseCase implements IUseCase {
-  constructor(private imageRepo: IImageRepo, private userRepo: IUserRepo) { }
+  constructor(private imageRepo: IImageRepo) { }
 
-  async execute(dto: CreateImageDto, loginDto: LoginUserDto) {
-    const user = await this.userRepo.getUser(loginDto)
-    if (!user.ok) return user
+  async execute(dto: CreateImageDto) {
     return await this.imageRepo.create(dto)
   }
 }

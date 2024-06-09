@@ -1,13 +1,8 @@
 import { z } from 'zod'
 import { HttpErrorCode, createHttpError } from '../../exceptions'
-import { getGroupsUseCase, createGroupUseCase } from '~/server/di'
+import { getGroupsUseCase, createGroupUseCase, authRepo } from '~/server/di'
 
 export default defineEventHandler(async (event) => {
-  const dummyLogin = {
-    email: 'art@art.art',
-    password: 'artartart',
-  }
-
   switch (event.method) {
     case 'GET': {
       const res = await getGroupsUseCase.execute()
@@ -19,9 +14,9 @@ export default defineEventHandler(async (event) => {
         title: z.string(),
         uri: z.string(),
       })
-
+      authRepo.assertAuthenticated(event)
       const body = await readValidatedBody(event, Body.parse)
-      const res = await createGroupUseCase.execute(body, dummyLogin)
+      const res = await createGroupUseCase.execute(body)
       if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
       return res.value
     }

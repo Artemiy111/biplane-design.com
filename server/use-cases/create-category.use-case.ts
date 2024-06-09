@@ -1,12 +1,9 @@
-import type { CreateCategoryDto, ICategoryRepo, IUseCase, IUserRepo, LoginUserDto } from './types'
+import type { CreateCategoryDto, ICategoryRepo, IUseCase } from './types'
 
 export class CreateCategoryUseCase implements IUseCase {
-  constructor(private categoryRepo: ICategoryRepo, private userRepo: IUserRepo) { }
+  constructor(private categoryRepo: ICategoryRepo) { }
 
-  async execute(dto: CreateCategoryDto, loginDto: LoginUserDto) {
-    const user = await this.userRepo.getUser(loginDto)
-    if (!user.ok) return user
-
+  async execute(dto: CreateCategoryDto) {
     return await this.categoryRepo.create(dto)
   }
 }

@@ -1,12 +1,9 @@
-import type { CategoryId, ICategoryRepo, IUseCase, IUserRepo, LoginUserDto } from './types'
+import type { CategoryId, ICategoryRepo, IUseCase } from './types'
 
 export class DeleteCategoryUseCase implements IUseCase {
-  constructor(private categoryRepo: ICategoryRepo, private userRepo: IUserRepo) { }
+  constructor(private categoryRepo: ICategoryRepo) { }
 
-  async execute(id: CategoryId, loginDto: LoginUserDto) {
-    const user = await this.userRepo.getUser(loginDto)
-    if (!user.ok) return user
-
+  async execute(id: CategoryId) {
     return await this.categoryRepo.delete(id)
   }
 }
