@@ -6,10 +6,11 @@ import Dropzone from '~/components/Dropzone.vue'
 
 const route = useRoute()
 const uri = route.params.uri as string
-const { data: project, error: _error, refresh: refreshImages } = await useLazyFetch<ProjectDto>(`/api/projects/?uri=${uri}`)
+const { data: project, error: _error, refresh: refreshImages }
+= await useLazyFetch<ProjectDto>(`/api/projects/?uri=${uri}`)
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: 'authed',
 })
 
 useSeoMeta({
@@ -63,7 +64,7 @@ async function uploadImages(images: File[]) {
     formData.append('type', image.type)
 
     try {
-      const res = await $fetch<ImageDto[]>(`/api/images`, {
+      const _res = await $fetch<ImageDto[]>(`/api/images`, {
         method: 'POST',
         body: formData,
       })

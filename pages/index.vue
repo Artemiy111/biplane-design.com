@@ -20,8 +20,9 @@ const headingRef = ref<HTMLHeadingElement | null>(null)
 onMounted(() => {
   if (!headingRef.value) return
   const headingText = new SplitType(headingRef.value, { types: 'words' })
-  gsap.from(headingText.words, { y: 80, duration: 0.8, opacity: 0, stagger: 0.3 })
-  const descriptionText = new SplitType('.description', { types: 'words' })
+  gsap.from(headingText.words, { y: 80, duration: 0.8, opacity: 0, stagger: 0.2 })
+  const descriptionText = new SplitType('.gsap-description', { types: 'words' })
+  gsap.from(descriptionText.words, { y: 20, opacity: 0, duration: 0.2, stagger: 0.1 })
 })
 </script>
 
@@ -44,11 +45,15 @@ onMounted(() => {
       >
         Biplane<br>Design
       </h1>
-      <span class="gsap-description font-medium pl-2 leading-[130%] md:text-xl sm:text-lg xs:text-base text-white text-3xl"><span>Первоклассные решения </span><span class="whitespace-nowrap">в архитектуре и дизайне</span> </span>
+      <span
+        class="gsap-description font-medium pl-2 leading-[130%] md:text-xl sm:text-lg xs:text-base text-white text-3xl"
+      ><span>Первоклассные решения</span>&nbsp;<span class="whitespace-nowrap">в архитектуре и дизайне</span>
+      </span>
       <NuxtLink
         to="/projects"
         :class="cn(buttonVariants({ variant: 'outline' }), 'w-fit ml-2')"
-      > Смотреть проекты</NuxtLink>
+      >
+        Смотреть проекты</NuxtLink>
     </section>
   </main>
 </template>
