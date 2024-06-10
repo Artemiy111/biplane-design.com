@@ -106,11 +106,13 @@ export class GroupDbRepo {
     const ctx = this.db
     try {
       return ctx.transaction(async (tx) => {
-        const [curOrder] = await tx.select({ value: count() }).from(groups)
-        const toCreate = groupDbMapper.toCreate(dto, curOrder.value + 1)
+        const toCreate = groupDbMapper.toCreate(dto, 1000)
         const createdInDb = (await tx.insert(groups).values(toCreate).returning())[0]
-        return ok(createdInDb)
+        const [curOrder] = await tx.select({ value: count() }).from(groups)
+        const [returned] = await tx.update(groups).set({ order: curOrder.value }).where(eq(groups.id, createdInDb.id)).returning()
+        return ok(returned)
       }, {
+        deferrable: true,
         isolationLevel: 'read uncommitted',
       })
     }

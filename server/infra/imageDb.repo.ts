@@ -78,14 +78,16 @@ export class ImageDbRepo {
   }
 
   async create(dto: CreateImageDto) {
-    const ctx = this.db
-
     try {
-      return ctx.transaction(async (tx) => {
-        const [curOrder] = await ctx.select({ value: count() }).from(images).where(eq(images.projectId, dto.projectId))
-        const toCreate = imageDbMapper.toDbCreate(dto, curOrder.value + 1)
+      return this.db.transaction(async (tx) => {
+        const toCreate = imageDbMapper.toDbCreate(dto, 1000)
         const createdInDb = (await tx.insert(images).values(toCreate).returning())[0]
-        return ok(createdInDb)
+        const [curOrder] = await tx.select({ value: count() }).from(images).where(eq(images.projectId, dto.projectId))
+        const [returned] = await tx.update(images).set({ order: curOrder.value }).where(eq(images.id, createdInDb.id)).returning()
+        return ok(returned)
+      }, {
+        deferrable: true,
+        isolationLevel: 'read uncommitted',
       })
     }
     catch (e) {
