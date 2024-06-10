@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { authRepo, createImageUseCase } from '~/server/di'
-import { HttpErrorCode, createHttpError } from '~/server/exceptions'
+import { authRepo, imageRepo } from '~/server/di'
+import { createHttpError, HttpErrorCode } from '~/server/exceptions'
 import { toUri } from '~/utils/toUri'
 
 export default defineEventHandler(async (event) => {
@@ -25,10 +25,7 @@ export default defineEventHandler(async (event) => {
       if (!body.success)
         throw createHttpError(HttpErrorCode.BadRequest, body.error)
 
-      const res = await createImageUseCase.execute(body.data)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
-
-      return res.value
+      return await imageRepo.create(body.data)
     }
   }
 })

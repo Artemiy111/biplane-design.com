@@ -1,13 +1,10 @@
 import { z } from 'zod'
-import { HttpErrorCode, createHttpError } from '../../exceptions'
-import { getGroupsUseCase, createGroupUseCase, authRepo } from '~/server/di'
+import { authRepo, groupRepo } from '~/server/di'
 
 export default defineEventHandler(async (event) => {
   switch (event.method) {
     case 'GET': {
-      const res = await getGroupsUseCase.execute()
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
-      return res.value
+      return await groupRepo.getAll()
     }
     case 'POST': {
       const Body = z.object({
@@ -16,9 +13,7 @@ export default defineEventHandler(async (event) => {
       })
       authRepo.assertAuthenticated(event)
       const body = await readValidatedBody(event, Body.parse)
-      const res = await createGroupUseCase.execute(body)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
-      return res.value
+      return await groupRepo.create(body)
     }
   }
 })

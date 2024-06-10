@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
 import { EllipsisVertical, LoaderCircle } from 'lucide-vue-next'
+import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import ProjectSheet from '~/components/admin/ProjectSheet.vue'
 import type { SheetMode } from '~/components/admin/ProjectSheet.vue'
 import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~/server/use-cases/types'
@@ -64,17 +65,15 @@ watch(groups, () => {
   setSelected({ group: groups.value[0], category: null })
 }, { once: true })
 
-const selectedCategoryOrGroupProjects = computed(() =>
-  projects.value.filter((project) => {
-    if (selected.value.category)
-      return project.categoryId === selected.value.category.id
+const selectedCategoryOrGroupProjects = computed(() => projects.value.filter((project) => {
+  if (selected.value.category)
+    return project.categoryId === selected.value.category.id
 
-    const category = getCategoryById(project.categoryId)
-    const group = getGroupById(category.groupId)
+  const category = getCategoryById(project.categoryId)
+  const group = getGroupById(category.groupId)
 
-    return group.id === selected.value.group?.id
-  }),
-)
+  return group.id === selected.value.group?.id
+}))
 
 function selectCategory(group: GroupDto, category: CategoryDto | null) {
   setSelected({ group, category })
@@ -156,6 +155,11 @@ function openProjectSheet(project: ProjectDto) {
     order: project.order,
     isMinimal: project.isMinimal,
   })
+}
+
+function onDragUpdate(e: SortableEvent) {
+  console.log(e.oldDraggableIndex, e.newDraggableIndex)
+  console.log(e.item)
 }
 </script>
 
@@ -247,10 +251,17 @@ function openProjectSheet(project: ProjectDto) {
             <TableHead>Расположение</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody class="w-full">
+        <TableBody
+          v-draggable="[selectedCategoryOrGroupProjects,
+                        {
+                          onUpdate: onDragUpdate }]"
+          class="w-full"
+        >
           <TableRow
             v-for="project in selectedCategoryOrGroupProjects"
             :key="project.id"
+            :data-project-id="project.id"
+            :data-order="project.order"
             class="cursor-pointer w-max grid grid-cols-[40px_100px_200px_200px_200px_200px_180px_120px_140px_180px_180px]"
             @click="navigateTo(`/admin/projects/${project.uri}`)"
           >

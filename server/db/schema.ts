@@ -37,9 +37,10 @@ export const groups = pgTable('groups', {
   order: integer('order').notNull().unique(),
 })
 
+export type GroupId = GroupDb['id']
 export type GroupDb = typeof groups.$inferSelect
-export type GroupDbCreate = Omit<GroupDb, 'id'>
-export type GroupDbUpdate = GroupDb
+export type GroupDbCreate = Omit<GroupDb, 'id' | 'order'>
+export type GroupDbUpdate = Omit<GroupDb, 'id'>
 
 export const groupsRelations = relations(groups, ({ many }) => ({
   categories: many(categories),
@@ -64,9 +65,10 @@ export const categories = pgTable(
   },
 )
 
+export type CategoryId = CategoryDb['id']
 export type CategoryDb = typeof categories.$inferSelect
-export type CategoryDbCreate = Omit<CategoryDb, 'id'>
-export type CategoryDbUpdate = Omit<CategoryDb, 'groupId'>
+export type CategoryDbCreate = Omit<CategoryDb, 'id' | 'order'>
+export type CategoryDbUpdate = Omit<CategoryDb, 'id' | 'groupId'>
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   group: one(groups, {
@@ -100,9 +102,10 @@ export const projects = pgTable(
   },
 )
 
+export type ProjectId = ProjectDb['id']
 export type ProjectDb = typeof projects.$inferSelect
 export type ProjectDbCreate = typeof projects.$inferInsert
-export type ProjectDbUpdate = ProjectDb
+export type ProjectDbUpdate = Omit<ProjectDb, 'id'>
 export type ProjectStatus = ProjectDb['status']
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -132,9 +135,10 @@ export const images = pgTable(
   },
 )
 
+export type ImageId = ImageDb['id']
 export type ImageDb = typeof images.$inferSelect
-export type ImageDbCreate = typeof images.$inferInsert
-export type ImageDbUpdate = Omit<ImageDb, 'projectId'>
+export type ImageDbCreate = Omit<typeof images.$inferInsert, 'order'>
+export type ImageDbUpdate = Omit<ImageDb, 'id' | 'projectId'>
 
 export const imageRelations = relations(images, ({ one }) => ({
   project: one(projects, {

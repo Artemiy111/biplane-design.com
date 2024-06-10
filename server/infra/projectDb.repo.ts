@@ -1,264 +1,157 @@
 import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import type { Db } from '../db'
-import { err, ok } from '../shared/result'
-import { imageDbMapper } from './imageDb.repo'
-import { type ProjectDbCreate, type ProjectDbDeep, type ProjectDbUpdate, projects } from '~/server/db/schema'
-import type { ProjectDbDto, CreateProjectDto, ProjectId, UpdateProjectDto, CategoryId } from '~/server/use-cases/types'
-
-export const projectDbMapper = {
-  toDb(db: ProjectDbDeep): ProjectDbDto {
-    return {
-      categoryId: db.categoryId,
-      id: db.id,
-      title: db.title,
-      uri: db.uri,
-      yearStart: db.yearStart,
-      yearEnd: db.yearEnd,
-      location: db.location,
-      status: db.status,
-      order: db.order,
-      isMinimal: db.isMinimal,
-      images: db.images.map(imageDbMapper.toDb),
-    }
-  },
-  toDbCreate(dto: CreateProjectDto, order: number): ProjectDbCreate {
-    return {
-      categoryId: dto.categoryId,
-      title: dto.title,
-      uri: dto.uri,
-      yearStart: dto.yearStart,
-      yearEnd: dto.yearEnd,
-      location: dto.location,
-      status: dto.status,
-      order,
-    }
-  },
-  toDbUpdate(dto: UpdateProjectDto): ProjectDbUpdate {
-    return {
-      categoryId: dto.categoryId,
-      id: dto.id,
-      title: dto.title,
-      uri: dto.uri,
-      yearStart: dto.yearStart,
-      yearEnd: dto.yearEnd,
-      location: dto.location,
-      status: dto.status,
-      order: dto.order,
-      isMinimal: dto.isMinimal,
-    }
-  },
-  toDbUpdateWithoutOrder(db: ProjectDbUpdate): Omit<ProjectDbUpdate, 'order'> {
-    const { order: _order, ...toUpdate } = db
-    return toUpdate
-  },
-}
+import { projectDbMapper } from '../mappers/projectDb.mapper'
+import type { CategoryId, ProjectId, ProjectDbUpdate } from '~/server/db/schema'
+import { projects } from '~/server/db/schema'
+import type { CreateProjectDto } from '~/server/use-cases/types'
 
 export class ProjectDbRepo {
   constructor(private db: Db) { }
 
   async getOne(id: ProjectId) {
-    try {
-      const project = (await this.db.query.projects.findFirst({
-        where: eq(projects.id, id), with: {
-          images: {
-            orderBy: images => images.order,
-          },
+    const model = await this.db.query.projects.findFirst({
+      where: eq(projects.id, id), with: {
+        images: {
+          orderBy: images => images.order,
         },
-      }))
-      if (!project)
-        return err(new Error(`Project with id \`${id}\` is not found`))
-
-      return ok(projectDbMapper.toDb(project))
-    }
-    catch (_e) {
-      return err(new Error(`Could not get project`))
-    }
+      },
+    })
+    if (!model) throw new Error(`Could not get project with id '${id}'`)
+    return model
   }
 
   async getOneByUri(uri: string) {
-    const ctx = this.db
-    try {
-      const project = (await ctx.query.projects.findFirst({
-        where: eq(projects.uri, uri), with: {
-          images: {
-            orderBy: images => images.order,
-          },
+    const model = await this.db.query.projects.findFirst({
+      where: eq(projects.uri, uri), with: {
+        images: {
+          orderBy: images => images.order,
         },
-      }))
-      if (!project)
-        return err(new Error(`Project with uri \`${uri}\` is not found`))
-
-      return ok(projectDbMapper.toDb(project))
-    }
-    catch (_e) {
-      return err(new Error(`Could not get project by uri \`${uri}\``))
-    }
+      },
+    })
+    if (!model) throw new Error(`Could not get project with uri '${uri}'`)
+    return model
   }
 
-  async getByCategoryId(categoryId: CategoryId) {
-    const ctx = this.db
-    try {
-      const projectsByCategoryId = (await ctx.query.projects.findMany({
-        where: eq(projects.categoryId, categoryId),
-        with: {
-          images: {
-            orderBy: images => images.order,
-          },
+  async getAllByCategoryId(categoryId: CategoryId) {
+    return await this.db.query.projects.findMany({
+      where: eq(projects.categoryId, categoryId),
+      with: {
+        images: {
+          orderBy: images => images.order,
         },
-        orderBy: projects => projects.order,
-      }))
-      return ok(projectsByCategoryId.map(projectDbMapper.toDb))
-    }
-    catch (_e) {
-      return err(new Error(`Could not get projects`))
-    }
+      },
+      orderBy: projects => projects.order,
+    })
   }
 
   async getAll() {
-    const ctx = this.db
-    try {
-      const projects = (await ctx.query.projects.findMany({
-        with: {
-          images: {
-            orderBy: images => images.order,
-          },
+    return await this.db.query.projects.findMany({
+      with: {
+        images: {
+          orderBy: images => images.order,
         },
-        orderBy: projects => projects.order,
-      }))
-      return ok(projects.map(projectDbMapper.toDb))
-    }
-    catch (_e) {
-      return err(new Error(`Could not get projects`))
-    }
+      },
+      orderBy: projects => projects.order,
+    })
   }
 
   async create(dto: CreateProjectDto) {
-    const ctx = this.db
-
-    try {
-      return ctx.transaction(async (tx) => {
-        const toCreate = projectDbMapper.toDbCreate(dto, 1000)
-        const createdInDb = (await tx.insert(projects).values(toCreate).returning())[0]
-        const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, dto.categoryId))
-        const [returned] = await tx.update(projects).set({ order: curOrder.value }).where(eq(projects.id, createdInDb.id)).returning()
-        return ok(returned)
-      }, {
-        deferrable: true,
-        isolationLevel: 'read uncommitted',
-      })
-    }
-    catch (e) {
-      return err(new Error(`Could not create project`))
-    }
+    return this.db.transaction(async (tx) => {
+      const toCreate = projectDbMapper.toDbCreate(dto, 1000)
+      const createdInDb = (await tx.insert(projects).values(toCreate).returning())[0]
+      const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, dto.categoryId))
+      await tx.update(projects).set({ order: curOrder.value }).where(eq(projects.id, createdInDb.id)).returning()
+      return await this.getOne(createdInDb.id)
+    }, {
+      deferrable: true,
+      isolationLevel: 'read uncommitted',
+    })
   }
 
-  private async updateOrder(dto: UpdateProjectDto, newOrder: number) {
-    if (dto.order === newOrder)
-      return ok(undefined)
+  async updateOrder(id: ProjectId, newOrder: number) {
+    return await this.db.transaction(async (tx) => {
+      const model = await tx.query.projects.findFirst({ where: eq(projects.id, id) })
+      if (!model) throw tx.rollback()
 
-    const ctx = this.db
+      if (model.order === newOrder) return
 
-    try {
-      return await ctx.transaction(async (tx) => {
-        const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, dto.categoryId))
-        if (newOrder > curOrder.value + 1)
-          return err('New order is out of range')
+      const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, model.categoryId))
+      if (newOrder > curOrder.value + 1)
+        throw new Error('New order is out of range')
 
-        if (newOrder > dto.order) {
-          await tx.update(projects).set({ order: sql`(${projects.order} - 1) * 1000` }).where(and(
-            eq(projects.categoryId, dto.categoryId),
-            gt(projects.order, dto.order),
-            lte(projects.order, newOrder),
-          ))
-        }
-        else if (newOrder < dto.order) {
-          await tx.update(projects).set({ order: sql`(${projects.order} + 1) * 1000` }).where(and(
-            eq(projects.categoryId, dto.categoryId),
-            gte(projects.order, newOrder),
-            lt(projects.order, dto.order),
-          ))
-        }
+      if (newOrder > model.order) {
+        await tx.update(projects).set({ order: sql`(${projects.order} - 1) * 1000` }).where(and(
+          eq(projects.categoryId, model.categoryId),
+          gt(projects.order, model.order),
+          lte(projects.order, newOrder),
+        ))
+      }
+      else if (newOrder < model.order) {
+        await tx.update(projects).set({ order: sql`(${projects.order} + 1) * 1000` }).where(and(
+          eq(projects.categoryId, model.categoryId),
+          gte(projects.order, newOrder),
+          lt(projects.order, model.order),
+        ))
+      }
 
-        await tx.update(projects).set({ order: newOrder }).where(eq(projects.id, dto.id))
-        await tx.update(projects).set({ order: sql`${projects.order} / 1000` }).where(gte(projects.order, 1000))
-        return ok(undefined)
-      })
-    }
-    catch (_e) {
-      return err(new Error(`Could not update order of project with id \`${dto.id}\``))
-    }
+      await tx.update(projects).set({ order: newOrder }).where(eq(projects.id, model.id))
+      await tx.update(projects).set({ order: sql`${projects.order} / 1000` }).where(gte(projects.order, 1000))
+    })
   }
 
-  async update(dto: UpdateProjectDto) {
-    const ctx = this.db
+  async update(id: ProjectId, update: ProjectDbUpdate) {
+    return await this.db.transaction(async (tx) => {
+      const model = await this.getOne(id)
+      const needCategoryUpdate = update.categoryId !== model.categoryId
+      if (needCategoryUpdate) {
+        const TMP_ORDER = 999
+        await this.updateOrder(id, TMP_ORDER)
 
-    try {
-      return await ctx.transaction(async (tx) => {
-        const project = await this.getOne(dto.id)
-        if (!project.ok)
-          return project
+        await tx.update(projects)
+          .set(projectDbMapper.toDbUpdateWithoutOrder(update))
+          .where(eq(projects.id, id))
 
-        const isProjectCategoryUpdated = dto.categoryId !== project.value.categoryId
-        if (isProjectCategoryUpdated) {
-          const tmpOrder = 999
-          await this.updateOrder(project.value, tmpOrder)
+        const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, update.categoryId))
+        await this.updateOrder(id, curOrder.value)
+      }
+      else {
+        await this.updateOrder(id, update.order)
+        await tx.update(projects)
+          .set(projectDbMapper.toDbUpdateWithoutOrder(update))
+          .where(eq(projects.id, id))
+      }
 
-          await tx.update(projects)
-            .set(projectDbMapper.toDbUpdateWithoutOrder(dto))
-            .where(eq(projects.id, dto.id))
+      const updatedProject = await this.getOne(id)
+      if (!updatedProject)
+        return tx.rollback()
 
-          const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, dto.categoryId))
-          await this.updateOrder(dto, curOrder.value)
-        }
-        else {
-          await this.updateOrder(project.value, dto.order)
-          await tx.update(projects)
-            .set(projectDbMapper.toDbUpdateWithoutOrder(dto))
-            .where(eq(projects.id, dto.id))
-        }
-
-        const updatedProject = await this.getOne(dto.id)
-        if (!updatedProject.ok)
-          return tx.rollback()
-
-        return ok(updatedProject.value)
-      })
-    }
-    catch (e) {
-      return err(new Error(`Could not update project with id \`${dto.id}\``))
-    }
+      return updatedProject
+    })
   }
 
   async delete(id: ProjectId) {
-    const ctx = this.db
-    try {
-      return await ctx.transaction(async (tx) => {
-        await this.db.delete(projects).where(eq(projects.id, id))
+    return await this.db.transaction(async (tx) => {
+      await this.db.delete(projects).where(eq(projects.id, id))
 
-        const remainProjects = await tx.select((
-          { ...getTableColumns(projects), newOrder: sql<number>`row_number() over (order by ${projects.order})`.mapWith(Number).as('new_order') }
-        )).from(projects)
+      const remainProjects = await tx.select((
+        { ...getTableColumns(projects), newOrder: sql<number>`row_number() over (order by ${projects.order})`.mapWith(Number).as('new_order') }
+      )).from(projects)
 
-        await Promise.all(
-          remainProjects.map((proj) => {
-            return tx.update(projects).set({ order: proj.newOrder * 1000 }).where(
-              eq(projects.id, proj.id),
-            )
-          }),
-        )
+      await Promise.all(
+        remainProjects.map((proj) => {
+          return tx.update(projects).set({ order: proj.newOrder * 1000 }).where(
+            eq(projects.id, proj.id),
+          )
+        }),
+      )
 
-        await Promise.all(
-          remainProjects.map((proj) => {
-            return tx.update(projects).set({ order: proj.newOrder }).where(
-              eq(projects.id, proj.id),
-            )
-          }),
-        )
-        return ok(undefined)
-      })
-    }
-    catch (_e) {
-      return err(new Error(`Could not delete project with id \`${id}\``))
-    }
+      await Promise.all(
+        remainProjects.map((proj) => {
+          return tx.update(projects).set({ order: proj.newOrder }).where(
+            eq(projects.id, proj.id),
+          )
+        }),
+      )
+    })
   }
 }

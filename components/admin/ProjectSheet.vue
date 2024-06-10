@@ -2,6 +2,7 @@
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { Select, SelectContent, SelectItem } from '../ui/select'
+import { Checkbox } from '../ui/checkbox'
 import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~/server/use-cases/types'
 import { Form } from '~/components/ui/form'
 
@@ -342,6 +343,22 @@ defineExpose({
                 placeholder="Уфа"
                 @change="handleChange"
                 @blur="handleBlur"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField
+          v-slot="{ value, handleChange }"
+          name="isMinimal"
+        >
+          <FormItem class="flex gap-4 items-center space-y-0">
+            <FormLabel>Минималистичный</FormLabel>
+            <FormControl class="m-0">
+              <Checkbox
+                :checked="value"
+                @update:checked="handleChange"
               />
             </FormControl>
             <FormMessage />

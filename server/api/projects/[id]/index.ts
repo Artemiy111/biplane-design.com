@@ -1,29 +1,33 @@
 import { z } from 'zod'
-import { authRepo, categoryRepo } from '~/server/di'
+import { authRepo, projectRepo } from '~/server/di'
 
 export default defineEventHandler(async (event) => {
   const id = Number(event.context.params!.id! as string)
 
   switch (event.method) {
     case 'GET': {
-      return await categoryRepo.getOne(id)
+      return projectRepo.getOne(id)
     }
 
     case 'PUT': {
       const Body = z.object({
-        groupId: z.number(),
-        id: z.number(),
+        categoryId: z.number(),
         title: z.string(),
         uri: z.string(),
+        status: z.enum(['завершён', 'строится', 'в разработке']),
+        yearStart: z.number().nullable(),
+        yearEnd: z.number().nullable(),
+        location: z.string(),
         order: z.number().min(1),
+        isMinimal: z.boolean(),
       })
       authRepo.assertAuthenticated(event)
       const body = await readValidatedBody(event, Body.parse)
-      return await categoryRepo.update(id, body)
+      return await projectRepo.update(id, body)
     }
     case 'DELETE': {
       authRepo.assertAuthenticated(event)
-      return await categoryRepo.delete(id)
+      return await projectRepo.delete(id)
     }
   }
 })

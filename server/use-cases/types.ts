@@ -1,6 +1,5 @@
 import type { Buffer } from 'node:buffer'
-import type { Result } from '../shared/result'
-import type { ProjectStatus } from '../db/schema'
+import type { CategoryDbUpdate, CategoryId, GroupDbUpdate, GroupId, ImageDbUpdate, ProjectDbUpdate, ProjectId, ProjectStatus } from '../db/schema'
 
 //
 export interface IUseCase {
@@ -10,7 +9,6 @@ export interface IUseCase {
 
 //
 
-export type GroupId = number
 export interface GroupDto {
   id: GroupId
   title: string
@@ -18,17 +16,13 @@ export interface GroupDto {
   order: number
   categories: CategoryDto[]
 }
-export type GroupDbDto = Omit<GroupDto, 'categories'> & {
-  categories: CategoryDbDto[]
-}
 
 export type CreateGroupDto = Omit<GroupDto, 'id' | 'order' | 'categories'>
-export type UpdateGroupDto = Omit<GroupDto, 'categories'>
+export type UpdateGroupDto = GroupDbUpdate
 
 export type ChangeGroupOrder = (id: GroupId, order: number) => Promise<void>
 //
 
-export type CategoryId = number
 export interface CategoryDto {
   groupId: GroupId
   id: CategoryId
@@ -37,16 +31,12 @@ export interface CategoryDto {
   order: number
   projects: ProjectDto[]
 }
-export type CategoryDbDto = Omit<CategoryDto, 'projects'> & {
-  projects: ProjectDbDto[]
-}
 
 export type CreateCategoryDto = Omit<CategoryDto, 'id' | 'order' | 'projects'>
-export type UpdateCategoryDto = Omit<CategoryDto, 'projects' | 'groupId'>
+export type UpdateCategoryDto = CategoryDbUpdate
 
 //
 
-export type ProjectId = number
 export interface ProjectDto {
   categoryId: CategoryId
   id: ProjectId
@@ -61,22 +51,18 @@ export interface ProjectDto {
   isMinimal: boolean
 }
 
-export type ProjectDbDto = Omit<ProjectDto, 'images'> & { images: ImageDbDto[] }
-
 export type CreateProjectDto = Omit<ProjectDto, 'id' | 'order' | 'images' | 'isMinimal'>
-export type UpdateProjectDto = Omit<ProjectDto, 'images'>
+export type UpdateProjectDto = ProjectDbUpdate
 
 //
 
-export type ImageId = string
 export interface ImageDto {
   projectId: ProjectId
-  id: ImageId
+  id: string
   url: string
   alt: string
   order: number
 }
-export type ImageDbDto = Omit<ImageDto, 'url'>
 
 export interface ImageFile {
   filename: string
@@ -88,12 +74,7 @@ export type CreateImageDto = Omit<ImageDto, 'id' | 'url' | 'order'> & {
   data: Buffer
   type: string
 }
-export type UpdateImageDto = {
-  filename: string
-  alt: string
-  order: number
-}
-
+export type UpdateImageDto = ImageDbUpdate
 //
 
 export type UserId = number
@@ -114,9 +95,4 @@ export interface CreateUserDto {
 
 export interface UpdateUserDto {
   password: string
-}
-
-export interface IUserRepo {
-  getUser: (loginDto: LoginUserDto) => Promise<Result<UserDto, Error>>
-  createUser: (dto: CreateUserDto) => Promise<Result<UserDto, Error>>
 }
