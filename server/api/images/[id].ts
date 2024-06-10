@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
       })
       authRepo.assertAuthenticated(event)
       const body = await readValidatedBody(event, Body.parse)
+      console.log(id, body)
       return await imageRepo.update(id, body)
     }
     case 'DELETE': {

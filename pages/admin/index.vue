@@ -157,9 +157,16 @@ function openProjectSheet(project: ProjectDto) {
   })
 }
 
-function onDragUpdate(e: SortableEvent) {
-  console.log(e.oldDraggableIndex, e.newDraggableIndex)
-  console.log(e.item)
+async function updateOrder(e: SortableEvent) {
+  const id = Number(e.item.dataset.projectId!)
+
+  await $fetch(`/api/projects/${id}/update-order`, {
+    method: 'PATCH',
+    body: {
+      order: e.newDraggableIndex! + 1,
+    },
+  })
+  await refresh()
 }
 </script>
 
@@ -241,7 +248,7 @@ function onDragUpdate(e: SortableEvent) {
             <TableHead>№</TableHead>
             <TableHead />
             <TableHead>Превью</TableHead>
-            <TableHead>Проект</TableHead>
+            <TableHead>Название</TableHead>
             <TableHead>Uri</TableHead>
             <TableHead>Группа</TableHead>
             <TableHead>Категория</TableHead>
@@ -254,7 +261,7 @@ function onDragUpdate(e: SortableEvent) {
         <TableBody
           v-draggable="[selectedCategoryOrGroupProjects,
                         {
-                          onUpdate: onDragUpdate }]"
+                          onUpdate: updateOrder }]"
           class="w-full"
         >
           <TableRow
