@@ -23,10 +23,11 @@ export class ImageDbRepo {
 
   async create(create: ImageDbCreate) {
     return this.db.transaction(async (tx) => {
-      const created = (await tx.insert(images).values({ ...create, order: 999 }).returning())[0]
+      const [created] = await tx.insert(images).values({ ...create, order: 999 }).returning()
       const [curOrder] = await tx.select({ value: count() }).from(images).where(eq(images.projectId, create.projectId))
       await tx.update(images).set({ order: curOrder.value }).where(eq(images.id, created.id)).returning()
-      return await this.getOne(created.id)
+      const returned = await tx.query.images.findFirst({ where: eq(images.id, create.id) })
+      return returned!
     }, {
       deferrable: true,
       isolationLevel: 'read uncommitted',
@@ -62,14 +63,13 @@ export class ImageDbRepo {
   }
 
   async update(id: ImageId, update: ImageDbUpdate) {
-    const ctx = this.db
-
-    return await ctx.transaction(async (tx) => {
+    return await this.db.transaction(async (tx) => {
       await this.updateOrder(id, update.order)
       await tx.update(images)
         .set(imageDbMapper.toDbUpdateWithoutOrder(update))
         .where(eq(images.id, id)).returning()
-      return this.getOne(id)
+      const returned = await tx.query.images.findFirst({ where: eq(images.id, id) })
+      return returned!
     })
   }
 

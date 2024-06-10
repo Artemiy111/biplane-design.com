@@ -42,9 +42,9 @@ async function deleteImages(ids: number[]) {
   refreshImages()
 }
 
-async function updateImage(dto: UpdateImageDto) {
+async function updateImage(id: string, dto: UpdateImageDto) {
   try {
-    await $fetch(`/api/images/${dto.filename}`, {
+    await $fetch(`/api/images/${id}`, {
       method: 'PUT',
       body: dto,
     })
@@ -65,7 +65,6 @@ async function uploadImages(images: File[]) {
     formData.append('projectId', String(project.value!.id))
     formData.append('filename', image.name)
     formData.append('alt', image.name)
-    formData.append('type', image.type)
 
     try {
       const _res = await $fetch<ImageDto[]>(`/api/images`, {
@@ -91,10 +90,10 @@ async function uploadImages(images: File[]) {
       {{ project.title }}
       {{ project.uri }}
     </section>
-    <section class="flex flex-col gap-4 p-8">
+    <section class="flex flex-col  gap-4 p-8">
       <span>Изображений: {{ project.images.length }}</span>
       <Dropzone
-        class="h-[20dvh] w-[600px]"
+        class="h-[25dvh] w-full"
         :clear-on-upload="true"
         :show-images="true"
         :show-icon="true"
@@ -104,7 +103,7 @@ async function uploadImages(images: File[]) {
       <Table class="overflow-hidden">
         <TableHeader>
           <TableRow>
-            <TableHead>Порядок</TableHead>
+            <TableHead>№</TableHead>
             <TableHead>Изображение</TableHead>
             <TableHead>Название файла</TableHead>
             <TableHead>Опции</TableHead>
@@ -133,7 +132,7 @@ async function uploadImages(images: File[]) {
                   <Button
                     v-if="idx !== 0"
                     variant="ghost"
-                    @click="updateImage({ ...image, order: image.order - 1 })"
+                    @click="updateImage(image.id, { ...image, order: image.order - 1 })"
                   >
                     <ArrowUp />
                   </Button>
@@ -146,7 +145,7 @@ async function uploadImages(images: File[]) {
                   <Button
                     v-if="idx !== project.images.length - 1"
                     variant="ghost"
-                    @click="updateImage({ ...image, order: image.order + 1 })"
+                    @click="updateImage(image.id, { ...image, order: image.order + 1 })"
                   >
                     <ArrowDown />
                   </Button>

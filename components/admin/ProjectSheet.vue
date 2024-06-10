@@ -50,7 +50,7 @@ const formSchema = z.object({
       catch (e) {
         return false
       }
-    }, 'Не валидный URL'),
+    }, 'Не валидный Uri'),
   status: z.enum(['строится', 'завершён', 'в разработке']),
   yearStart: z
     .number()
@@ -244,7 +244,7 @@ defineExpose({
           name="uri"
         >
           <FormItem>
-            <FormLabel>Человекопонятная ссылка *</FormLabel>
+            <FormLabel>Uri *</FormLabel>
             <FormControl>
               <Input
                 :model-value="componentField.modelValue"
