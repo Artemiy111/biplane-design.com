@@ -54,13 +54,13 @@ export class ImageRepo {
     if (!project.ok) return project
     dto.filename = crypto.randomUUID() + '.' + dto.filename.split('.').at(-1)
 
+    const createdInDb = await this.dbRepo.create(dto)
+    if (!createdInDb.ok) return createdInDb
+
     const createdInBucket = await this.bucketRepo.createImageFile(project.value.uri, dto.filename, dto.data)
     if (!createdInBucket.ok) return createdInBucket
 
     const url = this.bucketRepo.getUrl(project.value.uri, dto.filename)
-
-    const createdInDb = await this.dbRepo.create(dto)
-    if (!createdInDb.ok) return createdInDb
 
     const res = imageMapper.toDto(createdInDb.value, url)
     return ok(res)
