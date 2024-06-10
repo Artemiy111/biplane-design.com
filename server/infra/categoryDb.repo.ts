@@ -103,7 +103,6 @@ export class CategoryDbRepo {
             },
             orderBy: projects => projects.order,
           },
-
         },
         orderBy: categories.order,
       })
@@ -118,11 +117,13 @@ export class CategoryDbRepo {
     const ctx = this.db
     try {
       return ctx.transaction(async (tx) => {
-        const [curOrder] = await tx.select({ value: count() }).from(categories)
-        const toCreate = categoryDbMapper.toDbCreate(dto, curOrder.value + 1)
+        const toCreate = categoryDbMapper.toDbCreate(dto, 1000)
         const createdInDb = (await tx.insert(categories).values(toCreate).returning())[0]
-        return ok(createdInDb)
+        const [curOrder] = await tx.select({ value: count() }).from(categories)
+        const [returned] = await tx.update(categories).set({ order: curOrder.value }).where(eq(categories.id, createdInDb.id)).returning()
+        return ok(returned)
       }, {
+        deferrable: true,
         isolationLevel: 'read uncommitted',
       })
     }

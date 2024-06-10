@@ -136,10 +136,14 @@ export class ProjectDbRepo {
 
     try {
       return ctx.transaction(async (tx) => {
-        const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, dto.categoryId))
-        const toCreate = projectDbMapper.toDbCreate(dto, curOrder.value + 1)
+        const toCreate = projectDbMapper.toDbCreate(dto, 1000)
         const createdInDb = (await tx.insert(projects).values(toCreate).returning())[0]
-        return ok(createdInDb)
+        const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, dto.categoryId))
+        const [returned] = await tx.update(projects).set({ order: curOrder.value }).where(eq(projects.id, createdInDb.id)).returning()
+        return ok(returned)
+      }, {
+        deferrable: true,
+        isolationLevel: 'read uncommitted',
       })
     }
     catch (e) {
