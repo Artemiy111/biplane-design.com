@@ -6,7 +6,7 @@ import Dropzone from '~/components/Dropzone.vue'
 
 const route = useRoute()
 const uri = route.params.uri as string
-const { data: project, error: _error, refresh: refreshImages }
+const { data: project, error: error, refresh: refreshImages }
 = await useLazyFetch<ProjectDto>(`/api/projects/?uri=${uri}`)
 
 definePageMeta({
@@ -18,6 +18,10 @@ useSeoMeta({
   ogTitle: () => `Админ-панель | ${project.value?.title}`,
   description: () => `Админ-панель | ${project.value?.title}`,
   ogDescription: () => `Админ-панель | ${project.value?.title}`,
+})
+
+watch(error, async () => {
+  if (project.value === null) await navigateTo('/admin')
 })
 
 async function deleteImages(ids: number[]) {

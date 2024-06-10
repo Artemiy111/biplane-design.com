@@ -1,15 +1,12 @@
 import { z } from 'zod'
-import { getGroupUseCase, updateGroupUseCase, deleteGroupUseCase, authRepo } from '~/server/di'
-import { HttpErrorCode, createHttpError } from '~/server/exceptions'
+import { authRepo, groupRepo } from '~/server/di'
 
 export default defineEventHandler(async (event) => {
   const id = Number(event.context.params!.id! as string)
 
   switch (event.method) {
     case 'GET': {
-      const res = await getGroupUseCase.execute(id)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
-      return res.value
+      return await groupRepo.getOne(id)
     }
 
     case 'PUT': {
@@ -21,14 +18,10 @@ export default defineEventHandler(async (event) => {
       })
       authRepo.assertAuthenticated(event)
       const body = await readValidatedBody(event, Body.parse)
-      const res = await updateGroupUseCase.execute(body)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
-      return res.value
+      return groupRepo.update(id, body)
     }
     case 'DELETE': {
-      const res = await deleteGroupUseCase.execute(id)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
-      return res.value
+      return await groupRepo.delete(id)
     }
   }
 })
