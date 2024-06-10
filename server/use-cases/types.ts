@@ -72,7 +72,6 @@ export interface ImageFile {
 export type CreateImageDto = Omit<ImageDto, 'id' | 'url' | 'order'> & {
   filename: string
   data: Buffer
-  type: string
 }
 export type UpdateImageDto = ImageDbUpdate
 //

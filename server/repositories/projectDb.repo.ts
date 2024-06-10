@@ -58,10 +58,17 @@ export class ProjectDbRepo {
   async create(dto: CreateProjectDto) {
     return this.db.transaction(async (tx) => {
       const toCreate = projectDbMapper.toDbCreate(dto, 1000)
-      const createdInDb = (await tx.insert(projects).values(toCreate).returning())[0]
+      const created = (await tx.insert(projects).values(toCreate).returning())[0]
       const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, dto.categoryId))
-      await tx.update(projects).set({ order: curOrder.value }).where(eq(projects.id, createdInDb.id)).returning()
-      return await this.getOne(createdInDb.id)
+      await tx.update(projects).set({ order: curOrder.value }).where(eq(projects.id, created.id)).returning()
+      const returned = await tx.query.projects.findFirst({
+        where: eq(projects.id, created.id), with: {
+          images: {
+            orderBy: images => images.order,
+          },
+        },
+      })
+      return returned!
     }, {
       deferrable: true,
       isolationLevel: 'read uncommitted',
@@ -121,11 +128,14 @@ export class ProjectDbRepo {
           .where(eq(projects.id, id))
       }
 
-      const updatedProject = await this.getOne(id)
-      if (!updatedProject)
-        return tx.rollback()
-
-      return updatedProject
+      const returned = await tx.query.projects.findFirst({
+        where: eq(projects.id, id), with: {
+          images: {
+            orderBy: images => images.order,
+          },
+        },
+      })
+      return returned!
     })
   }
 
