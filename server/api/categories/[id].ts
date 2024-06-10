@@ -1,15 +1,12 @@
 import { z } from 'zod'
-import { getCategoryUseCase, updateCategoryUseCase, deleteCategoryUseCase, authRepo } from '~/server/di'
-import { HttpErrorCode, createHttpError } from '~/server/exceptions'
+import { authRepo, categoryRepo } from '~/server/di'
 
 export default defineEventHandler(async (event) => {
   const id = Number(event.context.params!.id! as string)
 
   switch (event.method) {
     case 'GET': {
-      const res = await getCategoryUseCase.execute(id)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
-      return res.value
+      return await categoryRepo.getOne(id)
     }
 
     case 'PUT': {
@@ -22,15 +19,11 @@ export default defineEventHandler(async (event) => {
       })
       authRepo.assertAuthenticated(event)
       const body = await readValidatedBody(event, Body.parse)
-      const res = await updateCategoryUseCase.execute(body)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
-      return res.value
+      return await categoryRepo.update(id, body)
     }
     case 'DELETE': {
       authRepo.assertAuthenticated(event)
-      const res = await deleteCategoryUseCase.execute(id)
-      if (!res.ok) throw createHttpError(HttpErrorCode.InternalServerError, res.error)
-      return res.value
+      return await categoryRepo.delete(id)
     }
   }
 })
