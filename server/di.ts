@@ -1,18 +1,18 @@
 import { db } from './db'
 import { s3 } from './s3'
 
-import { UserRepo } from './infra/user.repo'
-import { GroupDbRepo } from './infra/groupDb.repo'
-import { ProjectRepo } from './infra/project.repo'
-import { ProjectDbRepo } from './infra/projectDb.repo'
-import { ImageDbRepo } from './infra/imageDb.repo'
-import { ImageRepo } from './infra/image.repo'
-import { CategoryDbRepo } from './infra/categoryDb.repo'
-import { ImageS3Repo } from './infra/imageS3.repo'
-import { ProjectS3Repo } from './infra/projectS3.repo'
-import { CategoryRepo } from './infra/category.repo'
-import { GroupRepo } from './infra/group.repo'
-import { AuthRepo } from './infra/auth.repo'
+import { UserRepo } from './repositories/user.repo'
+import { GroupDbRepo } from './repositories/groupDb.repo'
+import { ProjectRepo } from './repositories/project.repo'
+import { ProjectDbRepo } from './repositories/projectDb.repo'
+import { ImageDbRepo } from './repositories/imageDb.repo'
+import { ImageRepo } from './repositories/image.repo'
+import { CategoryDbRepo } from './repositories/categoryDb.repo'
+import { ImageS3Repo } from './repositories/imageS3.repo'
+import { ProjectS3Repo } from './repositories/projectS3.repo'
+import { CategoryRepo } from './repositories/category.repo'
+import { GroupRepo } from './repositories/group.repo'
+import { AuthRepo } from './repositories/auth.repo'
 
 import { env } from '~/server/shared/env'
 import { logger } from '~/server/shared/logger'
@@ -34,4 +34,4 @@ export const categoryRepo = new CategoryRepo(categoryDbRepo, projectRepo)
 export const groupDbRepo = new GroupDbRepo(db)
 export const groupRepo = new GroupRepo(groupDbRepo, categoryRepo)
 
-logger.log('di phase done')
+logger.log('di done')
