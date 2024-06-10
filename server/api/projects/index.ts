@@ -24,10 +24,11 @@ export default defineEventHandler(async (event) => {
         categoryId: z.number(),
         title: z.string(),
         uri: z.string(),
-        status: z.string(),
+        status: z.enum(['строится', 'в разработке', 'завершён']),
         yearStart: z.number().nullable(),
         yearEnd: z.number().nullable(),
         location: z.string(),
+        isMinimal: z.boolean().optional(),
       })
       authRepo.assertAuthenticated(event)
       const body = await readValidatedBody(event, Body.parse)

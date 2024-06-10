@@ -1,4 +1,5 @@
 import {
+  boolean,
   integer,
   pgTable,
   serial,
@@ -85,11 +86,12 @@ export const projects = pgTable(
     id: serial('id').primaryKey(),
     title: text('title').notNull(),
     uri: text('uri').notNull().unique(),
-    status: text('status').notNull(),
+    status: text('status', { enum: ['завершён', 'строится', 'в разработке'] }).notNull(),
     yearStart: integer('year_start'),
     yearEnd: integer('year_end'),
     location: text('location').notNull(),
     order: integer('order').notNull(),
+    isMinimal: boolean('is_minimal').notNull().default(false),
   },
   (t) => {
     return {
@@ -99,8 +101,9 @@ export const projects = pgTable(
 )
 
 export type ProjectDb = typeof projects.$inferSelect
-export type ProjectDbCreate = Omit<ProjectDb, 'id'>
+export type ProjectDbCreate = typeof projects.$inferInsert
 export type ProjectDbUpdate = ProjectDb
+export type ProjectStatus = ProjectDb['status']
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   category: one(categories, {

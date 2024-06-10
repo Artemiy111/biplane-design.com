@@ -18,7 +18,6 @@ const groupsToCreate: CreateGroupDto[] = groupsBiplane.map((g) => {
 })
 
 const createdGroups = await Promise.all(groupsToCreate.map(async (g, idx) => {
-  await new Promise(res => setTimeout(res, idx * 300))
   return await groupRepo.create(g)
 }))
 logger.log(createdGroups)
@@ -31,7 +30,6 @@ const createdCategories = createdGroups.map(async (g, idx) => {
       groupId: g.value.id,
     }))
     return Promise.all(dtos.map(async (dto, idx) => {
-      await new Promise(res => setTimeout(res, idx * 300))
       return await categoryRepo.create(dto)
     }))
   }

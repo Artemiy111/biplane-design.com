@@ -17,6 +17,7 @@ export const projectDbMapper = {
       location: db.location,
       status: db.status,
       order: db.order,
+      isMinimal: db.isMinimal,
       images: db.images.map(imageDbMapper.toDb),
     }
   },
@@ -43,6 +44,7 @@ export const projectDbMapper = {
       location: dto.location,
       status: dto.status,
       order: dto.order,
+      isMinimal: dto.isMinimal,
     }
   },
   toDbUpdateWithoutOrder(db: ProjectDbUpdate): Omit<ProjectDbUpdate, 'order'> {
@@ -55,9 +57,8 @@ export class ProjectDbRepo {
   constructor(private db: Db) { }
 
   async getOne(id: ProjectId) {
-    const ctx = this.db
     try {
-      const project = (await ctx.query.projects.findFirst({
+      const project = (await this.db.query.projects.findFirst({
         where: eq(projects.id, id), with: {
           images: {
             orderBy: images => images.order,

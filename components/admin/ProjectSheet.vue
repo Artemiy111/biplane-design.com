@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
-import type { CreateProjectDto, GroupDto, ImageDto, UpdateProjectDto } from '~/server/use-cases/types'
+import { Select, SelectContent, SelectItem } from '../ui/select'
+import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~/server/use-cases/types'
 import { Form } from '~/components/ui/form'
 
 const props = defineProps<{
@@ -19,13 +20,13 @@ const initialValues = ref<FormSchema>({
   uri: '',
   groupId: props.groups?.[0].id,
   categoryId: props.groups?.[0].categories[0].id,
-  status: '',
+  status: 'завершён',
   yearStart: null,
   yearEnd: null,
   location: '',
-  images: [],
   id: -1,
   order: -1,
+  isMinimal: false,
 })
 
 const MIN_YEAR = 2000
@@ -49,7 +50,7 @@ const formSchema = z.object({
         return false
       }
     }, 'Не валидный URL'),
-  status: z.string().trim().min(3, 'Минимум 3 символа'),
+  status: z.enum(['строится', 'завершён', 'в разработке']),
   yearStart: z
     .number()
     .min(MIN_YEAR, `Год начала не может быть меньше ${MIN_YEAR}`)
@@ -61,10 +62,9 @@ const formSchema = z.object({
     .max(MAX_YEAR, `Год завершения не может быть больше ${MAX_YEAR}`)
     .nullable(),
   location: z.string().trim().min(3, 'Минимум 3 символа'),
-
   groupId: z.union([z.string(), z.number()]).transform(v => Number(v)),
-  images: z.array(z.object({ id: z.number() })),
   order: z.number(),
+  isMinimal: z.boolean().optional().default(false),
 })
 
 export type FormSchema = z.infer<typeof formSchema>
@@ -138,7 +138,7 @@ defineExpose({
     @update:open="isOpen = $event"
   >
     <SheetContent
-      :side="mode === 'create' ? 'left' : 'right'"
+      side="left"
       class="w-full max-w-3xl overflow-auto"
       @pointer-down-outside="$event.preventDefault(), handleClose()"
     >
@@ -256,19 +256,41 @@ defineExpose({
           </FormItem>
         </FormField>
         <FormField
-          v-slot="{ componentField, handleChange, handleBlur }"
+          v-slot="{ field, handleChange, handleBlur }"
           name="status"
         >
           <FormItem>
             <FormLabel>Статус *</FormLabel>
-            <FormControl>
-              <Input
-                :model-value="componentField.modelValue"
-                placeholder="Завершён"
-                @change="handleChange"
-                @blur="handleBlur"
-              />
-            </FormControl>
+            <Select
+              :model-value="String(field.value)"
+              @update:model-value="(v) => {
+                handleChange(v)
+                handleBlur()
+              }"
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите статус" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem
+                  value="завершён"
+                >
+                  завершён
+                </SelectItem>
+                <SelectItem
+                  value="строится"
+                >
+                  строится
+                </SelectItem>
+                <SelectItem
+                  value="в разработке"
+                >
+                  в разработке
+                </SelectItem>
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         </FormField>
@@ -325,38 +347,7 @@ defineExpose({
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField
-          v-if="values.images.length"
-          v-slot="{ field, handleChange, handleBlur }"
-          name="previewId"
-        >
-          <FormItem>
-            <FormLabel>Превью</FormLabel>
-            <FormControl>
-              <Select
-                :model-value="String(field.value)"
-                @update:model-value="(v) => {
-                  handleChange(Number(v))
-                  handleBlur()
-                }"
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите превью" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    v-for="image in (values.images as ImageDto[])"
-                    :key="image.filename"
-                    :value="image.id.toString()"
-                  >
-                    {{ image.filename }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+
         <SheetFooter>
           <Button type="submit">
             {{ mode === 'create' ? 'Создать' : "Сохранить изменения" }}

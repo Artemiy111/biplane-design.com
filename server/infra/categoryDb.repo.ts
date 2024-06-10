@@ -42,9 +42,8 @@ export class CategoryDbRepo {
   constructor(private db: Db) { }
 
   async getOne(id: CategoryId) {
-    const ctx = this.db
     try {
-      const res = await ctx.query.categories.findFirst({
+      const res = await this.db.query.categories.findFirst({
         where: eq(categories.id, id),
         with: {
           projects: {
@@ -119,7 +118,7 @@ export class CategoryDbRepo {
       return ctx.transaction(async (tx) => {
         const toCreate = categoryDbMapper.toDbCreate(dto, 1000)
         const createdInDb = (await tx.insert(categories).values(toCreate).returning())[0]
-        const [curOrder] = await tx.select({ value: count() }).from(categories)
+        const [curOrder] = await tx.select({ value: count() }).from(categories).where(eq(categories.groupId, dto.groupId))
         const [returned] = await tx.update(categories).set({ order: curOrder.value }).where(eq(categories.id, createdInDb.id)).returning()
         return ok(returned)
       }, {
@@ -136,10 +135,8 @@ export class CategoryDbRepo {
     if (dto.order === newOrder)
       return ok(undefined)
 
-    const ctx = this.db
-
     try {
-      return await ctx.transaction(async (tx) => {
+      return await this.db.transaction(async (tx) => {
         const [curOrder] = await tx.select({ value: count() }).from(categories)
         if (newOrder > curOrder.value + 1)
           return err(new Error('New order is out of range'))
@@ -170,10 +167,8 @@ export class CategoryDbRepo {
   }
 
   async update(dto: UpdateCategoryDto) {
-    const ctx = this.db
-
     try {
-      return await ctx.transaction(async (tx) => {
+      return await this.db.transaction(async (tx) => {
         const category = await this.getOne(dto.id)
         if (!category.ok)
           return category
@@ -197,9 +192,8 @@ export class CategoryDbRepo {
   }
 
   async delete(id: CategoryId) {
-    const ctx = this.db
     try {
-      return await ctx.transaction(async (tx) => {
+      return await this.db.transaction(async (tx) => {
         const toDelete = await tx.query.groups.findFirst({ where: eq(categories.id, id) })
         if (!toDelete)
           return tx.rollback()

@@ -13,7 +13,7 @@ import type { ProjectDbRepo } from './projectDb.repo'
 import type { ProjectS3Repo } from './projectS3.repo'
 
 const projectMapper = {
-  toDto(dbDto: ProjectDbDto, images: ImageDto[]): ProjectDto {
+  toDto(dbDto: Omit<ProjectDbDto, 'images'>, images: ImageDto[]): ProjectDto {
     return {
       ...dbDto,
       images,

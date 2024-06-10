@@ -154,7 +154,7 @@ function openProjectSheet(project: ProjectDto) {
     yearEnd: project.yearEnd,
     categoryId: project.categoryId,
     order: project.order,
-    images: project.images,
+    isMinimal: project.isMinimal,
   })
 }
 </script>
@@ -230,80 +230,82 @@ function openProjectSheet(project: ProjectDto) {
         </Button>
       </section>
 
-      <ScrollArea class="w-full h-dvh">
-        <Table class="grid grid-cols-1">
-          <TableHeader class="w-full">
-            <TableRow class="grid w-max grid-cols-[40px_200px_200px_200px_200px_180px_120px_140px_180px_180px_100px]">
-              <TableHead>№</TableHead>
-              <TableHead>Превью</TableHead>
-              <TableHead>Проект</TableHead>
-              <TableHead>Uri</TableHead>
-              <TableHead>Группа</TableHead>
-              <TableHead>Категория</TableHead>
-              <TableHead>Начало</TableHead>
-              <TableHead>Завершение</TableHead>
-              <TableHead>Статус</TableHead>
-              <TableHead>Расположение</TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody class="w-full">
-            <TableRow
-              v-for="project in selectedCategoryOrGroupProjects"
-              :key="project.id"
-              class="cursor-pointer w-max grid grid-cols-[40px_200px_200px_200px_200px_180px_120px_140px_180px_180px_100px]"
-              @click="navigateTo(`/admin/projects/${project.uri}`)"
+      <!-- <ScrollArea class="w-full h-dvh"> -->
+      <Table class="grid grid-cols-1 text-xs w-full">
+        <TableHeader class="w-full">
+          <TableRow class="grid w-max grid-cols-[40px_100px_200px_200px_200px_200px_180px_120px_140px_180px_180px]">
+            <TableHead>№</TableHead>
+            <TableHead />
+            <TableHead>Превью</TableHead>
+            <TableHead>Проект</TableHead>
+            <TableHead>Uri</TableHead>
+            <TableHead>Группа</TableHead>
+            <TableHead>Категория</TableHead>
+            <TableHead>Начало</TableHead>
+            <TableHead>Завершение</TableHead>
+            <TableHead>Статус</TableHead>
+            <TableHead>Расположение</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody class="w-full">
+          <TableRow
+            v-for="project in selectedCategoryOrGroupProjects"
+            :key="project.id"
+            class="cursor-pointer w-max grid grid-cols-[40px_100px_200px_200px_200px_200px_180px_120px_140px_180px_180px]"
+            @click="navigateTo(`/admin/projects/${project.uri}`)"
+          >
+            <TableCell>{{ project.order }}</TableCell>
+            <TableCell
+              @click.stop
             >
-              <TableCell>{{ project.order }}</TableCell>
-              <TableCell>
-                <NuxtImg
-                  v-if="project.images.length"
-                  format="avif,webp,png,jpg"
-                  :src="project.images[0].url"
-                  :alt="project.images[0].alt"
-                  class="aspect-video w-full object-cover"
-                />
-              </TableCell>
-              <TableCell>
-                <NuxtLink :to="`/admin/projects/${project.uri}`" />
-                {{ project.title }}
-              </TableCell>
-              <TableCell>{{ project.uri }}</TableCell>
-              <TableCell>{{ getGroupById(getCategoryById(project.categoryId).groupId).title }}</TableCell>
-              <TableCell>{{ getCategoryById(project.categoryId).title }}</TableCell>
-              <TableCell>{{ project.yearStart }}</TableCell>
-              <TableCell>{{ project.yearEnd }}</TableCell>
-              <TableCell>{{ project.status }}</TableCell>
-              <TableCell>{{ project.location }}</TableCell>
-              <TableCell @click.stop>
-                <Popover>
-                  <PopoverTrigger as-child>
-                    <Button
-                      variant="ghost"
-                    >
-                      <EllipsisVertical />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent class="z-10 flex w-fit flex-col gap-4">
-                    <Button
-                      variant="outline"
-                      @click="openProjectSheet(project)"
-                    >
-                      Изменить
-                    </Button>
-                    <Button
-                      variant="destructiveOutline"
-                      @click="deleteProject(project.id)"
-                    >
-                      Удалить
-                    </Button>
-                  </PopoverContent>
-                </Popover>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </ScrollArea>
+              <Popover>
+                <PopoverTrigger as-child>
+                  <Button
+                    variant="ghost"
+                  >
+                    <EllipsisVertical />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent class="z-10 flex w-fit flex-col gap-4">
+                  <Button
+                    variant="outline"
+                    @click="openProjectSheet(project)"
+                  >
+                    Изменить
+                  </Button>
+                  <Button
+                    variant="destructiveOutline"
+                    @click="deleteProject(project.id)"
+                  >
+                    Удалить
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            </TableCell>
+            <TableCell>
+              <NuxtImg
+                v-if="project.images.length"
+                format="avif,webp,png,jpg"
+                :src="project.images[0].url"
+                :alt="project.images[0].alt"
+                class="aspect-video w-full object-cover"
+              />
+            </TableCell>
+            <TableCell>
+              <NuxtLink :to="`/admin/projects/${project.uri}`" />
+              {{ project.title }}
+            </TableCell>
+            <TableCell>{{ project.uri }}</TableCell>
+            <TableCell>{{ getGroupById(getCategoryById(project.categoryId).groupId).title }}</TableCell>
+            <TableCell>{{ getCategoryById(project.categoryId).title }}</TableCell>
+            <TableCell>{{ project.yearStart }}</TableCell>
+            <TableCell>{{ project.yearEnd }}</TableCell>
+            <TableCell>{{ project.status }}</TableCell>
+            <TableCell>{{ project.location }}</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+      <!-- </ScrollArea> -->
     </section>
   </main>
 </template>

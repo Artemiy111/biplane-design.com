@@ -1,5 +1,6 @@
 import type { Buffer } from 'node:buffer'
 import type { Result } from '../shared/result'
+import type { ProjectStatus } from '../db/schema'
 
 //
 export interface IUseCase {
@@ -56,12 +57,13 @@ export interface ProjectDto {
   location: string
   yearStart: number | null
   yearEnd: number | null
-  status: string
+  status: ProjectStatus
+  isMinimal: boolean
 }
 
 export type ProjectDbDto = Omit<ProjectDto, 'images'> & { images: ImageDbDto[] }
 
-export type CreateProjectDto = Omit<ProjectDto, 'id' | 'order' | 'images'>
+export type CreateProjectDto = Omit<ProjectDto, 'id' | 'order' | 'images' | 'isMinimal'>
 export type UpdateProjectDto = Omit<ProjectDto, 'images'>
 
 //
