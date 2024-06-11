@@ -4,53 +4,46 @@ import { imageDbMapper } from '../mappers/imageDb.mapper'
 import type { CreateImageDto, UpdateImageDto } from '../use-cases/types'
 import type { ImageDbRepo } from './imageDb.repo'
 import type { ImageS3Repo } from './imageS3.repo'
-import type { ProjectDbRepo } from './projectDb.repo'
 
 export class ImageRepo {
-  constructor(private dbRepo: ImageDbRepo, private bucketRepo: ImageS3Repo, private projectDbRepo: ProjectDbRepo) { }
+  constructor(private dbRepo: ImageDbRepo, private s3Repo: ImageS3Repo) { }
 
   async getOne(id: ImageId) {
     const model = await this.dbRepo.getOne(id)
-    const project = await this.projectDbRepo.getOne(model.projectId)
-    const url = this.bucketRepo.getUrl(project.uri, model.id)
+    const url = this.s3Repo.getUrl(model.projectId, model.id)
     return imageMapper.toDto(model, url)
   }
 
   async getAllByProjectId(projectId: ProjectId) {
-    const project = await this.projectDbRepo.getOne(projectId)
-    const images = await this.dbRepo.getAllByProjectId(projectId)
-    return await Promise.all(images.map(async (img) => {
-      const url = this.bucketRepo.getUrl(project.uri, img.id)
-      return imageMapper.toDto(img, url)
+    const models = await this.dbRepo.getAllByProjectId(projectId)
+    return await Promise.all(models.map(async (model) => {
+      const url = this.s3Repo.getUrl(model.projectId, model.id)
+      return imageMapper.toDto(model, url)
     }))
   }
 
   async create(dto: CreateImageDto) {
-    const project = await this.projectDbRepo.getOne(dto.projectId)
-    dto.filename = crypto.randomUUID() + '.' + dto.filename.split('.').at(-1)
+    const filename = crypto.randomUUID() + '.' + dto.file.type.split('/').at(-1)
+    const createdInDb = await this.dbRepo.create(imageDbMapper.toDbCreate(dto, filename))
+    await this.s3Repo.createImageFile(dto.projectId, filename, dto.file)
 
-    const createdInDb = await this.dbRepo.create(imageDbMapper.toDbCreate(dto))
-    await this.bucketRepo.createImageFile(project.uri, dto.filename, dto.data)
-
-    const url = this.bucketRepo.getUrl(project.uri, dto.filename)
+    const url = this.s3Repo.getUrl(dto.projectId, filename)
     return imageMapper.toDto(createdInDb, url)
   }
 
   async update(id: ImageId, dto: UpdateImageDto) {
-    const image = await this.getOne(id)
-    const project = await this.projectDbRepo.getOne(image.projectId)
+    const model = await this.getOne(id)
 
     const updatedInDb = await this.dbRepo.update(id, imageDbMapper.toDbUpdate(dto))
 
-    const url = this.bucketRepo.getUrl(project.uri, id)
+    const url = this.s3Repo.getUrl(model.projectId, id)
     return imageMapper.toDto(updatedInDb, url)
   }
 
   async delete(id: ImageId) {
-    const image = await this.dbRepo.getOne(id)
-    const project = await this.projectDbRepo.getOne(image.projectId)
+    const model = await this.dbRepo.getOne(id)
 
-    await this.bucketRepo.deleteImageFile(project.uri, image.id)
-    await this.dbRepo.delete(image.id)
+    await this.s3Repo.deleteImageFile(model.projectId, model.id)
+    await this.dbRepo.delete(model.id)
   }
 }
