@@ -3,8 +3,8 @@ import { toast } from 'vue-sonner'
 import { EllipsisVertical, LoaderCircle } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import ProjectSheet from '~/components/admin/ProjectSheet.vue'
-import type { SheetMode } from '~/components/admin/ProjectSheet.vue'
 import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~/server/use-cases/types'
+import type { ProjectId } from '~/server/db/schema'
 
 definePageMeta({
   middleware: 'authenticated',
@@ -25,11 +25,7 @@ const { data: groups, error: fetchError, refresh } = await useLazyFetch<GroupDto
 const groupsMap = computed(() => new Map(groups.value.map(g => [g.id, g])))
 const categories = computed(() => groups.value.flatMap(g => g.categories) || [])
 const categoriesMap = computed(() => new Map(categories.value.map(c => [c.id, c])))
-const projects = ref<ProjectDto[]>([])
-
-watchEffect(() => {
-  projects.value = categories.value.flatMap(c => c.projects)
-})
+const projects = computed(() => categories.value.flatMap(c => c.projects))
 
 function getCategoryById(id: number) {
   return categoriesMap.value.get(id)!
@@ -46,10 +42,12 @@ watch(groups, () => {
   selectedCategory.value = groups.value[0]?.categories[0] || null
 }, { once: true })
 
-const selectedCategoryProjects = computed(() => projects.value.filter((project) => {
-  return project.categoryId === selectedCategory.value?.id
-}))
-
+const selectedCategoryProjects = ref<ProjectDto[]>([])
+watchEffect(() => {
+  selectedCategoryProjects.value = projects.value.filter((project) => {
+    return project.categoryId === selectedCategory.value?.id
+  })
+})
 watch(fetchError, () => {
   if (!fetchError.value)
     return
@@ -57,43 +55,58 @@ watch(fetchError, () => {
 })
 
 const projectSheetRef = ref<InstanceType<typeof ProjectSheet> | null>(null)
-async function onSubmit(dto: CreateProjectDto | UpdateProjectDto, mode: SheetMode) {
-  switch (mode) {
-    case 'create': {
-      const createDto = dto as CreateProjectDto
-      try {
-        await $fetch('/api/projects', {
-          method: 'POST',
-          body: createDto,
-        })
-        projectSheetRef.value?.close()
-        toast.success('Проект создан')
-      }
-      catch (_e) {
-        const e = _e as Error
-        toast.error(e.message)
-      }
-      refresh()
-      break
-    }
-    case 'update': {
-      const updateDto = dto as UpdateProjectDto
-      try {
-        await $fetch(`/api/projects/${updateDto.id}`, {
-          method: 'PUT',
-          body: updateDto,
-        })
-        projectSheetRef.value?.close()
-        toast.success('Проект изменён')
-      }
-      catch (_e) {
-        const e = _e as Error
-        toast.error(e.message)
-      }
 
-      refresh()
-      break
-    }
+async function createProject(dto: CreateProjectDto) {
+  try {
+    await $fetch('/api/projects', {
+      method: 'POST',
+      body: dto,
+    })
+    projectSheetRef.value?.close()
+    toast.success('Проект создан')
+    refresh()
+  }
+  catch (_e) {
+    const e = _e as Error
+    toast.error(e.message)
+  }
+}
+
+async function updateProject(id: ProjectId, dto: UpdateProjectDto) {
+  try {
+    await $fetch(`/api/projects/${id}`, {
+      method: 'PUT',
+      body: dto,
+    })
+    projectSheetRef.value?.close()
+    toast.success('Проект изменён')
+    refresh()
+  }
+  catch (_e) {
+    const e = _e as Error
+    toast.error(e.message)
+  }
+}
+
+async function updateProjectOrder(e: SortableEvent) {
+  const id = Number(e.item.dataset.projectId!)
+  const order = e.oldDraggableIndex! + 1
+  const newOrder = e.newDraggableIndex! + 1
+
+  const [project] = selectedCategoryProjects.value.splice(order - 1, 1)
+  selectedCategoryProjects.value.splice(newOrder - 1, 0, project)
+
+  try {
+    await $fetch(`/api/projects/${id}/update-order`, {
+      method: 'PATCH',
+      body: {
+        order: newOrder,
+      },
+    })
+    await refresh()
+  }
+  catch (_e) {
+    toast.error('Ну удалось переместить проект')
   }
 }
 
@@ -104,12 +117,12 @@ async function deleteProject(id: number) {
     })
     projectSheetRef.value?.close()
     toast.success('Проект удалён')
+    refresh()
   }
   catch (_e) {
     const e = _e as Error
     toast.error(e.message)
   }
-  refresh()
 }
 
 function openProjectSheet(project: ProjectDto) {
@@ -126,27 +139,6 @@ function openProjectSheet(project: ProjectDto) {
     order: project.order,
     isMinimal: project.isMinimal,
   })
-}
-
-async function updateOrder(e: SortableEvent) {
-  const id = Number(e.item.dataset.projectId!)
-  const order = e.oldDraggableIndex! + 1
-  const newOrder = e.newDraggableIndex! + 1
-
-  console.log(projects.value)
-  const [project] = selectedCategoryProjects.value.splice(order - 1, 1)
-  console.log(project)
-  selectedCategoryProjects.effect.trigger()
-  // selectedCategoryProjects.value.splice(newOrder, 0, project)
-  console.log(projects.value)
-
-  // await $fetch(`/api/projects/${id}/update-order`, {
-  //   method: 'PATCH',
-  //   body: {
-  //     order: newOrder,
-  //   },
-  // })
-  // await refresh()
 }
 </script>
 
@@ -175,22 +167,11 @@ async function updateOrder(e: SortableEvent) {
           <span class="w-full text-slate-800 rounded-sm px-2 py-1 font-bold">{{
             group.title
           }}</span>
-          <!-- <li
-            class="cursor-pointer ml-2 px-2 py-1 hover:bg-primary-foreground"
-            :class="
-              selected.group?.id === group.id && !selected.category
-                ? 'font-bold bg-primary-foreground'
-                : ''
-            "
-            @click="selectCategory(group, null)"
-          >
-            Все
-          </li> -->
           <li
             v-for="category in group.categories"
             :key="category.id"
             class="cursor-pointer ml-2 px-2 py-1 hover:bg-primary-foreground"
-            :class="category.id === selected.category?.id ? 'font-bold bg-primary-foreground' : ''"
+            :class="category.id === selectedCategory?.id ? 'font-bold bg-primary-foreground' : ''"
             @click="selectedCategory = category"
           >
             <span>{{ category.title }}</span>
@@ -207,7 +188,8 @@ async function updateOrder(e: SortableEvent) {
         v-if="groups.length"
         ref="projectSheetRef"
         :groups="groups"
-        @submit="onSubmit"
+        @create="createProject"
+        @update="updateProject"
       />
 
       <section class="px-8 py-4 sm:px-4 sm:py-2">
@@ -239,9 +221,11 @@ async function updateOrder(e: SortableEvent) {
           </TableRow>
         </TableHeader>
         <TableBody
-          v-draggable="[selectedCategoryProjects,
-                        {
-                          onUpdate: updateOrder }]"
+          v-draggable="[
+            selectedCategoryProjects as any,
+            {
+              onUpdate: updateProjectOrder,
+            }]"
           class="w-full"
         >
           <TableRow

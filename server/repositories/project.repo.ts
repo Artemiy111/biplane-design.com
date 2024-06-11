@@ -41,15 +41,12 @@ export class ProjectRepo {
 
   async create(dto: CreateProjectDto) {
     const createdInDb = await this.dbRepo.create(dto)
-    await this.bucketRepo.createDir(dto.uri)
     const images = await this.imageRepo.getAllByProjectId(createdInDb.id)
     return projectMapper.toDto(createdInDb, images)
   }
 
   async update(id: ProjectId, dto: UpdateProjectDto) {
-    const model = await this.dbRepo.getOne(id)
     const updatedInDb = await this.dbRepo.update(id, dto)
-    await this.bucketRepo.renameDir(model.uri, dto.uri)
     const images = await this.imageRepo.getAllByProjectId(id)
     return projectMapper.toDto(updatedInDb, images)
   }
@@ -60,7 +57,7 @@ export class ProjectRepo {
 
   async delete(id: ProjectId) {
     const project = await this.dbRepo.getOne(id)
-    await this.bucketRepo.deleteDir(project.uri)
+    await this.bucketRepo.deleteDir(id)
     await this.dbRepo.delete(project.id)
   }
 }

@@ -46,7 +46,9 @@ function onChange() {
   if (!newFiles.length)
     return
 
-  if (props.multiple) { files.value.push(...newFiles) }
+  if (props.multiple) {
+    files.value.push(...newFiles)
+  }
   else {
     clear()
     files.value.push(...newFiles)
@@ -95,7 +97,7 @@ defineExpose({
         <template v-else>
           <NuxtImg
             v-for="image in images"
-            :key="image.filename"
+            :key="image.id"
             format=".avif,.webp,.png,.jpg,.jpeg"
             class="aspect-video w-full object-cover"
             :src="image.url"

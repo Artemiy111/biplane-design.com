@@ -3,6 +3,7 @@ import { toast } from 'vue-sonner'
 import { ArrowDown, ArrowUp } from 'lucide-vue-next'
 import type { ImageDto, ProjectDto, UpdateImageDto } from '~/server/use-cases/types'
 import Dropzone from '~/components/Dropzone.vue'
+import type { ImageId } from '~/server/db/schema'
 
 const route = useRoute()
 const uri = route.params.uri as string
@@ -24,7 +25,7 @@ watch(error, async () => {
   if (project.value === null) await navigateTo('/admin')
 })
 
-async function deleteImages(ids: number[]) {
+async function deleteImages(ids: ImageId[]) {
   if (!project.value) return
 
   await Promise.all(ids.map(async (id) => {
@@ -42,7 +43,7 @@ async function deleteImages(ids: number[]) {
   refreshImages()
 }
 
-async function updateImage(id: string, dto: UpdateImageDto) {
+async function updateImage(id: ImageId, dto: UpdateImageDto) {
   try {
     await $fetch(`/api/images/${id}`, {
       method: 'PUT',
@@ -61,13 +62,11 @@ async function uploadImages(images: File[]) {
   if (!project.value) return
   images.forEach(async (image) => {
     const formData = new FormData()
-    formData.append('data', image)
-    formData.append('projectId', String(project.value!.id))
-    formData.append('filename', image.name)
-    formData.append('alt', image.name)
+    formData.append('file', image, image.name)
+    formData.append('projectId', project.value!.id.toString())
 
     try {
-      const _res = await $fetch<ImageDto[]>(`/api/images`, {
+      await $fetch<ImageDto[]>(`/api/images`, {
         method: 'POST',
         body: formData,
       })

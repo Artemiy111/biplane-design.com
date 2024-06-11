@@ -1,21 +1,22 @@
 import type { S3ServiceException, S3Client } from '@aws-sdk/client-s3'
 import { HeadObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import type { ProjectId } from '../db/schema'
 import { env } from '~/server/shared/env'
 
 export class ImageS3Repo {
   constructor(private bucketName: string, private s3: S3Client) { }
 
-  getKey(projectUri: string, filename: string): string {
-    return `${projectUri}/${filename}`
+  getKey(projectId: ProjectId, filename: string): string {
+    return `${projectId}/${filename}`
   }
 
-  getUrl(projectUri: string, filename: string) {
-    const key = this.getKey(projectUri, filename)
+  getUrl(projectId: ProjectId, filename: string) {
+    const key = this.getKey(projectId, filename)
     return env.ENDPOINT_URL + '/' + this.bucketName + '/' + key
   }
 
-  async isImageFileExist(projectUri: string, filename: string) {
-    const key = this.getKey(projectUri, filename)
+  async isImageFileExist(projectId: ProjectId, filename: string) {
+    const key = this.getKey(projectId, filename)
 
     try {
       await this.s3.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: key }))
@@ -26,18 +27,17 @@ export class ImageS3Repo {
       if (error.name === 'NotFound') {
         return false
       }
-      return new Error(`Error checking existence of image '${filename}' in project '${projectUri}': ${error.message}`)
+      return new Error(`Error checking existence of image '${filename}' in project '${projectId}': ${error.message}`)
     }
   }
 
-  async createImageFile(projectUri: string, filename: string, data: Buffer) {
-    const key = this.getKey(projectUri, filename)
-    const mimeType = 'image/' + filename.split('.').at(-1)
-    await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key, Body: data, ContentType: mimeType }))
+  async createImageFile(projectId: ProjectId, filename: string, file: File) {
+    const key = this.getKey(projectId, filename)
+    await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key, Body: Buffer.from(await file.arrayBuffer()), ContentType: file.type }))
   }
 
-  async deleteImageFile(projectUri: string, filename: string) {
-    const key = this.getKey(projectUri, filename)
+  async deleteImageFile(projectId: ProjectId, filename: string) {
+    const key = this.getKey(projectId, filename)
     await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: key }))
   }
 }

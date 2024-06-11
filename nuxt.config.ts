@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   ssr: false,
   telemetry: { enabled: false },
   devtools: {
-    enabled: true,
+    enabled: false,
     timeline: {
       enabled: true,
     },
@@ -18,13 +18,7 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     'shadcn-nuxt',
     '@tresjs/nuxt',
-    '@scalar/nuxt',
   ],
-  nitro: {
-    experimental: {
-      openAPI: true,
-    },
-  },
   // style
   fonts: {
     families: [{
@@ -48,18 +42,11 @@ export default defineNuxtConfig({
   imports: {
     dirs: [],
   },
-  components: {
-    dirs: [],
-  },
+  // components: {
+  //   dirs: [],
+  // },
 
   runtimeConfig: {
-    databaseUrl: process.env.DATABASE_URL,
-    supabaseUrl: process.env.SUPABASE_URL,
-    supabaseKey: process.env.SUPABASE_KEY,
-    awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    endpointUrl: process.env.ENDPOINT_URL,
-    region: process.env.REGION,
   },
   image: {
     ipx: {

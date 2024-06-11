@@ -5,13 +5,15 @@ import { Select, SelectContent, SelectItem } from '../ui/select'
 import { Checkbox } from '../ui/checkbox'
 import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~/server/use-cases/types'
 import { Form } from '~/components/ui/form'
+import type { ProjectId } from '~/server/db/schema'
 
 const props = defineProps<{
   groups: GroupDto[]
 }>()
 
 const emit = defineEmits<{
-  submit: [dto: CreateProjectDto | UpdateProjectDto, mode: SheetMode]
+  create: [dto: CreateProjectDto]
+  update: [id: ProjectId, dto: UpdateProjectDto]
 }>()
 export type SheetMode = 'create' | 'update'
 const mode = ref<SheetMode>('create')
@@ -116,12 +118,12 @@ function submit(values: FormSchema) {
   switch (mode.value) {
     case 'create': {
       const createDto: CreateProjectDto = values
-      emit('submit', createDto, mode.value)
+      emit('create', createDto)
       break
     }
     case 'update': {
       const updateDto: UpdateProjectDto = values
-      emit('submit', updateDto, mode.value)
+      emit('update', values.id, updateDto)
       break
     }
   }
@@ -151,7 +153,7 @@ defineExpose({
       </SheetHeader>
       <Form
         ref="formRef"
-        v-slot="{ setFieldValue, values }"
+        v-slot="{ setFieldValue }"
         :initial-values="initialValues"
         :validation-schema="validationSchema"
         class="grid gap-4"
