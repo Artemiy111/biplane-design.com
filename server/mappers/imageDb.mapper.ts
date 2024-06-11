@@ -6,7 +6,7 @@ export const imageDbMapper = {
     return {
       id: filename,
       projectId: dto.projectId,
-      alt: filename,
+      alt: dto.file.name,
     }
   },
   toDbUpdate(dto: UpdateImageDto): ImageDbUpdate {
