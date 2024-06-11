@@ -37,7 +37,8 @@ export class ImageDbRepo {
   private async updateOrder(id: ImageId, newOrder: number) {
     return await this.db.transaction(async (tx) => {
       const model = await tx.query.images.findFirst({ where: eq(images.id, id) })
-      if (!model || model.order === newOrder) throw tx.rollback()
+      if (!model) throw tx.rollback()
+      if (model.order === newOrder) return
       const [curOrder] = await tx.select({ value: count() }).from(images).where(eq(images.projectId, model.projectId))
       if (newOrder > curOrder.value + 1)
         throw new Error('New order is out of range')
