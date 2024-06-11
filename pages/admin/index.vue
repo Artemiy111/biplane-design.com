@@ -25,18 +25,11 @@ const { data: groups, error: fetchError, refresh } = await useLazyFetch<GroupDto
 const groupsMap = computed(() => new Map(groups.value.map(g => [g.id, g])))
 const categories = computed(() => groups.value.flatMap(g => g.categories) || [])
 const categoriesMap = computed(() => new Map(categories.value.map(c => [c.id, c])))
-const projects = computed(() => categories.value.flatMap(c => c.projects) || [])
+const projects = ref<ProjectDto[]>([])
 
-type SelectedGroupAndCategoryState = {
-  group: null
-  category: null
-} | {
-  group: GroupDto
-  category: null
-} | {
-  group: GroupDto
-  category: CategoryDto
-}
+watchEffect(() => {
+  projects.value = categories.value.flatMap(c => c.projects)
+})
 
 function getCategoryById(id: number) {
   return categoriesMap.value.get(id)!
@@ -46,38 +39,16 @@ function getGroupById(id: number) {
   return groupsMap.value.get(id)!
 }
 
-function useSelected() {
-  const selected = ref<SelectedGroupAndCategoryState>({ group: null, category: null })
+const selectedCategory = ref<CategoryDto | null>(null)
 
-  const setSelected = (newSelected: SelectedGroupAndCategoryState) => {
-    selected.value = newSelected
-  }
-
-  return {
-    selected: readonly(selected),
-    setSelected,
-  }
-}
-
-const { selected, setSelected } = useSelected()
 watch(groups, () => {
   if (!groups.value.length) return
-  setSelected({ group: groups.value[0], category: null })
+  selectedCategory.value = groups.value[0]?.categories[0] || null
 }, { once: true })
 
-const selectedCategoryOrGroupProjects = computed(() => projects.value.filter((project) => {
-  if (selected.value.category)
-    return project.categoryId === selected.value.category.id
-
-  const category = getCategoryById(project.categoryId)
-  const group = getGroupById(category.groupId)
-
-  return group.id === selected.value.group?.id
+const selectedCategoryProjects = computed(() => projects.value.filter((project) => {
+  return project.categoryId === selectedCategory.value?.id
 }))
-
-function selectCategory(group: GroupDto, category: CategoryDto | null) {
-  setSelected({ group, category })
-}
 
 watch(fetchError, () => {
   if (!fetchError.value)
@@ -159,14 +130,23 @@ function openProjectSheet(project: ProjectDto) {
 
 async function updateOrder(e: SortableEvent) {
   const id = Number(e.item.dataset.projectId!)
+  const order = e.oldDraggableIndex! + 1
+  const newOrder = e.newDraggableIndex! + 1
 
-  await $fetch(`/api/projects/${id}/update-order`, {
-    method: 'PATCH',
-    body: {
-      order: e.newDraggableIndex! + 1,
-    },
-  })
-  await refresh()
+  console.log(projects.value)
+  const [project] = selectedCategoryProjects.value.splice(order - 1, 1)
+  console.log(project)
+  selectedCategoryProjects.effect.trigger()
+  // selectedCategoryProjects.value.splice(newOrder, 0, project)
+  console.log(projects.value)
+
+  // await $fetch(`/api/projects/${id}/update-order`, {
+  //   method: 'PATCH',
+  //   body: {
+  //     order: newOrder,
+  //   },
+  // })
+  // await refresh()
 }
 </script>
 
@@ -195,7 +175,7 @@ async function updateOrder(e: SortableEvent) {
           <span class="w-full text-slate-800 rounded-sm px-2 py-1 font-bold">{{
             group.title
           }}</span>
-          <li
+          <!-- <li
             class="cursor-pointer ml-2 px-2 py-1 hover:bg-primary-foreground"
             :class="
               selected.group?.id === group.id && !selected.category
@@ -205,13 +185,13 @@ async function updateOrder(e: SortableEvent) {
             @click="selectCategory(group, null)"
           >
             Все
-          </li>
+          </li> -->
           <li
             v-for="category in group.categories"
             :key="category.id"
             class="cursor-pointer ml-2 px-2 py-1 hover:bg-primary-foreground"
             :class="category.id === selected.category?.id ? 'font-bold bg-primary-foreground' : ''"
-            @click="selectCategory(group, category)"
+            @click="selectedCategory = category"
           >
             <span>{{ category.title }}</span>
           </li>
@@ -259,13 +239,13 @@ async function updateOrder(e: SortableEvent) {
           </TableRow>
         </TableHeader>
         <TableBody
-          v-draggable="[selectedCategoryOrGroupProjects,
+          v-draggable="[selectedCategoryProjects,
                         {
                           onUpdate: updateOrder }]"
           class="w-full"
         >
           <TableRow
-            v-for="project in selectedCategoryOrGroupProjects"
+            v-for="project in selectedCategoryProjects"
             :key="project.id"
             :data-project-id="project.id"
             :data-order="project.order"

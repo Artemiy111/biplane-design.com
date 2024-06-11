@@ -18,7 +18,13 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     'shadcn-nuxt',
     '@tresjs/nuxt',
+    '@scalar/nuxt',
   ],
+  nitro: {
+    experimental: {
+      openAPI: true,
+    },
+  },
   // style
   fonts: {
     families: [{
