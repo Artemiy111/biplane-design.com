@@ -19,6 +19,7 @@
     "@aws-sdk/client-s3": "^3.592.0",
     "@aws-sdk/s3-request-presigner": "^3.592.0",
     "@lucia-auth/adapter-drizzle": "^1.0.7",
+    "@scalar/nuxt": "^0.1.5",
     "@tanstack/vue-table": "^8.17.3",
     "@tresjs/cientos": "^3.9.0",
     "@tresjs/nuxt": "^2.1.2",

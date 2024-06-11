@@ -1,4 +1,3 @@
-import type { Buffer } from 'node:buffer'
 import type { CategoryDbUpdate, CategoryId, GroupDbUpdate, GroupId, ImageDbUpdate, ProjectDbUpdate, ProjectId, ProjectStatus } from '../db/schema'
 
 //
@@ -69,9 +68,9 @@ export interface ImageFile {
   projectUri: string
   file: File
 }
-export type CreateImageDto = Omit<ImageDto, 'id' | 'url' | 'order'> & {
-  filename: string
-  data: Buffer
+export type CreateImageDto = {
+  projectId: ProjectId
+  file: File
 }
 export type UpdateImageDto = ImageDbUpdate
 //
