@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
 import { ArrowDown, ArrowUp } from 'lucide-vue-next'
+import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import type { ImageDto, ProjectDto, UpdateImageDto } from '~/server/use-cases/types'
 import Dropzone from '~/components/Dropzone.vue'
 import type { ImageId } from '~/server/db/schema'
 
 const route = useRoute()
 const uri = route.params.uri as string
-const { data: project, error: error, refresh: refreshImages }
-= await useLazyFetch<ProjectDto>(`/api/projects/?uri=${uri}`)
+const { data: project, refresh }
+= await useLazyFetch<ProjectDto>(`/api/projects/?uri=${uri}`, {
+  onResponseError: () => toast.error('Не удалось загрузить информацию о проекте'),
+})
 
 definePageMeta({
   middleware: 'authenticated',
@@ -21,26 +24,18 @@ useSeoMeta({
   ogDescription: () => `Админ-панель | ${project.value?.title}`,
 })
 
-watch(error, async () => {
-  if (project.value === null) await navigateTo('/admin')
-})
-
-async function deleteImages(ids: ImageId[]) {
+async function deleteImage(id: ImageId) {
   if (!project.value) return
-
-  await Promise.all(ids.map(async (id) => {
-    try {
-      await $fetch(`/api/images/${id}`, {
-        method: 'DELETE',
-      })
-      toast.success(`Изображение удалено`)
-    }
-    catch (_e) {
-      const e = _e as Error
-      toast.error(e.message)
-    }
-  }))
-  refreshImages()
+  project.value.images = project.value.images.filter(img => img.id !== id)
+  try {
+    await $fetch(`/api/images/${id}`, {
+      method: 'DELETE',
+    })
+    refresh()
+  }
+  catch (_e) {
+    toast.success(`Не удалось удалить изображение`)
+  }
 }
 
 async function updateImage(id: ImageId, dto: UpdateImageDto) {
@@ -49,13 +44,29 @@ async function updateImage(id: ImageId, dto: UpdateImageDto) {
       method: 'PUT',
       body: dto,
     })
-    toast.success(`Изображение обновлено`)
+    refresh()
   }
   catch (_e) {
-    const e = _e as Error
-    toast.error(e.message)
+    toast.error('Не удалось обновить изображение')
   }
-  refreshImages()
+}
+
+async function updateImageOrder(e: SortableEvent) {
+  if (!project.value) return
+  const index = e.oldDraggableIndex!
+  const newIndex = e.newDraggableIndex!
+  const [image] = project.value.images.splice(index, 1)
+  project.value.images.splice(newIndex, 0, image)
+  image.order = newIndex + 1
+  try {
+    await $fetch(`/api/images/${image.id}`, {
+      method: 'PUT', body: image,
+    })
+    refresh()
+  }
+  catch (_e) {
+    toast.error('Не удалось переместить изображение')
+  }
 }
 
 async function uploadImages(images: File[]) {
@@ -71,7 +82,7 @@ async function uploadImages(images: File[]) {
         body: formData,
       })
       toast.success(`Изображение загружено`)
-      refreshImages()
+      refresh()
     }
     catch (e) {
       toast.error(`Не удалось загрузить изображение`)
@@ -104,12 +115,18 @@ async function uploadImages(images: File[]) {
           <TableRow>
             <TableHead>№</TableHead>
             <TableHead>Изображение</TableHead>
-            <TableHead>Название файла</TableHead>
+            <TableHead>Описание</TableHead>
             <TableHead>Опции</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody class="transition-all [&>.row-leave-active]:absolute">
-          <TransitionGroup name="row">
+        <TableBody
+          v-draggable="[
+            project.images as any, { onUpdate: updateImageOrder }]"
+          class="transition-all [&>.row-leave-active]:absolute"
+        >
+          <TransitionGroup
+            name="row"
+          >
             <TableRow
               v-for="(image, idx) in project.images"
               :key="image.id"
@@ -124,7 +141,10 @@ async function uploadImages(images: File[]) {
                 >
               </TableCell>
               <TableCell>
-                {{ image.id }}
+                <Input
+                  :model-value="image.alt"
+                  @change="(e: Event) => updateImage(image.id, { ...image, alt: (e.target as HTMLInputElement).value }) "
+                />
               </TableCell>
               <TableCell>
                 <div class="flex w-full flex-col items-center gap-2">
@@ -136,8 +156,8 @@ async function uploadImages(images: File[]) {
                     <ArrowUp />
                   </Button>
                   <Button
-                    variant="outline"
-                    @click="deleteImages([image.id])"
+                    variant="destructiveOutline"
+                    @click="deleteImage(image.id)"
                   >
                     Удалить
                   </Button>
