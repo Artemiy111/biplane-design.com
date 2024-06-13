@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UserRound } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import {
   NavigationMenu,
@@ -49,7 +50,11 @@ async function singOut() {
       </NuxtLink>
       <ClientOnly>
         <DropdownMenu>
-          <DropdownMenuTrigger v-if="user">
+          <DropdownMenuTrigger
+            v-if="user"
+            class="flex gap-3 items-center"
+          >
+            <UserRound :stroke-width="1.5" />
             {{ user.username }}
           </DropdownMenuTrigger>
           <DropdownMenuContent>
