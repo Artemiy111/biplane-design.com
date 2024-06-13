@@ -18,8 +18,8 @@ const current = ref(0)
 useSeoMeta({
   title: () => `Проекты | ${project.value?.title}`,
   ogTitle: () => `Проекты | ${project.value?.title}`,
-  description: () => `Расположение: ${project.value?.location}`,
-  ogDescription: () => `Расположение: ${project.value?.location}`,
+  description: () => `${project.value?.title}. Расположение: ${project.value?.location}`,
+  ogDescription: () => `${project.value?.title}. Расположение: ${project.value?.location}`,
 })
 
 watch(api, (api) => {
@@ -33,7 +33,6 @@ watch(api, (api) => {
     current.value = api.selectedScrollSnap()
   })
 }, { once: true })
-
 watch(current, () => scrollToImage(current.value))
 
 function scrollToImage(index: number) {
@@ -47,11 +46,10 @@ function scrollToImage(index: number) {
     v-if="project"
     class="container flex flex-col"
   >
-    <section class="flex justify-between px-8 py-4 text-3xl 2xl:text-2xl lg:text-xl md:text-lg sm:py-2 sm:text-base">
+    <section class="flex justify-between px-8 py-4 text-3xl 2xl:text-2xl lg:text-xl md:text-lg sm:py-2 sm:px-4 sm:text-base">
       <h1 class="font-bold">
         {{ project.title }}
       </h1>
-      <span class="">{{ project.status }}</span>
     </section>
     <Separator />
     <section
@@ -73,7 +71,7 @@ function scrollToImage(index: number) {
         >
           <CarouselItem
             v-for="(img, index) in project.images"
-            :key="img.filename"
+            :key="img.id"
             class="cursor-grab p-0"
 
             :class="[index === current ? 'outline outline-[16px] xl:outline-8 xl:-outline-offset-8 outline-secondary -outline-offset-[16px]' : '']"
@@ -90,7 +88,7 @@ function scrollToImage(index: number) {
       </Carousel>
       <Carousel
         ref="mainCarouselRef"
-        class="aspect-video w-full"
+        class="aspect-video w-full md:hidden"
         :opts="{
           loop: true,
         }"
@@ -99,7 +97,7 @@ function scrollToImage(index: number) {
         <CarouselContent class="flex items-center">
           <CarouselItem
             v-for="img in project.images"
-            :key="img.filename"
+            :key="img.id"
             class="flex items-center justify-center"
           >
             <NuxtImg
@@ -113,7 +111,17 @@ function scrollToImage(index: number) {
       </Carousel>
     </section>
     <Separator />
-    <section class="grid grid-cols-[repeat(2,max-content)] gap-x-16 gap-y-2 px-8 py-8">
+    <NuxtImg
+      v-for="img in project.images.slice(0, 1)"
+      :key="img.id"
+      :src="img.url"
+      :alt="img.alt"
+      format="avif,webp,png,jpg"
+      class="aspect-video w-full"
+    />
+    <section class="grid grid-cols-[repeat(2,max-content)] gap-x-16 gap-y-2 px-8 py-8 sm:px-4">
+      <span>Статус</span>
+      <span>{{ project.status }}</span>
       <span>Расположение</span>
       <span>{{ project.location }}</span>
       <template v-if="project.yearStart">
@@ -125,5 +133,15 @@ function scrollToImage(index: number) {
         <span>{{ project.yearEnd }}</span>
       </template>
     </section>
+    <div class="md:flex w-full flex-col gap-4 hidden">
+      <NuxtImg
+        v-for="img in project.images.slice(1, -1)"
+        :key="img.id"
+        :src="img.url"
+        :alt="img.alt"
+        format="avif,webp,png,jpg"
+        class="aspect-video w-full max-h-[70vh]"
+      />
+    </div>
   </main>
 </template>

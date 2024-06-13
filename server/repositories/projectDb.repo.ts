@@ -1,4 +1,4 @@
-import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
+import { and, count, eq, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import type { Db } from '../db'
 import { projectDbMapper } from '../mappers/projectDb.mapper'
 import type { CategoryId, ProjectId, ProjectDbUpdate } from '~/server/db/schema'
@@ -109,17 +109,17 @@ export class ProjectDbRepo {
   async update(id: ProjectId, update: ProjectDbUpdate) {
     return await this.db.transaction(async (tx) => {
       const model = await this.getOne(id)
-      const needCategoryUpdate = update.categoryId !== model.categoryId
-      if (needCategoryUpdate) {
-        const TMP_ORDER = 999
-        await this.updateOrder(id, TMP_ORDER)
 
+      if (update.categoryId !== model.categoryId) {
+        const [lastOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, model.categoryId))
+        await this.updateOrder(id, lastOrder.value)
+
+        await tx.update(projects).set({ order: 999 }).where(eq(projects.id, id))
         await tx.update(projects)
           .set(projectDbMapper.toDbUpdateWithoutOrder(update))
           .where(eq(projects.id, id))
-
         const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, update.categoryId))
-        await this.updateOrder(id, curOrder.value)
+        await tx.update(projects).set({ order: curOrder.value }).where(eq(projects.id, id))
       }
       else {
         await this.updateOrder(id, update.order)
@@ -141,27 +141,11 @@ export class ProjectDbRepo {
 
   async delete(id: ProjectId) {
     return await this.db.transaction(async (tx) => {
+      const toDelete = await tx.query.projects.findFirst({ where: eq(projects.id, id) })
+      if (!toDelete) throw tx.rollback()
       await this.db.delete(projects).where(eq(projects.id, id))
-
-      const remainProjects = await tx.select((
-        { ...getTableColumns(projects), newOrder: sql<number>`row_number() over (order by ${projects.order})`.mapWith(Number).as('new_order') }
-      )).from(projects)
-
-      await Promise.all(
-        remainProjects.map((proj) => {
-          return tx.update(projects).set({ order: proj.newOrder * 1000 }).where(
-            eq(projects.id, proj.id),
-          )
-        }),
-      )
-
-      await Promise.all(
-        remainProjects.map((proj) => {
-          return tx.update(projects).set({ order: proj.newOrder }).where(
-            eq(projects.id, proj.id),
-          )
-        }),
-      )
+      await tx.update(projects).set({ order: sql`(${projects.order} - 1) * 1000` }).where(and(eq(projects.categoryId, toDelete.categoryId), gt(projects.order, toDelete.order)))
+      await tx.update(projects).set({ order: sql`${projects.order} / 1000` }).where(and(eq(projects.categoryId, toDelete.categoryId), gte(projects.order, 1000)))
     })
   }
 }

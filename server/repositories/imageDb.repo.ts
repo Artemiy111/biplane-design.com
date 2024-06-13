@@ -1,4 +1,4 @@
-import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
+import { and, count, eq, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import { imageDbMapper } from '../mappers/imageDb.mapper'
 import type { Db } from '~/server/db'
 import type { ImageDbCreate, ImageDbUpdate, ImageId, ProjectId } from '~/server/db/schema'
@@ -39,9 +39,11 @@ export class ImageDbRepo {
       const model = await tx.query.images.findFirst({ where: eq(images.id, id) })
       if (!model) throw tx.rollback()
       if (model.order === newOrder) return
-      const [curOrder] = await tx.select({ value: count() }).from(images).where(eq(images.projectId, model.projectId))
-      if (newOrder > curOrder.value + 1)
-        throw new Error('New order is out of range')
+
+      // const [curOrder] = await tx.select({ value: count() }).from(images).where(eq(images.projectId, model.projectId))
+      // if (newOrder > curOrder.value + 1)
+      //   throw new Error('New order is out of range')
+      // await tx.update(images).set({ order: 999 }).where(eq(images.id, id))
 
       if (newOrder > model.order) {
         await tx.update(images).set({ order: sql`(${images.order} - 1) * 1000` }).where(and(
@@ -57,9 +59,11 @@ export class ImageDbRepo {
           lt(images.order, model.order),
         ))
       }
-
       await tx.update(images).set({ order: newOrder }).where(eq(images.id, id))
       await tx.update(images).set({ order: sql`${images.order} / 1000` }).where(gte(images.order, 1000))
+    }, {
+      deferrable: true,
+      isolationLevel: 'read uncommitted',
     })
   }
 
@@ -76,29 +80,14 @@ export class ImageDbRepo {
 
   async delete(id: ImageId) {
     return await this.db.transaction(async (tx) => {
-      const imageToDelete = await this.getOne(id)
-
-      await this.db.delete(images).where(eq(images.id, id))
-
-      const remainImages = await tx.select((
-        { ...getTableColumns(images), newOrder: sql<number>`row_number() over (order by ${images.order})`.mapWith(Number).as('new_order') }
-      )).from(images).where(eq(images.projectId, imageToDelete.projectId))
-
-      await Promise.all(
-        remainImages.map((img) => {
-          return tx.update(images).set({ order: img.newOrder * 1000 }).where(
-            eq(images.id, img.id),
-          )
-        }),
-      )
-
-      await Promise.all(
-        remainImages.map((img) => {
-          return tx.update(images).set({ order: img.newOrder }).where(
-            eq(images.id, img.id),
-          )
-        }),
-      )
+      const toDelete = await tx.query.images.findFirst({ where: eq(images.id, id) })
+      if (!toDelete) throw tx.rollback()
+      await tx.delete(images).where(eq(images.id, id))
+      await tx.update(images).set({ order: sql`(${images.order} - 1) * 1000` }).where(and(eq(images.projectId, toDelete.projectId), gt(images.order, toDelete.order)))
+      await tx.update(images).set({ order: sql`${images.order} / 1000` }).where(and(eq(images.projectId, toDelete.projectId), gte(images.order, 1000)))
+    }, {
+      deferrable: true,
+      isolationLevel: 'read uncommitted',
     })
   }
 }

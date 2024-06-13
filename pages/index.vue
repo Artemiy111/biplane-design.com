@@ -28,11 +28,6 @@ onMounted(() => {
 
 <template>
   <main class="container relative justify-center flex flex-col flex-grow h-full">
-    <!-- <NuxtImg
-      class="-z-10 absolute w-full top-[60px] right-[200px] max-w-[700px]"
-      src="/plane.png"
-      alt="plane"
-    /> -->
     <NuxtImg
       src="/main.jpg"
       :style="{ height: `${mainScreenHeight}px` }"

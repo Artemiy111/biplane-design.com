@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
-import { ArrowDown, ArrowUp } from 'lucide-vue-next'
+import { GripVertical, Trash2 } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import type { ImageDto, ProjectDto, UpdateImageDto } from '~/server/use-cases/types'
 import Dropzone from '~/components/Dropzone.vue'
@@ -31,11 +31,11 @@ async function deleteImage(id: ImageId) {
     await $fetch(`/api/images/${id}`, {
       method: 'DELETE',
     })
-    refresh()
   }
   catch (_e) {
-    toast.success(`Не удалось удалить изображение`)
+    toast.error(`Не удалось удалить изображение`)
   }
+  refresh()
 }
 
 async function updateImage(id: ImageId, dto: UpdateImageDto) {
@@ -44,11 +44,11 @@ async function updateImage(id: ImageId, dto: UpdateImageDto) {
       method: 'PUT',
       body: dto,
     })
-    refresh()
   }
   catch (_e) {
     toast.error('Не удалось обновить изображение')
   }
+  refresh()
 }
 
 async function updateImageOrder(e: SortableEvent) {
@@ -62,11 +62,11 @@ async function updateImageOrder(e: SortableEvent) {
     await $fetch(`/api/images/${image.id}`, {
       method: 'PUT', body: image,
     })
-    refresh()
   }
   catch (_e) {
     toast.error('Не удалось переместить изображение')
   }
+  refresh()
 }
 
 async function uploadImages(images: File[]) {
@@ -81,12 +81,12 @@ async function uploadImages(images: File[]) {
         method: 'POST',
         body: formData,
       })
-      toast.success(`Изображение загружено`)
-      refresh()
+      toast.info(`Изображение загружено`)
     }
     catch (e) {
       toast.error(`Не удалось загрузить изображение`)
     }
+    refresh()
   })
 }
 </script>
@@ -96,23 +96,41 @@ async function uploadImages(images: File[]) {
     v-if="project"
     class="container flex flex-col"
   >
-    <section class="flex p-8">
+    <h1 class="font-bold px-8 sm:px-4 mt-4 md:mt-4 text-3xl 2xl:text-2xl lg:text-xl md:text-lg sm:text-base">
       {{ project.title }}
-      {{ project.uri }}
-    </section>
-    <section class="flex flex-col  gap-4 p-8">
-      <span>Изображений: {{ project.images.length }}</span>
+    </h1>
+    <div class="grid  grid-cols-[1fr_1fr] md:grid-cols-1 px-8 py-8 md:py-4 sm:px-4 gap-x-16 gap-y-8">
+      <section class="grid md:overflow-x-auto w-full grid-cols-[repeat(2,max-content)] gap-x-16 md:gap-x-8 gap-y-2">
+        <span>Id</span>
+        <span>{{ project.id }}</span>
+        <span>Uri</span>
+        <span>{{ project.uri }}</span>
+        <span>Расположение</span>
+        <span>{{ project.location }}</span>
+        <span>Год начала</span>
+        <span>{{ project.yearStart }}</span>
+        <span>Год завершения</span>
+        <span>{{ project.yearEnd }}</span>
+        <span>Мини</span>
+        <span>{{ project.isMinimal ? "да" : 'нет' }}</span>
+        <span>№ в категории</span>
+        <span>{{ project.order }}</span>
+        <span>Изображений</span>
+        <span>{{ project.images.length }}</span>
+      </section>
       <Dropzone
-        class="h-[25dvh] w-full"
+        class="h-full min-h-[25vh] "
         :clear-on-upload="true"
-        :show-images="true"
         :show-icon="true"
         :multiple="true"
         @upload="uploadImages"
       />
-      <Table class="overflow-hidden">
-        <TableHeader>
-          <TableRow>
+    </div>
+
+    <section class="flex flex-col sm:px-4 gap-4 px-8 md:py-4">
+      <Table class="overflow-x-auto grid grid-cols-[120px_max-content_1fr_max-content] md:grid-cols-[max-content_260px_200px_max-content]">
+        <TableHeader class="grid grid-cols-subgrid col-span-4">
+          <TableRow class="grid grid-cols-subgrid col-span-4">
             <TableHead>№</TableHead>
             <TableHead>Изображение</TableHead>
             <TableHead>Описание</TableHead>
@@ -121,17 +139,26 @@ async function uploadImages(images: File[]) {
         </TableHeader>
         <TableBody
           v-draggable="[
-            project.images as any, { onUpdate: updateImageOrder }]"
-          class="transition-all [&>.row-leave-active]:absolute"
+            project.images as any, {
+              onUpdate: updateImageOrder,
+              handle: `[data-draggable-handler='true']`,
+            }]"
+          class="transition-all grid grid-cols-subgrid col-span-4 [&>.row-leave-active]:absolute "
         >
           <TransitionGroup
             name="row"
           >
             <TableRow
-              v-for="(image, idx) in project.images"
+              v-for="(image) in project.images"
               :key="image.id"
+              class="grid grid-cols-subgrid col-span-4 items-center"
             >
-              <TableCell>{{ image.order }}</TableCell>
+              <TableCell
+                class="cursor-grab flex gap-4"
+                :data-draggable-handler="true"
+              >
+                {{ image.order }} <GripVertical />
+              </TableCell>
               <TableCell>
                 <img
                   format="avif,webp,png,jpg"
@@ -146,29 +173,12 @@ async function uploadImages(images: File[]) {
                   @change="(e: Event) => updateImage(image.id, { ...image, alt: (e.target as HTMLInputElement).value }) "
                 />
               </TableCell>
-              <TableCell>
-                <div class="flex w-full flex-col items-center gap-2">
-                  <Button
-                    v-if="idx !== 0"
-                    variant="ghost"
-                    @click="updateImage(image.id, { ...image, order: image.order - 1 })"
-                  >
-                    <ArrowUp />
-                  </Button>
-                  <Button
-                    variant="destructiveOutline"
-                    @click="deleteImage(image.id)"
-                  >
-                    Удалить
-                  </Button>
-                  <Button
-                    v-if="idx !== project.images.length - 1"
-                    variant="ghost"
-                    @click="updateImage(image.id, { ...image, order: image.order + 1 })"
-                  >
-                    <ArrowDown />
-                  </Button>
-                </div>
+              <TableCell class="text-center">
+                <button
+                  @click="deleteImage(image.id)"
+                >
+                  <Trash2 class="text-red-500" />
+                </button>
               </TableCell>
             </TableRow>
           </TransitionGroup>
