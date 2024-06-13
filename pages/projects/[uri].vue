@@ -117,7 +117,7 @@ function scrollToImage(index: number) {
       :src="img.url"
       :alt="img.alt"
       format="avif,webp,png,jpg"
-      class="aspect-video w-full"
+      class="aspect-video w-full hidden md:block"
     />
     <section class="grid grid-cols-[repeat(2,max-content)] gap-x-16 gap-y-2 px-8 py-8 sm:px-4">
       <span>Статус</span>
