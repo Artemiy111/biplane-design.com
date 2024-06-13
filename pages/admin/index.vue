@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
-import { EllipsisVertical, LoaderCircle } from 'lucide-vue-next'
+import { GripVertical, LoaderCircle, Pen, Trash2 } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import ProjectSheet from '~/components/admin/ProjectSheet.vue'
 import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~/server/use-cases/types'
@@ -127,17 +127,20 @@ async function deleteProject(id: number) {
 
 function openProjectSheet(project: ProjectDto) {
   projectSheetRef.value?.open({
-    id: project.id,
-    uri: project.uri,
-    title: project.title,
-    groupId: getGroupById(getCategoryById(project.categoryId).groupId).id,
-    location: project.location,
-    status: project.status,
-    yearStart: project.yearStart,
-    yearEnd: project.yearEnd,
-    categoryId: project.categoryId,
-    order: project.order,
-    isMinimal: project.isMinimal,
+    mode: 'update',
+    initial: {
+      id: project.id,
+      uri: project.uri,
+      title: project.title,
+      groupId: getGroupById(getCategoryById(project.categoryId).groupId).id,
+      location: project.location,
+      status: project.status,
+      yearStart: project.yearStart,
+      yearEnd: project.yearEnd,
+      categoryId: project.categoryId,
+      order: project.order,
+      isMinimal: project.isMinimal,
+    },
   })
 }
 </script>
@@ -155,22 +158,22 @@ function openProjectSheet(project: ProjectDto) {
   </main>
   <main
     v-else
-    class="container grid grid-cols-[300px,1fr] "
+    class="container grid gap-8 grid-cols-[1fr_minmax(600px,1350px)] lg:grid-cols-1 px-8 sm:px-4 mt-8"
   >
-    <aside class="flex flex-col gap-4 p-4">
+    <ul class="flex flex-col gap-4">
       <li
         v-for="group in groups"
         :key="group.id"
         class="w-full list-none"
       >
-        <ul class="flex w-full flex-col gap-2">
-          <span class="w-full text-slate-800 rounded-sm px-2 py-1 font-bold">{{
+        <ul class="flex w-full flex-col lg:flex-row flex-wrap gap-2">
+          <span class="w-full text-slate-800 rounded-sm font-bold">{{
             group.title
           }}</span>
           <li
             v-for="category in group.categories"
             :key="category.id"
-            class="cursor-pointer ml-2 px-2 py-1 hover:bg-primary-foreground"
+            class="cursor-pointer ml-2 lg:m-0 px-2 py-1 hover:bg-primary-foreground"
             :class="category.id === selectedCategory?.id ? 'font-bold bg-primary-foreground' : ''"
             @click="selectedCategory = category"
           >
@@ -178,11 +181,11 @@ function openProjectSheet(project: ProjectDto) {
           </li>
         </ul>
       </li>
-    </aside>
+    </ul>
 
     <section
       v-if="groups?.length"
-      class="flex flex-col grow-1 w-full"
+      class="flex flex-col gap-4 w-full"
     >
       <ProjectSheet
         v-if="groups.length"
@@ -192,28 +195,28 @@ function openProjectSheet(project: ProjectDto) {
         @update="updateProject"
       />
 
-      <section class="px-8 py-4 sm:px-4 sm:py-2">
-        <Button
-          :size="md ? 'sm' : 'default'"
-          :variant="md ? 'secondary' : 'default'"
-          class="w-fit"
-          @click="projectSheetRef?.open()"
-        >
-          Создать проект
-        </Button>
-      </section>
+      <Button
+        :size="md ? 'sm' : 'default'"
+        class="w-fit"
+        @click="projectSheetRef?.open({
+          mode: 'create',
+          initial: selectedCategory
+            ? ({
+              groupId: selectedCategory.groupId,
+              categoryId: selectedCategory.id })
+            : undefined })"
+      >
+        Создать проект
+      </Button>
 
-      <!-- <ScrollArea class="w-full h-dvh"> -->
-      <Table class="grid grid-cols-1 text-xs w-full">
-        <TableHeader class="w-full">
-          <TableRow class="grid w-max grid-cols-[40px_100px_200px_200px_200px_200px_180px_120px_140px_180px_180px]">
+      <Table class="grid overflow-x-auto text-xs grid-cols-[max-content_max-content_200px_200px_180px_120px_140px_170px_170px]">
+        <TableHeader class="grid grid-cols-subgrid col-span-9">
+          <TableRow class="grid grid-cols-subgrid col-span-9">
             <TableHead>№</TableHead>
             <TableHead />
             <TableHead>Превью</TableHead>
             <TableHead>Название</TableHead>
             <TableHead>Uri</TableHead>
-            <TableHead>Группа</TableHead>
-            <TableHead>Категория</TableHead>
             <TableHead>Начало</TableHead>
             <TableHead>Завершение</TableHead>
             <TableHead>Статус</TableHead>
@@ -225,61 +228,69 @@ function openProjectSheet(project: ProjectDto) {
             selectedCategoryProjects as any,
             {
               onUpdate: updateProjectOrder,
+              handle: `[data-draggable-handler='true']`,
             }]"
-          class="w-full"
+          class="grid grid-cols-subgrid col-span-9"
         >
           <TableRow
             v-for="project in selectedCategoryProjects"
             :key="project.id"
             :data-project-id="project.id"
             :data-order="project.order"
-            class="cursor-pointer w-max grid grid-cols-[40px_100px_200px_200px_200px_200px_180px_120px_140px_180px_180px]"
-            @click="navigateTo(`/admin/projects/${project.uri}`)"
+            class="items-center w-max grid grid-cols-subgrid col-span-9"
           >
-            <TableCell>{{ project.order }}</TableCell>
             <TableCell
+              class="flex gap-2 cursor-grab"
+              :data-draggable-handler="true"
+            >
+              {{ project.order }}
+              <GripVertical />
+            </TableCell>
+            <TableCell
+              class="flex gap-4"
               @click.stop
             >
+              <button
+                @click="openProjectSheet(project)"
+              >
+                <Pen />
+              </button>
               <Popover>
-                <PopoverTrigger as-child>
-                  <Button
-                    variant="ghost"
+                <PopoverTrigger>
+                  <button
+                    class="text-red-500"
                   >
-                    <EllipsisVertical />
-                  </Button>
+                    <Trash2 />
+                  </button>
                 </PopoverTrigger>
                 <PopoverContent class="z-10 flex w-fit flex-col gap-4">
+                  Вы действительно хотите удалить проект?
                   <Button
-                    variant="outline"
-                    @click="openProjectSheet(project)"
-                  >
-                    Изменить
-                  </Button>
-                  <Button
-                    variant="destructiveOutline"
                     @click="deleteProject(project.id)"
                   >
-                    Удалить
+                    Да
                   </Button>
                 </PopoverContent>
               </Popover>
             </TableCell>
             <TableCell>
-              <NuxtImg
-                v-if="project.images.length"
-                format="avif,webp,png,jpg"
-                :src="project.images[0].url"
-                :alt="project.images[0].alt"
-                class="aspect-video w-full object-cover"
-              />
+              <NuxtLink :to="`/admin/projects/${project.uri}`">
+                <NuxtImg
+                  v-if="project.images.length"
+                  format="avif,webp,png,jpg"
+                  :src="project.images[0].url"
+                  :alt="project.images[0].alt"
+                  class="aspect-video w-full object-cover"
+                />
+
+              </NuxtLink>
             </TableCell>
             <TableCell>
-              <NuxtLink :to="`/admin/projects/${project.uri}`" />
-              {{ project.title }}
+              <NuxtLink :to="`/admin/projects/${project.uri}`">
+                {{ project.title }}
+              </NuxtLink>
             </TableCell>
             <TableCell>{{ project.uri }}</TableCell>
-            <TableCell>{{ getGroupById(getCategoryById(project.categoryId).groupId).title }}</TableCell>
-            <TableCell>{{ getCategoryById(project.categoryId).title }}</TableCell>
             <TableCell>{{ project.yearStart }}</TableCell>
             <TableCell>{{ project.yearEnd }}</TableCell>
             <TableCell>{{ project.status }}</TableCell>
@@ -287,6 +298,9 @@ function openProjectSheet(project: ProjectDto) {
           </TableRow>
         </TableBody>
       </Table>
+
+      <!-- <ScrollArea class="w-full h-dvh"> -->
+
       <!-- </ScrollArea> -->
     </section>
   </main>

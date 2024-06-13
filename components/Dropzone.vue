@@ -7,7 +7,6 @@ import type { ImageDto } from '~/server/use-cases/types'
 
 const props = defineProps<{
   multiple?: boolean
-  showImages?: boolean
   showIcon?: boolean
   clearOnUpload?: boolean
   class?: HTMLAttributes['class']
@@ -62,14 +61,6 @@ function clear() {
   files.value.length = 0
 }
 
-function generateURL(file: File) {
-  const fileSrc = URL.createObjectURL(file)
-  setTimeout(() => {
-    URL.revokeObjectURL(fileSrc)
-  }, 1000)
-  return fileSrc
-}
-
 defineExpose({
   clear,
 })
@@ -84,54 +75,21 @@ defineExpose({
     @drop.prevent="onDrop"
   >
     <template v-if="!files.length">
-
       <div class="flex flex-col items-center justify-center gap-2">
-        <template v-if="!props.images?.length">
-          <FolderUp
-            v-if="props.showIcon"
-            :size="50"
-            :stroke-width="1"
-          />
-          <span>Загрузить изображение</span>
-        </template>
-        <template v-else>
-          <NuxtImg
-            v-for="image in images"
-            :key="image.id"
-            format=".avif,.webp,.png,.jpg,.jpeg"
-            class="aspect-video w-full object-cover"
-            :src="image.url"
-            :alt="image.alt"
-          />
-        </template>
-      </div>
-    </template>
-    <template v-else>
-      <ul v-if="!props.showImages">
-        <div
-          v-for="file in files"
-          :key="file.name"
-        >{{ file.name }}</div>
-      </ul>
-      <div
-        v-for="file in files"
-        v-else
-        :key="file.name"
-        class="flex h-full flex-col gap-2"
-      >
-        <NuxtImg
-          class="aspect-video h-full w-full object-cover"
-          :src="generateURL(file)"
+        <FolderUp
+          v-if="props.showIcon"
+          :size="50"
+          :stroke-width="1"
         />
-      </div>
-    </template>
-    <Input
-      ref="inputRef"
-      type="file"
-      :multiple="props.multiple"
-      accept=".avif,.webp,.png,.jpg,.jpeg"
-      class="absolute h-[1px] w-[1px] overflow-hidden opacity-0"
-      @change="onChange"
-    />
-  </Label>
+        <span>Загрузить изображения</span>
+
+        <Input
+          ref="inputRef"
+          type="file"
+          :multiple="props.multiple"
+          accept=".avif,.webp,.png,.jpg,.jpeg"
+          class="absolute h-[1px] w-[1px] overflow-hidden opacity-0"
+          @change="onChange"
+        />
+      </div></template></Label>
 </template>

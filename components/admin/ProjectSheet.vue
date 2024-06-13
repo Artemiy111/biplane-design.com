@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem } from '../ui/select'
 import { Checkbox } from '../ui/checkbox'
 import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~/server/use-cases/types'
 import { Form } from '~/components/ui/form'
-import type { ProjectId } from '~/server/db/schema'
+import type { CategoryId, GroupId, ProjectId } from '~/server/db/schema'
 
 const props = defineProps<{
   groups: GroupDto[]
@@ -95,18 +95,26 @@ function handleClose() {
   isOpen.value = false
 }
 
-async function open(initial?: FormSchema) {
+async function open(data:
+  { mode: 'create'
+    initial?: {
+      groupId: GroupId
+      categoryId: CategoryId }
+  }
+    |
+  { mode: 'update', initial: FormSchema }) {
   isOpen.value = true
-  mode.value = 'update'
 
-  if (initial) {
+  if (data.mode === 'update') {
+    mode.value = 'update'
     await nextTick()
-    formRef.value?.setValues(initial, false)
+    formRef.value?.setValues(data.initial, false)
   }
   else {
+    mode.value = 'create'
     await nextTick()
     formRef.value?.resetForm()
-    mode.value = 'create'
+    if (data.initial) formRef.value?.setValues(data.initial, false)
   }
 }
 

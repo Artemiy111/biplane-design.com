@@ -24,9 +24,8 @@ export class ImageRepo {
 
   async create(dto: CreateImageDto) {
     const filename = crypto.randomUUID() + '.' + dto.file.type.split('/').at(-1)
-    const createdInDb = await this.dbRepo.create(imageDbMapper.toDbCreate(dto, filename))
     await this.s3Repo.createImageFile(dto.projectId, filename, dto.file)
-
+    const createdInDb = await this.dbRepo.create(imageDbMapper.toDbCreate(dto, filename))
     const url = this.s3Repo.getUrl(dto.projectId, filename)
     return imageMapper.toDto(createdInDb, url)
   }
