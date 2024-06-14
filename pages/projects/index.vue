@@ -4,6 +4,7 @@ import type { LocationQuery } from 'vue-router'
 import { LoaderCircle } from 'lucide-vue-next'
 import { Carousel } from '~/components/ui/carousel'
 import type { CategoryDto, GroupDto } from '~/server/use-cases/types'
+import { cn } from '~/lib/utils'
 
 useSeoMeta({
   title: 'Проекты',
@@ -80,6 +81,22 @@ function changeGroup(group: GroupDto) {
 function changeCategory(category: CategoryDto) {
   currentCategory.value = category
 }
+
+const { size } = useScreenSize()
+
+const dummyProjects = computed(() => {
+  if (!currentCategory.value) return 0
+  const count = currentCategory.value.projects.length
+  if (currentCategory.value.layout === 'mini') {
+    if (size.value === 'xs') return 0
+    if (size.value === 'sm' || size.value === 'md' || size.value === 'lg') return count % 2
+    else return count % 3
+  }
+  else {
+    if (size.value === 'default' || size.value === '2xl' || size.value === 'xl') return count % 2
+    else return 0
+  }
+})
 </script>
 
 <template>
@@ -116,7 +133,7 @@ function changeCategory(category: CategoryDto) {
       class="relative mx-8 my-4 sm:mx-2 sm:my-2 sm:gap-2"
     >
       <div
-        :class="[haveHiddenCategories ? 'opacity-100' : 'opacity-0']"
+        :class="[!haveHiddenCategories ? 'opacity-100' : 'opacity-0']"
         class="pointer-events-none absolute right-0 top-0 z-50 h-full w-24 border-primary-foreground bg-gradient-to-r from-transparent to-white transition"
       />
       <Carousel
@@ -134,7 +151,7 @@ function changeCategory(category: CategoryDto) {
           >
             <Button
               :size="md ? 'sm' : 'default'"
-              :class="[c === currentCategory ? 'bg-primary-foreground font-bold' : '']"
+              :class="cn(c === currentCategory && 'bg-primary-foreground font-bold')"
               variant="ghost"
               @click="changeCategory(c)"
             >
@@ -144,18 +161,20 @@ function changeCategory(category: CategoryDto) {
         </CarouselContent>
       </Carousel>
     </section>
-    <Separator v-if="currentGroup?.categories.length" />
+    <Separator
+      v-if="currentGroup?.categories.length"
+    />
     <section
       v-if="projectsWithImages?.length"
-      class="grid grid-cols-2 gap-x-[2px] gap-y-[2px] lg:grid-cols-1"
+      :class="cn('grid grid-cols-2 gap-x-[1px] bg-border gap-y-[1px] lg:grid-cols-1',
+                 currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 xs:grid-cols-1')"
     >
-      <NuxtLink
-        v-for="p in projectsWithImages"
+      <template
+        v-for="p in projectsWithImages "
         :key="p.id"
-        :to="`/projects/${p.uri}`"
-        class="flex flex-col transition-colors hover:bg-primary-foreground"
       >
         <Carousel
+          v-if="p.isMinimal"
           :opts="{ active: false }"
           class="w-full"
         >
@@ -164,23 +183,57 @@ function changeCategory(category: CategoryDto) {
               v-for="img in p.images.slice(0, 1)"
               :key="img.id"
             >
-              <NuxtImg
+              <img
                 loading="lazy"
                 format="avif,webp,png,jpg"
                 :width="500"
                 :height="500"
                 :src="img.url"
                 :alt="img.alt"
-                class="aspect-video object-contain w-full bg-white"
-              />
+                :class="cn('aspect-video w-full bg-white', img.fit)"
+              >
             </CarouselItem>
           </CarouselContent>
         </Carousel>
-        <div class="flex items-center justify-between gap-8 px-8 py-4 sm:px-4 sm:py-2">
-          <h4>{{ p.title }}</h4>
-          <span class="text-slate-400">{{ p.yearStart }}</span>
-        </div>
-      </NuxtLink>
+        <NuxtLink
+          v-else
+          :to="`/projects/${p.uri}`"
+          class="flex flex-col transition-colors bg-white hover:bg-primary-foreground"
+        >
+          <Carousel
+            :opts="{ active: false }"
+            class="w-full"
+          >
+            <CarouselContent>
+              <CarouselItem
+                v-for="img in p.images.slice(0, 1)"
+                :key="img.id"
+              >
+                <img
+                  loading="lazy"
+                  format="avif,webp,png,jpg"
+                  :width="500"
+                  :height="500"
+                  :src="img.url"
+                  :alt="img.alt"
+                  :class="cn('aspect-video w-full bg-white', img.fit)"
+                >
+              </CarouselItem>
+            </CarouselContent>
+          </Carousel>
+          <div
+            class="flex items-center justify-between gap-8 px-8 py-4 sm:px-4 sm:py-2"
+          >
+            <h4>{{ p.title }}</h4>
+            <span class="text-slate-400">{{ p.yearStart }}</span>
+          </div>
+        </NuxtLink>
+      </template>
+      <div
+        v-for="n in dummyProjects"
+        :key="n"
+        class="bg-white"
+      />
     </section>
     <section
       v-else

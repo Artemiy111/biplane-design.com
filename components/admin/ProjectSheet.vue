@@ -26,7 +26,7 @@ const initialValues = ref<FormSchema>({
   status: 'завершён',
   yearStart: null,
   yearEnd: null,
-  location: '',
+  location: null,
   id: -1,
   order: -1,
   isMinimal: false,
@@ -64,10 +64,10 @@ const formSchema = z.object({
     .min(MIN_YEAR, `Год завершения не может быть меньше ${MIN_YEAR}`)
     .max(MAX_YEAR, `Год завершения не может быть больше ${MAX_YEAR}`)
     .nullable(),
-  location: z.string().trim().min(3, 'Минимум 3 символа'),
+  location: z.string().trim().min(3, 'Минимум 3 символа').nullable(),
   groupId: z.union([z.string(), z.number()]).transform(v => Number(v)),
   order: z.number(),
-  isMinimal: z.boolean().optional().default(false),
+  isMinimal: z.boolean(),
 })
 
 export type FormSchema = z.infer<typeof formSchema>
@@ -346,12 +346,12 @@ defineExpose({
           name="location"
         >
           <FormItem>
-            <FormLabel>Расположение *</FormLabel>
+            <FormLabel>Расположение</FormLabel>
             <FormControl>
               <Input
                 :model-value="componentField.modelValue"
                 placeholder="Уфа"
-                @change="handleChange"
+                @change="handleChange($event.target.value.trim() || null)"
                 @blur="handleBlur"
               />
             </FormControl>

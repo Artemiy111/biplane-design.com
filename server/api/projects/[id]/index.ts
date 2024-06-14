@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
         status: z.enum(['завершён', 'строится', 'в разработке']),
         yearStart: z.number().nullable(),
         yearEnd: z.number().nullable(),
-        location: z.string(),
+        location: z.string().min(3).nullable(),
         order: z.number().min(1),
         isMinimal: z.boolean(),
       })

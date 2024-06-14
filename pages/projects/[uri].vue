@@ -3,6 +3,7 @@ import { useElementSize } from '@vueuse/core'
 import type { ComponentPublicInstance } from 'vue'
 import { Carousel, type CarouselApi } from '@/components/ui/carousel'
 import type { ProjectDto } from '~/server/use-cases/types'
+import { cn } from '~/lib/utils'
 
 const route = useRoute()
 const projectUri = route.params.uri! as string
@@ -59,7 +60,7 @@ function scrollToImage(index: number) {
         class="md:hidden"
         orientation="vertical"
         :opts="{
-          loop: true,
+          loop: false,
           align: 'start',
           dragFree: true,
         }"
@@ -81,7 +82,7 @@ function scrollToImage(index: number) {
               :src="img.url"
               :alt="img.alt"
               format="avif,webp,png,jpg"
-              class="aspect-video w-full object-cover"
+              :class="cn('aspect-video w-full', img.fit)"
             />
           </CarouselItem>
         </CarouselContent>
@@ -90,7 +91,7 @@ function scrollToImage(index: number) {
         ref="mainCarouselRef"
         class="aspect-video w-full md:hidden"
         :opts="{
-          loop: true,
+          loop: false,
         }"
         @init-api="api = $event"
       >
@@ -104,7 +105,8 @@ function scrollToImage(index: number) {
               :src="img.url"
               :alt="img.alt"
               format="avif,webp,png,jpg"
-              class="aspect-video w-full object-contain"
+              :class="img.fit"
+              class="aspect-video w-full"
             />
           </CarouselItem>
         </CarouselContent>
@@ -112,18 +114,19 @@ function scrollToImage(index: number) {
     </section>
     <Separator />
     <NuxtImg
-      v-for="img in project.images.slice(0, 1)"
-      :key="img.id"
-      :src="img.url"
-      :alt="img.alt"
+      :key="project.images[0].id"
+      :src="project.images[0].url"
+      :alt="project.images[0].alt"
       format="avif,webp,png,jpg"
       class="aspect-video w-full hidden md:block"
     />
     <section class="grid grid-cols-[repeat(2,max-content)] gap-x-16 gap-y-2 px-8 py-8 sm:px-4">
       <span>Статус</span>
       <span>{{ project.status }}</span>
-      <span>Расположение</span>
-      <span>{{ project.location }}</span>
+      <template v-if="project.location">
+        <span>Расположение</span>
+        <span>{{ project.location }}</span>
+      </template>
       <template v-if="project.yearStart">
         <span>Год начала</span>
         <span>{{ project.yearStart }}</span>

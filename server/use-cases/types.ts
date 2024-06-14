@@ -1,4 +1,4 @@
-import type { CategoryDbUpdate, CategoryId, GroupDbUpdate, GroupId, ImageDbUpdate, ProjectDbUpdate, ProjectId, ProjectStatus } from '../db/schema'
+import type { CategoryDbUpdate, CategoryId, CategoryLayout, GroupDbUpdate, GroupId, ImageDbUpdate, ImageFit, ProjectDbCreate, ProjectDbUpdate, ProjectId, ProjectStatus } from '../db/schema'
 
 //
 export interface IUseCase {
@@ -28,6 +28,7 @@ export interface CategoryDto {
   title: string
   uri: string
   order: number
+  layout: CategoryLayout
   projects: ProjectDto[]
 }
 
@@ -43,14 +44,14 @@ export interface ProjectDto {
   uri: string
   order: number
   images: ImageDto[]
-  location: string
+  location: string | null
   yearStart: number | null
   yearEnd: number | null
   status: ProjectStatus
   isMinimal: boolean
 }
 
-export type CreateProjectDto = Omit<ProjectDto, 'id' | 'order' | 'images' | 'isMinimal'>
+export type CreateProjectDto = Omit<ProjectDbCreate, 'order'>
 export type UpdateProjectDto = ProjectDbUpdate
 
 //
@@ -60,6 +61,7 @@ export interface ImageDto {
   id: string
   url: string
   alt: string
+  fit: ImageFit
   order: number
 }
 
@@ -70,6 +72,7 @@ export interface ImageFile {
 }
 export type CreateImageDto = {
   projectId: ProjectId
+  fit: ImageFit
   file: File
 }
 export type UpdateImageDto = ImageDbUpdate

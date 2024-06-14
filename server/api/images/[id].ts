@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
       const Body = z.object({
         alt: z.string(),
         order: z.number().min(1),
+        fit: z.enum(['object-fill', 'object-contain', 'object-cover', 'object-none']),
       })
       authRepo.assertAuthenticated(event)
       const body = await readValidatedBody(event, Body.parse)

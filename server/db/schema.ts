@@ -56,6 +56,7 @@ export const categories = pgTable(
     title: text('title').notNull().unique(),
     uri: text('uri').notNull(),
     order: integer('order').notNull(),
+    layout: text('layout', { enum: ['base', 'mini'] }).notNull(),
   },
   (t) => {
     return {
@@ -66,6 +67,7 @@ export const categories = pgTable(
 )
 
 export type CategoryId = CategoryDb['id']
+export type CategoryLayout = CategoryDb['layout']
 export type CategoryDb = typeof categories.$inferSelect
 export type CategoryDbCreate = Omit<CategoryDb, 'id' | 'order'>
 export type CategoryDbUpdate = Omit<CategoryDb, 'id' | 'groupId'>
@@ -91,7 +93,7 @@ export const projects = pgTable(
     status: text('status', { enum: ['завершён', 'строится', 'в разработке'] }).notNull(),
     yearStart: integer('year_start'),
     yearEnd: integer('year_end'),
-    location: text('location').notNull(),
+    location: text('location'),
     order: integer('order').notNull(),
     isMinimal: boolean('is_minimal').notNull().default(false),
   },
@@ -123,6 +125,7 @@ export const images = pgTable(
     projectId: integer('project_id').notNull().references(() => projects.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     id: text('id').primaryKey().notNull(),
     alt: text('alt').notNull(),
+    fit: text('fit', { enum: ['object-fill', 'object-contain', 'object-cover', 'object-none'] }).notNull(),
     order: integer('order').notNull(),
   },
   (t) => {
@@ -136,6 +139,7 @@ export const images = pgTable(
 )
 
 export type ImageId = ImageDb['id']
+export type ImageFit = ImageDb['fit']
 export type ImageDb = typeof images.$inferSelect
 export type ImageDbCreate = Omit<typeof images.$inferInsert, 'order'>
 export type ImageDbUpdate = Omit<ImageDb, 'id' | 'projectId'>
