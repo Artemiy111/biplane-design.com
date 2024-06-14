@@ -21,7 +21,7 @@ const querySchema = z.object({
 const route = useRoute()
 const router = useRouter()
 const { md } = useScreenSize()
-const { data: groups, pending, error: _error } = await useLazyFetch<GroupDto[]>('/api/groups')
+const { data: groups, pending, error: _error } = await useLazyFetch<GroupDto[]>('/api/groups', { key: 'groups' })
 
 const currentGroup = ref<GroupDto | null>(groups.value?.[0] || null)
 const currentCategory = ref<CategoryDto | null>(currentGroup.value?.categories[0] || null)
@@ -200,27 +200,16 @@ const dummyProjects = computed(() => {
           :to="`/projects/${p.uri}`"
           class="flex flex-col transition-colors bg-white hover:bg-primary-foreground"
         >
-          <Carousel
-            :opts="{ active: false }"
-            class="w-full"
-          >
-            <CarouselContent>
-              <CarouselItem
-                v-for="img in p.images.slice(0, 1)"
-                :key="img.id"
-              >
-                <img
-                  loading="lazy"
-                  format="avif,webp,png,jpg"
-                  :width="500"
-                  :height="500"
-                  :src="img.url"
-                  :alt="img.alt"
-                  :class="cn('aspect-video w-full bg-white', img.fit)"
-                >
-              </CarouselItem>
-            </CarouselContent>
-          </Carousel>
+
+          <NuxtImg
+            loading="lazy"
+            format="avif,webp,png,jpg"
+            :width="500"
+            :height="500"
+            :src="p.images[0].url"
+            :alt="p.images[0].alt"
+            :class="cn('aspect-video w-full bg-white', p.images[0].fit)"
+          />
           <div
             class="flex items-center justify-between gap-8 px-8 py-4 sm:px-4 sm:py-2"
           >
