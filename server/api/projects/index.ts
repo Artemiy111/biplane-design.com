@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
         status: z.enum(['строится', 'в разработке', 'завершён']),
         yearStart: z.number().nullable(),
         yearEnd: z.number().nullable(),
-        location: z.string(),
+        location: z.string().min(3).nullable(),
         isMinimal: z.boolean().optional(),
       })
       authRepo.assertAuthenticated(event)
