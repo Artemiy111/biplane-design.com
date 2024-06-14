@@ -4,7 +4,8 @@ import { GripVertical, Trash2 } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import type { ImageDto, ProjectDto, UpdateImageDto } from '~/server/use-cases/types'
 import Dropzone from '~/components/Dropzone.vue'
-import type { ImageId } from '~/server/db/schema'
+import type { ImageFit, ImageId } from '~/server/db/schema'
+import { cn } from '~/lib/utils'
 
 const route = useRoute()
 const uri = route.params.uri as string
@@ -34,11 +35,16 @@ async function deleteImage(id: ImageId) {
   }
   catch (_e) {
     toast.error(`Не удалось удалить изображение`)
+    refresh()
   }
-  refresh()
 }
 
 async function updateImage(id: ImageId, dto: UpdateImageDto) {
+  if (!project.value) return
+  const imageIdx = project.value.images.findIndex(img => img.id === id)
+  const [image] = project.value.images.splice(imageIdx, 1)
+  project.value.images.splice(dto.order - 1, 0, { ...image, ...dto })
+  project.value.images.forEach((img, idx) => img.order = idx + 1)
   try {
     await $fetch(`/api/images/${id}`, {
       method: 'PUT',
@@ -47,26 +53,16 @@ async function updateImage(id: ImageId, dto: UpdateImageDto) {
   }
   catch (_e) {
     toast.error('Не удалось обновить изображение')
+    refresh()
   }
-  refresh()
 }
 
 async function updateImageOrder(e: SortableEvent) {
   if (!project.value) return
-  const index = e.oldDraggableIndex!
-  const newIndex = e.newDraggableIndex!
-  const [image] = project.value.images.splice(index, 1)
-  project.value.images.splice(newIndex, 0, image)
-  image.order = newIndex + 1
-  try {
-    await $fetch(`/api/images/${image.id}`, {
-      method: 'PUT', body: image,
-    })
-  }
-  catch (_e) {
-    toast.error('Не удалось переместить изображение')
-  }
-  refresh()
+  const imageIdx = e.oldDraggableIndex!
+  const newIdx = e.newDraggableIndex!
+  const image = project.value.images[imageIdx]
+  await updateImage(image.id, { ...image, order: newIdx + 1 })
 }
 
 async function uploadImages(images: File[]) {
@@ -128,11 +124,12 @@ async function uploadImages(images: File[]) {
     </div>
 
     <section class="flex flex-col sm:px-4 gap-4 px-8 md:py-4">
-      <Table class="overflow-x-auto grid grid-cols-[120px_max-content_1fr_max-content] md:grid-cols-[max-content_260px_200px_max-content]">
-        <TableHeader class="grid grid-cols-subgrid col-span-4">
-          <TableRow class="grid grid-cols-subgrid col-span-4">
+      <Table class="overflow-x-auto grid grid-cols-[120px_max-content_max-content_1fr_max-content] md:grid-cols-[max-content_260px_200px_max-content_max-content]">
+        <TableHeader class="grid grid-cols-subgrid col-span-5">
+          <TableRow class="grid grid-cols-subgrid col-span-5">
             <TableHead>№</TableHead>
             <TableHead>Изображение</TableHead>
+            <TableHead>Вид</TableHead>
             <TableHead>Описание</TableHead>
             <TableHead>Опции</TableHead>
           </TableRow>
@@ -143,7 +140,7 @@ async function uploadImages(images: File[]) {
               onUpdate: updateImageOrder,
               handle: `[data-draggable-handler='true']`,
             }]"
-          class="transition-all grid grid-cols-subgrid col-span-4 [&>.row-leave-active]:absolute "
+          class="transition-all grid grid-cols-subgrid col-span-5 [&>.row-leave-active]:absolute "
         >
           <TransitionGroup
             name="row"
@@ -151,7 +148,7 @@ async function uploadImages(images: File[]) {
             <TableRow
               v-for="(image) in project.images"
               :key="image.id"
-              class="grid grid-cols-subgrid col-span-4 items-center"
+              class="grid grid-cols-subgrid col-span-5 items-center"
             >
               <TableCell
                 class="cursor-grab flex gap-4"
@@ -160,17 +157,44 @@ async function uploadImages(images: File[]) {
                 {{ image.order }} <GripVertical />
               </TableCell>
               <TableCell>
-                <img
+                <NuxtImg
                   format="avif,webp,png,jpg"
-                  class="aspect-video w-[300px] object-contain"
+                  :class="cn('aspect-video w-[300px] object-contain border-primary border bg-white', image.fit)"
                   :src="image.url"
                   :alt="image.alt"
+                />
+              </TableCell>
+              <TableCell>
+                <Select
+                  :model-value="image.fit"
+                  class="w-fit"
+                  @update:model-value="updateImage(image.id, { ...image, fit: $event as ImageFit })"
                 >
+                  <SelectTrigger
+                    class="w-max"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem :value="'object-none'">
+                      обычный
+                    </SelectItem>
+                    <SelectItem :value="'object-cover'">
+                      увеличить
+                    </SelectItem>
+                    <SelectItem :value="'object-fill'">
+                      растянуть
+                    </SelectItem>
+                    <SelectItem :value="'object-contain'">
+                      внутри
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </TableCell>
               <TableCell>
                 <Input
                   :model-value="image.alt"
-                  @change="(e: Event) => updateImage(image.id, { ...image, alt: (e.target as HTMLInputElement).value }) "
+                  @change="updateImage(image.id, { ...image, alt: ($event.target as HTMLInputElement).value }) "
                 />
               </TableCell>
               <TableCell class="text-center">

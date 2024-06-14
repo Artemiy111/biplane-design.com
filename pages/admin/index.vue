@@ -5,6 +5,7 @@ import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import ProjectSheet from '~/components/admin/ProjectSheet.vue'
 import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~/server/use-cases/types'
 import type { ProjectId } from '~/server/db/schema'
+import { cn } from '~/lib/utils'
 
 definePageMeta({
   middleware: 'authenticated',
@@ -280,9 +281,8 @@ function openProjectSheet(project: ProjectDto) {
                   format="avif,webp,png,jpg"
                   :src="project.images[0].url"
                   :alt="project.images[0].alt"
-                  class="aspect-video w-full object-cover"
+                  :class="cn('aspect-video w-full', project.images[0].fit)"
                 />
-
               </NuxtLink>
             </TableCell>
             <TableCell>
