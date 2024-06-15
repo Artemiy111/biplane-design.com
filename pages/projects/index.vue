@@ -6,7 +6,7 @@ import { Carousel } from '~/components/ui/carousel'
 import type { CategoryDto, GroupDto } from '~/server/use-cases/types'
 import { cn } from '~/lib/utils'
 
-useSeoMeta({
+useServerSeoMeta({
   title: 'Проекты',
   ogTitle: 'Проекты',
   description: 'Представлены различные категории проектов',
@@ -29,37 +29,34 @@ const { data: groups, error: _error } = await useLazyFetch<GroupDto[] | null>('/
 })
 const categories = computed(() => groups.value?.flatMap(g => g.categories) || [])
 
-// const currentGroup = ref<GroupDto | null>(groups.value?.[0] || null)
-// const currentCategory = ref<CategoryDto | null>(currentGroup.value?.categories[0] || null)
-const currentCategory = ref<CategoryDto | null>(groups.value?.[0].categories?.[0] || null)
+const currentCategory = ref<CategoryDto | null>(getCurrentCategory(route.query))
 const currentGroup = computed(() => groups.value?.find(g => g.id === currentCategory.value?.groupId) || null)
 
-const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
+const currentCategoryProjects = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
 watch(groups, () => {
-  if (!currentCategory.value)
-    currentCategory.value = groups.value?.[0].categories?.[0] || null
+  if (groups.value && !currentCategory.value)
+    navigateTo({ path: route.path, query: { category: groups.value?.[0]?.categories[0]?.uri } })
 })
 
-function handleRouteQuery(query: LocationQuery) {
+function getCategoryFromFromRouteQuery(query: LocationQuery): CategoryDto | null {
   const validatedQuery = querySchema.safeParse(query)
   if (!validatedQuery.success)
-    return
+    return null
 
   const queryCategory = categories.value.find(c => c.uri === validatedQuery.data.category) || null
 
   if (!queryCategory)
-    return
+    return null
 
-  currentCategory.value = queryCategory
+  return queryCategory
 }
 
-handleRouteQuery(route.query)
-router.afterEach(guard => handleRouteQuery(guard.query))
+function getCurrentCategory(query: LocationQuery) {
+  return getCategoryFromFromRouteQuery(query) || categories.value[0] || null
+}
 
-watch(() => [currentCategory.value], () => {
-  router.push({ query: { ...route.query, category: currentCategory.value?.uri } })
-})
+router.afterEach(guard => currentCategory.value = getCurrentCategory(guard.query))
 
 const categoriesCarouselRef = ref<InstanceType<typeof Carousel> | null>(null)
 const haveHiddenCategories = ref(false)
@@ -81,10 +78,6 @@ function changeGroup(group: GroupDto) {
   if (group.id !== currentCategory.value?.groupId) {
     currentCategory.value = group.categories[0] || null
   }
-}
-
-function changeCategory(category: CategoryDto) {
-  currentCategory.value = category
 }
 
 const { size } = useScreenSize()
@@ -158,7 +151,7 @@ const dummyProjects = computed(() => {
               :size="md ? 'sm' : 'default'"
               :class="cn(c.id === currentCategory?.id && 'bg-primary-foreground font-bold')"
               variant="ghost"
-              @click="changeCategory(c)"
+              @click="navigateTo({ path: route.path, query: { category: c.uri } })"
             >
               {{ c.title }}
             </Button>
@@ -170,12 +163,12 @@ const dummyProjects = computed(() => {
       v-if="currentGroup?.categories.length"
     />
     <section
-      v-if="projectsWithImages?.length"
+      v-if="currentCategoryProjects?.length"
       :class="cn('grid grid-cols-2 gap-x-[1px] bg-border gap-y-[1px] lg:grid-cols-1',
                  currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 xs:grid-cols-1')"
     >
       <template
-        v-for="p in projectsWithImages "
+        v-for="p in currentCategoryProjects "
         :key="p.id"
       >
         <Carousel

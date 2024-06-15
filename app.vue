@@ -6,9 +6,6 @@ import { Toaster } from '~/components/ui/sonner'
 
 await useLazyFetch<GroupDto[]>('/api/groups', {
   key: 'groups',
-  onRequest: (r) => {
-    console.log('revalidate')
-  },
 })
 </script>
 
