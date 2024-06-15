@@ -8,7 +8,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <main class="container prose sm:prose-sm mx-0 max-w-5xl px-8 py-4 text-base prose-headings:text-2xl 2xl:prose-headings:text-2xl lg:prose-headings:text-xl md:text-sm md:prose-headings:text-lg sm:px-4 sm:py-2 sm:prose-headings:text-base">
+  <main class="container pb-4 prose-li:marker:text-slate-400 sm:px-4 prose-ul:space-y-2 prose-ul:my-4 leading-[160%] prose-li:ml-8 prose-li:list-disc prose-headings:font-bold mx-0 max-w-5xl prose-p:m-0 prose-headings:my-4 px-8 text-base prose-headings:m-0  prose-headings:text-2xl 2xl:prose-headings:text-2xl lg:prose-headings:text-xl md:text-sm md:prose-headings:text-lg  sm:prose-headings:text-base">
     <h1 class="mb-4 leading-normal">
       О студии
     </h1>
