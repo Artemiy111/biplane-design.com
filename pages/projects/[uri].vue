@@ -2,12 +2,17 @@
 import { useElementSize } from '@vueuse/core'
 import type { ComponentPublicInstance } from 'vue'
 import { Carousel, type CarouselApi } from '@/components/ui/carousel'
-import type { ProjectDto } from '~/server/use-cases/types'
+import type { GroupDto, ProjectDto } from '~/server/use-cases/types'
 import { cn } from '~/lib/utils'
 
-const route = useRoute()
-const projectUri = route.params.uri! as string
-const { data: project, error: _error } = await useLazyFetch<ProjectDto>(`/api/projects/?uri=${projectUri}`)
+const projectUri = useRoute().params.uri! as string
+const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
+const { data: project, error: _error } = await useLazyFetch<ProjectDto | null>(`/api/projects/?uri=${projectUri}`, {
+  default() {
+    const cached = cachedGroups.value?.flatMap(g => g.categories.flatMap(c => c.projects)).find(p => p.uri === projectUri) || null
+    return cached
+  },
+})
 
 const api = ref<CarouselApi | null>(null)
 const apiTumb = ref<CarouselApi | null>(null)

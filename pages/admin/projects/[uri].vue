@@ -2,16 +2,20 @@
 import { toast } from 'vue-sonner'
 import { GripVertical, Trash2 } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
-import type { ImageDto, ProjectDto, UpdateImageDto } from '~/server/use-cases/types'
+import type { GroupDto, ImageDto, ProjectDto, UpdateImageDto } from '~/server/use-cases/types'
 import Dropzone from '~/components/Dropzone.vue'
 import type { ImageFit, ImageId } from '~/server/db/schema'
 import { cn } from '~/lib/utils'
 
 const route = useRoute()
 const uri = route.params.uri as string
-const { data: project, refresh }
-= await useLazyFetch<ProjectDto>(`/api/projects/?uri=${uri}`, {
-  onResponseError: () => toast.error('Не удалось загрузить информацию о проекте'),
+const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
+const { data: project, refresh: refreshProject }
+= await useLazyFetch<ProjectDto | null>(`/api/projects/?uri=${uri}`, {
+  default() {
+    const cached = cachedGroups.value?.flatMap(g => g.categories.flatMap(c => c.projects)).find(p => p.uri === uri) || null
+    return cached
+  },
 })
 
 definePageMeta({
@@ -24,6 +28,11 @@ useSeoMeta({
   description: () => `Админ-панель | ${project.value?.title}`,
   ogDescription: () => `Админ-панель | ${project.value?.title}`,
 })
+
+async function refresh() {
+  refreshProject()
+  refreshNuxtData('groups')
+}
 
 async function deleteImage(id: ImageId) {
   if (!project.value) return

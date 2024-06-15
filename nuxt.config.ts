@@ -2,7 +2,7 @@
 import '@total-typescript/ts-reset'
 
 export default defineNuxtConfig({
-  ssr: false,
+  ssr: true,
   telemetry: { enabled: false },
   devtools: {
     enabled: false,
