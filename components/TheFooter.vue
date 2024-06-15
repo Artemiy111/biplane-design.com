@@ -20,7 +20,7 @@
           Адрес
         </h6>
         <li>
-          Стерлитамак, ул Карла Маркса 101Б, офис 313
+          Стерлитамак, ул&nbsp;Карла&nbsp;Маркса&nbsp;101Б, офис&nbsp;313
         </li>
       </ul>
       <ul class="flex flex-col gap-1">
@@ -48,7 +48,7 @@
           </NuxtLink>
         </li>
       </ul>
-      <ul class="flex flex-col gap-1">
+      <!-- <ul class="flex flex-col gap-1">
         <li class="font-bold">
           <NuxtLink
             href="/"
@@ -57,7 +57,7 @@
             Пример документации проекта
           </NuxtLink>
         </li>
-      </ul>
+      </ul> -->
     </section>
     <section>
       <Separator />
