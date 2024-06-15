@@ -12,9 +12,10 @@ useSeoMeta({
   ogDescription: 'Студия дизайна',
 })
 
-const { height } = useWindowSize()
+const { height: _windowHeight } = useWindowSize()
+const windowHeight = computed(() => Number.isFinite(_windowHeight.value) ? _windowHeight.value : 1080)
 const { height: headerHeight } = useHeaderSize()
-const mainScreenHeight = computed(() => height.value - headerHeight.value)
+const mainScreenHeight = computed(() => windowHeight.value - headerHeight.value)
 
 const headingRef = ref<HTMLHeadingElement | null>(null)
 onMounted(() => {
@@ -28,11 +29,13 @@ onMounted(() => {
 
 <template>
   <main class="container relative justify-center flex flex-col flex-grow h-full">
-    <NuxtImg
-      src="/main.jpg"
-      :style="{ height: `${mainScreenHeight}px` }"
-      class="w-full object-cover"
-    />
+    <ClientOnly>
+      <NuxtImg
+        src="/main.jpg"
+        :style="{ height: `${mainScreenHeight}px` }"
+        class="w-full object-cover"
+      />
+    </ClientOnly>
     <section class="absolute mx-4 flex gap-4 flex-col flex-grow pb-[200px]">
       <h1
         ref="headingRef"
@@ -46,7 +49,7 @@ onMounted(() => {
       </span>
       <NuxtLink
         to="/projects"
-        :class="cn(buttonVariants({ variant: 'outline' }), 'w-fit ml-2')"
+        :class="cn(buttonVariants({ variant: 'outline' }), 'w-fit ml-2 text-white hover:text-white bg-transparent hover:bg-black/30')"
       >
         Смотреть проекты</NuxtLink>
     </section>

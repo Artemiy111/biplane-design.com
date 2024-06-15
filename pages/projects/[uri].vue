@@ -6,12 +6,11 @@ import type { GroupDto, ProjectDto } from '~/server/use-cases/types'
 import { cn } from '~/lib/utils'
 
 const projectUri = useRoute().params.uri! as string
-const { data: groups } = useNuxtData<GroupDto[]>('groups')
-const { data: project, error: _error } = await useLazyFetch<ProjectDto>(`/api/projects/?uri=${projectUri}`, {
+const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
+const { data: project, error: _error } = await useLazyFetch<ProjectDto | null>(`/api/projects/?uri=${projectUri}`, {
   default() {
-    const cached = groups.value?.flatMap(g => g.categories.flatMap(c => c.projects)).find(p => p.uri === projectUri)
-    console.log('cached', cached)
-    return cached!
+    const cached = cachedGroups.value?.flatMap(g => g.categories.flatMap(c => c.projects)).find(p => p.uri === projectUri) || null
+    return cached
   },
 })
 

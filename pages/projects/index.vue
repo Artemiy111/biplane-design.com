@@ -14,22 +14,31 @@ useSeoMeta({
 })
 
 const querySchema = z.object({
-  group: z.string().min(3),
   category: z.string().min(3),
 })
 
 const route = useRoute()
 const router = useRouter()
 const { md } = useScreenSize()
-const { data: groups, pending, error: _error } = await useLazyFetch<GroupDto[]>('/api/groups', { key: 'groups' })
+const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
+const { data: groups, error: _error } = await useLazyFetch<GroupDto[] | null>('/api/groups', {
+  key: 'groups',
+  default() {
+    return cachedGroups.value
+  },
+})
+const categories = computed(() => groups.value?.flatMap(g => g.categories) || [])
 
-const currentGroup = ref<GroupDto | null>(groups.value?.[0] || null)
-const currentCategory = ref<CategoryDto | null>(currentGroup.value?.categories[0] || null)
+// const currentGroup = ref<GroupDto | null>(groups.value?.[0] || null)
+// const currentCategory = ref<CategoryDto | null>(currentGroup.value?.categories[0] || null)
+const currentCategory = ref<CategoryDto | null>(groups.value?.[0].categories?.[0] || null)
+const currentGroup = computed(() => groups.value?.find(g => g.id === currentCategory.value?.groupId) || null)
+
 const projectsWithImages = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
 watch(groups, () => {
-  currentGroup.value = groups.value?.[0] || null
-  currentCategory.value = currentGroup.value?.categories?.[0] || null
+  if (!currentCategory.value)
+    currentCategory.value = groups.value?.[0].categories?.[0] || null
 })
 
 function handleRouteQuery(query: LocationQuery) {
@@ -37,21 +46,19 @@ function handleRouteQuery(query: LocationQuery) {
   if (!validatedQuery.success)
     return
 
-  const queryGroup = groups.value?.find(g => g.uri === validatedQuery.data.group) || null
-  const queryCategory = queryGroup?.categories.find(c => c.uri === validatedQuery.data.category) || null
+  const queryCategory = categories.value.find(c => c.uri === validatedQuery.data.category) || null
 
-  if (!queryGroup || !queryCategory)
+  if (!queryCategory)
     return
 
-  currentGroup.value = queryGroup
   currentCategory.value = queryCategory
 }
 
 handleRouteQuery(route.query)
 router.afterEach(guard => handleRouteQuery(guard.query))
 
-watch(() => [currentGroup.value, currentCategory.value], () => {
-  router.push({ query: { ...route.query, group: currentGroup.value?.uri, category: currentCategory.value?.uri } })
+watch(() => [currentCategory.value], () => {
+  router.push({ query: { ...route.query, category: currentCategory.value?.uri } })
 })
 
 const categoriesCarouselRef = ref<InstanceType<typeof Carousel> | null>(null)
@@ -71,11 +78,9 @@ onMounted(() => {
 })
 
 function changeGroup(group: GroupDto) {
-  if (group !== currentGroup.value) {
-    currentGroup.value = group
-    currentCategory.value = currentGroup.value.categories?.[0] || null
+  if (group.id !== currentCategory.value?.groupId) {
+    currentCategory.value = group.categories[0] || null
   }
-  currentGroup.value = group
 }
 
 function changeCategory(category: CategoryDto) {
@@ -101,7 +106,7 @@ const dummyProjects = computed(() => {
 
 <template>
   <main
-    v-if="pending"
+    v-if="groups === null"
     class="container flex h-full flex-grow flex-col items-center justify-center"
   >
     <LoaderCircle
@@ -119,7 +124,7 @@ const dummyProjects = computed(() => {
         v-for="group in groups"
         :key="group.id"
         class="w-full cursor-pointer px-8 py-4 font-bold transition-colors hover:bg-secondary sm:px-4 sm:py-2"
-        :class="[group === currentGroup ? 'bg-primary-foreground' : '']"
+        :class="[group.id === currentGroup?.id ? 'bg-primary-foreground' : '']"
         tabindex="0"
         @keypress.enter.space="changeGroup(group)"
         @click="changeGroup(group)"
@@ -151,7 +156,7 @@ const dummyProjects = computed(() => {
           >
             <Button
               :size="md ? 'sm' : 'default'"
-              :class="cn(c === currentCategory && 'bg-primary-foreground font-bold')"
+              :class="cn(c.id === currentCategory?.id && 'bg-primary-foreground font-bold')"
               variant="ghost"
               @click="changeCategory(c)"
             >
