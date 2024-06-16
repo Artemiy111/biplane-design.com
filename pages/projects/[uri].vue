@@ -52,8 +52,8 @@ function scrollToImage(index: number) {
     v-if="project"
     class="container flex flex-col"
   >
-    <section class="flex justify-between px-8 py-4 text-3xl 2xl:text-2xl lg:text-xl md:text-lg sm:py-2 sm:px-4 sm:text-base">
-      <h1 class="font-bold">
+    <section class="flex justify-between px-8 py-4 text-xl lg:text-lg md:my-3 sm:py-2 sm:px-4 sm:text-base">
+      <h1 class="font-semibold">
         {{ project.title }}
       </h1>
     </section>

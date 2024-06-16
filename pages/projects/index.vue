@@ -112,12 +112,12 @@ const dummyProjects = computed(() => {
     v-else
     class="container flex h-full flex-grow flex-col"
   >
-    <section class="grid grid-cols-2 items-center divide-x text-3xl 2xl:text-2xl lg:text-xl md:text-lg sm:text-base">
+    <section class="grid grid-cols-2 items-center divide-x text-xl lg:text-lg sm:text-base">
       <h2
         v-for="group in groups"
         :key="group.id"
-        class="w-full cursor-pointer px-8 py-4 font-bold transition-colors hover:bg-secondary sm:px-4 sm:py-2"
-        :class="[group.id === currentGroup?.id ? 'bg-primary-foreground' : '']"
+        :class="cn('w-full cursor-pointer px-8 py-4 transition-colors hover:bg-secondary md:py-3 sm:px-4 sm:py-2',
+                   group.id === currentGroup?.id && 'bg-primary-foreground font-semibold')"
         tabindex="0"
         @keypress.enter.space="changeGroup(group)"
         @click="changeGroup(group)"
@@ -128,10 +128,10 @@ const dummyProjects = computed(() => {
     <Separator />
     <section
       v-if="currentGroup?.categories.length"
-      class="relative mx-8 my-4 sm:mx-2 sm:my-2 sm:gap-2"
+      class="relative mx-8 my-4 sm:mx-2 sm:my-2 sm:gap-2 md:my-3"
     >
       <div
-        :class="[!haveHiddenCategories ? 'opacity-100' : 'opacity-0']"
+        :class="[haveHiddenCategories ? 'opacity-100' : 'opacity-0']"
         class="pointer-events-none absolute right-0 top-0 z-50 h-full w-24 border-primary-foreground bg-gradient-to-r from-transparent to-white transition"
       />
       <Carousel
@@ -149,7 +149,7 @@ const dummyProjects = computed(() => {
           >
             <Button
               :size="md ? 'sm' : 'default'"
-              :class="cn(c.id === currentCategory?.id && 'bg-primary-foreground font-bold')"
+              :class="cn(c.id === currentCategory?.id && 'bg-primary-foreground font-semibold')"
               variant="ghost"
               @click="navigateTo({ path: route.path, query: { category: c.uri } })"
             >
