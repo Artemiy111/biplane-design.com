@@ -37,6 +37,7 @@ async function register(data: RegisterForm) {
     await $fetch('/api/auth/register', { method: 'post', body: data })
     loginFormRef.value?.resetForm()
     toast.success('Аккаунт успешно создан')
+    await refreshNuxtData('user')
     await navigateTo('/admin')
   }
   catch (_e) {
@@ -49,6 +50,7 @@ async function login(data: LoginForm) {
     await $fetch('/api/auth/login', { method: 'post', body: data })
     loginFormRef.value?.resetForm()
     toast.success('Вход выполнен')
+    await refreshNuxtData('user')
     await navigateTo('/admin')
   }
   catch (_e) {
