@@ -10,6 +10,7 @@ await useLazyFetch<GroupDto[]>('/api/groups', {
 </script>
 
 <template>
+  <YandexMetrikaInformer />
   <Toaster :rich-colors="true" />
   <div class="text-base font-normal md:text-sm">
     <div class="flex h-full min-h-[100dvh] w-full flex-col">
