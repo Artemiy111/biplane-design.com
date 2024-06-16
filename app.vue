@@ -5,6 +5,13 @@ import TheHeader from '~/components/TheHeader.vue'
 import TheFooter from '~/components/TheFooter.vue'
 import { Toaster } from '~/components/ui/sonner'
 
+const user = useUser()
+const { data: fetchedUser } = await useFetch('/api/user', { key: 'user', onRequest() {
+  console.log('refresh')
+} })
+watch(fetchedUser, () => {
+  user.value = fetchedUser.value
+}, { immediate: true })
 await useLazyFetch<GroupDto[]>('/api/groups', {
   key: 'groups',
 })

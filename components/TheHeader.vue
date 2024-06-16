@@ -25,6 +25,8 @@ async function singOut() {
   try {
     await $fetch('/api/auth/logout')
     toast.success('Вы вышли из аккаунта')
+    await refreshNuxtData('user')
+    if (useRoute().path.includes('admin')) await navigateTo('/admin/auth')
   }
   catch (_e) {
     toast.error('Не удалось выйти из аккаунта')
