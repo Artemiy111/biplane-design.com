@@ -18,7 +18,7 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     'shadcn-nuxt',
     '@tresjs/nuxt',
-    'nuxt-yandex-metrika',
+    // 'nuxt-yandex-metrika',
   ],
   // style
   fonts: {
@@ -54,8 +54,8 @@ export default defineNuxtConfig({
     },
     format: ['avif', 'webp', 'png', 'jpg'],
   },
-  yandexMetrika: {
-    debug: false,
-    id: '61819282',
-  },
+  // yandexMetrika: {
+  //   debug: false,
+  //   id: '61819282',
+  // },
 })
