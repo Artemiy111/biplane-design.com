@@ -105,7 +105,7 @@ async function singOut() {
               class="cursor-pointer"
               :class="[
                 md ? navigationMenuTriggerStyle({ size: 'sm' }) : navigationMenuTriggerStyle(),
-                r.link === route.path ? 'bg-primary-foreground font-bold' : '']"
+                r.link === route.path ? 'bg-primary-foreground font-semibold' : '']"
             >
               {{ r.title }}
             </NuxtLink>
