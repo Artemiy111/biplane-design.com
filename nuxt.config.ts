@@ -55,7 +55,7 @@ export default defineNuxtConfig({
     format: ['avif', 'webp', 'png', 'jpg'],
   },
   yandexMetrika: {
-    debug: process.env.NODE_ENV !== 'production',
+    debug: false,
     id: '61819282',
   },
 })
