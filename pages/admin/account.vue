@@ -56,8 +56,8 @@ async function changePassword(data: ChangePasswordSchema) {
 </script>
 
 <template>
-  <main class="container flex flex-col gap-4 px-8 py-4 sm:px-4 sm:py-2">
-    <h1 class="text-2xl font-bold">
+  <main class="container flex flex-col gap-4 px-8 py-8 sm:px-4 sm:py-4">
+    <h1 class="text-xl lg:text-lg md:text-base font-semibold">
       Аккаунт
     </h1>
     <div

@@ -52,7 +52,7 @@ function scrollToImage(index: number) {
     v-if="project"
     class="container flex flex-col"
   >
-    <section class="flex justify-between px-8 py-4 text-xl lg:text-lg md:my-3 sm:py-2 sm:px-4 sm:text-base">
+    <section class="flex justify-between px-8 py-4 text-xl lg:text-lg sm:py-2 sm:px-4 sm:text-base">
       <h1 class="font-semibold">
         {{ project.title }}
       </h1>
@@ -110,8 +110,7 @@ function scrollToImage(index: number) {
               :src="img.url"
               :alt="img.alt"
               format="avif,webp,png,jpg"
-              :class="img.fit"
-              class="aspect-video w-full"
+              :class="cn('aspect-video w-full', img.fit)"
             />
           </CarouselItem>
         </CarouselContent>
@@ -123,7 +122,7 @@ function scrollToImage(index: number) {
       :src="project.images[0].url"
       :alt="project.images[0].alt"
       format="avif,webp,png,jpg"
-      class="aspect-video w-full hidden md:block"
+      :class="cn('w-full hidden md:block', project.images[0].fit)"
     />
     <section class="grid grid-cols-[repeat(2,max-content)] gap-x-16 gap-y-2 px-8 py-8 sm:px-4">
       <span>Статус</span>
@@ -148,7 +147,7 @@ function scrollToImage(index: number) {
         :src="img.url"
         :alt="img.alt"
         format="avif,webp,png,jpg"
-        class="aspect-video w-full max-h-[70vh]"
+        :class="cn('w-full max-h-[70vh]', img.fit)"
       />
     </div>
   </main>
