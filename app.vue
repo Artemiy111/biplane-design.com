@@ -7,9 +7,9 @@ import { Toaster } from '~/components/ui/sonner'
 
 const user = useUser()
 const { data: fetchedUser } = await useFetch('/api/user', { key: 'user', onRequest() {
-  console.log('refresh')
 } })
 watch(fetchedUser, () => {
+  console.log('refresh', fetchedUser.value)
   user.value = fetchedUser.value
 }, { immediate: true })
 await useLazyFetch<GroupDto[]>('/api/groups', {
