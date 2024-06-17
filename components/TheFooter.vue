@@ -1,7 +1,11 @@
+<script setup lang="ts">
+import { SquareArrowOutUpRight } from 'lucide-vue-next'
+</script>
+
 <template>
   <footer class="container flex flex-col">
     <Separator />
-    <section class="flex grid-cols-[repeat(4,fit-content(100%))] flex-wrap gap-x-32 gap-y-8 px-8 py-8 lg:gap-x-16 md:gap-y-4 sm:px-4 sm:py-4">
+    <section class="flex grid-cols-[repeat(4,fit-content(100%))] flex-wrap gap-x-32 gap-y-8 px-8 py-8 lg:gap-x-16 md:gap-y-4 sm:px-4 ">
       <ul class="flex flex-col gap-1">
         <h6 class="text-lg font-semibold md:text-base sm:text-sm">
           Контакты
@@ -32,9 +36,9 @@
             href="https://coolors.co"
             external
             target="_blank"
-            class="underline hover:no-underline"
+            class="flex gap-2 "
           >
-            Цветовая палитра
+            Цветовая палитра <SquareArrowOutUpRight :stroke-width="1.5" />
           </NuxtLink>
         </li>
         <li>
@@ -42,9 +46,9 @@
             href="https://habr.com/ru/companies/ruvds/articles/553582"
             external
             target="_blank"
-            class="underline hover:no-underline"
+            class="flex gap-2"
           >
-            Теория цвета
+            Теория цвета <SquareArrowOutUpRight :stroke-width="1.5" />
           </NuxtLink>
         </li>
       </ul>
@@ -62,7 +66,7 @@
     <section>
       <Separator />
       <iframe
-        class="max-h-[80dvh]"
+        class="max-h-[65vh]"
         src="https://yandex.ru/map-widget/v1/?um=constructor%3A3da4595a6346865d8223d34a3ff56c219a4f3852edd8bb18b888329ab0ba28fa&amp;source=constructor"
         width="100%"
         height="600"
@@ -70,8 +74,8 @@
       />
       <Separator />
     </section>
-    <section class="flex px-8 py-4 sm:px-4">
-      <span>© Биплан-Дизайн 2000 - 2024</span>
-    </section>
+    <!-- <section class="flex px-8 py-4 sm:px-4">
+      <span>© Biplane-Design 2000 - 2024</span>
+    </section> -->
   </footer>
 </template>
