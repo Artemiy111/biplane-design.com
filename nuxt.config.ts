@@ -10,6 +10,9 @@ export default defineNuxtConfig({
       enabled: true,
     },
   },
+  future: {
+    compatibilityVersion: 4,
+  },
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxtjs/partytown',
@@ -17,8 +20,9 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/fonts',
     'shadcn-nuxt',
-    '@tresjs/nuxt',
     // 'nuxt-yandex-metrika',
+    '@tresjs/nuxt',
+    '@nuxtjs/seo',
   ],
   // style
   fonts: {
@@ -53,6 +57,15 @@ export default defineNuxtConfig({
     ipx: {
     },
     format: ['avif', 'webp', 'png', 'jpg'],
+  },
+  site: {
+    url: 'https://biplane-design.com',
+  },
+  sitemap: {
+    sources: ['/api/__sitemap__/urls']
+  },
+  robots: {
+    disallow: ['/admin/*'],
   },
   // yandexMetrika: {
   //   debug: false,
