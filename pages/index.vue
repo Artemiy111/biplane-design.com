@@ -5,9 +5,15 @@ import SplitType from 'split-type'
 import { buttonVariants } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
 
+useServerSeoMeta({
+  title: 'Biplane-Design | Главная',
+  ogTitle: 'Biplane-Design | Главная',
+  description: 'Студия дизайна',
+  ogDescription: 'Студия дизайна',
+})
 useSeoMeta({
-  title: 'Biplane-Design',
-  ogTitle: 'Biplane-Design',
+  title: 'Biplane-Design | Главная',
+  ogTitle: 'Biplane-Design | Главная',
   description: 'Студия дизайна',
   ogDescription: 'Студия дизайна',
 })

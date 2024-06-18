@@ -12,7 +12,12 @@ useServerSeoMeta({
   description: 'Представлены различные категории проектов',
   ogDescription: 'Представлены различные категории проектов',
 })
-
+useSeoMeta({
+  title: 'Проекты',
+  ogTitle: 'Проекты',
+  description: 'Представлены различные категории проектов',
+  ogDescription: 'Представлены различные категории проектов',
+})
 const querySchema = z.object({
   category: z.string().min(3),
 })

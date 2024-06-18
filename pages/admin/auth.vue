@@ -4,6 +4,12 @@ import * as z from 'zod'
 import { toast } from 'vue-sonner'
 import { Form } from '~/components/ui/form'
 
+useServerSeoMeta({
+  title: 'Вход/Регистрация',
+  ogTitle: 'Вход/Регистрация',
+  description: 'Вход для администратора',
+  ogDescription: 'Вход для администратора',
+})
 useSeoMeta({
   title: 'Вход/Регистрация',
   ogTitle: 'Вход/Регистрация',
