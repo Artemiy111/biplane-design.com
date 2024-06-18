@@ -8,7 +8,12 @@ import { Dialog } from '~/components/ui/dialog'
 definePageMeta({
   middleware: 'authenticated',
 })
-
+useServerSeoMeta({
+  title: 'Аккаунт администратора',
+  ogTitle: 'Аккаунт администратора',
+  description: 'Настройки аккаунта администратора',
+  ogDescription: 'Настройки аккаунта администратора',
+})
 useSeoMeta({
   title: 'Аккаунт администратора',
   ogTitle: 'Аккаунт администратора',

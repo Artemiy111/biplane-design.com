@@ -17,6 +17,12 @@ useServerSeoMeta({
   description: 'Менеджмент базы-данных',
   ogDescription: 'Менеджмент базы-данных',
 })
+useSeoMeta({
+  title: 'Админ-панель',
+  ogTitle: 'Админ-панель',
+  description: 'Менеджмент базы-данных',
+  ogDescription: 'Менеджмент базы-данных',
+})
 const { md } = useScreenSize()
 const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
 

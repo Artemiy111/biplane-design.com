@@ -1,4 +1,10 @@
 <script setup lan="ts">
+useServerSeoMeta({
+  title: 'О нас',
+  ogTitle: 'О нас',
+  description: 'История развития студии',
+  ogDescription: 'История развития студии',
+})
 useSeoMeta({
   title: 'О нас',
   ogTitle: 'О нас',
