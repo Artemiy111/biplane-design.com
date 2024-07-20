@@ -121,8 +121,10 @@ const dummyProjects = computed(() => {
       <h2
         v-for="group in groups"
         :key="group.id"
-        :class="cn('w-full cursor-pointer px-8 py-4 transition-colors hover:bg-secondary md:py-3 sm:px-4 sm:py-2',
-                   group.id === currentGroup?.id && 'bg-primary-foreground font-semibold')"
+        :class="cn(
+          'w-full cursor-pointer px-8 py-4 transition-colors hover:bg-secondary md:py-3 sm:px-4 sm:py-2',
+          group.id === currentGroup?.id && ' font-semibold',
+        )"
         tabindex="0"
         @keypress.enter.space="changeGroup(group)"
         @click="changeGroup(group)"
@@ -133,7 +135,7 @@ const dummyProjects = computed(() => {
     <Separator />
     <section
       v-if="currentGroup?.categories.length"
-      class="relative mx-8 my-4 sm:mx-2 sm:my-2 sm:gap-2 md:my-3"
+      class="relative mx-8 my-6 sm:mx-2 sm:my-2 md:my-3"
     >
       <div
         :class="[haveHiddenCategories ? 'opacity-100' : 'opacity-0']"
@@ -146,30 +148,26 @@ const dummyProjects = computed(() => {
           dragFree: true,
         }"
       >
-        <CarouselContent class="">
+        <CarouselContent class="w-full gap-8 m-0">
           <CarouselItem
             v-for="c in currentGroup.categories"
             :key="c.id"
-            class="w-fit shrink-0 basis-auto"
+            class="basis-auto p-0"
           >
-            <Button
-              :size="md ? 'sm' : 'default'"
-              :class="cn(c.id === currentCategory?.id && 'bg-primary-foreground font-semibold')"
+            <div
+              :class="cn('cursor-pointer', c.id === currentCategory?.id && 'font-semibold')"
               variant="ghost"
               @click="navigateTo({ path: route.path, query: { category: c.uri } })"
             >
               {{ c.title }}
-            </Button>
+            </div>
           </CarouselItem>
         </CarouselContent>
       </Carousel>
     </section>
-    <Separator
-      v-if="currentGroup?.categories.length"
-    />
     <section
       v-if="currentCategoryProjects?.length"
-      :class="cn('grid grid-cols-2 gap-x-[1px] bg-border gap-y-[1px] lg:grid-cols-1',
+      :class="cn('grid grid-cols-2 gap-x-8 lg:grid-cols-1',
                  currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 xs:grid-cols-1')"
     >
       <template
@@ -214,7 +212,7 @@ const dummyProjects = computed(() => {
             :class="cn('aspect-video w-full bg-white', p.images[0].fit)"
           />
           <div
-            class="flex items-center justify-between gap-8 px-8 py-4 sm:px-4 sm:py-2"
+            class="flex items-center justify-between gap-8 px-8 pt-4 pb-16 sm:px-4 sm:py-2"
           >
             <h4>{{ p.title }}</h4>
             <span class="text-slate-400">{{ p.yearStart }}</span>

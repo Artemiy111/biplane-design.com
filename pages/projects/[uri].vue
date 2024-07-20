@@ -57,9 +57,8 @@ function scrollToImage(index: number) {
         {{ project.title }}
       </h1>
     </section>
-    <Separator />
     <section
-      class="grid h-fit grid-cols-[300px,1fr] items-start divide-x-2 divide-primary-foreground overflow-hidden 2xl:grid-cols-[250px,1fr] xl:grid-cols-[200px,1fr] lg:grid-cols-[150px,1fr] md:grid-cols-1"
+      class="grid h-fit grid-cols-[300px,1fr] items-start gap-4 overflow-hidden 2xl:grid-cols-[250px,1fr] xl:grid-cols-[200px,1fr] lg:grid-cols-[150px,1fr] md:grid-cols-1"
     >
       <Carousel
         class="md:hidden"
@@ -72,7 +71,7 @@ function scrollToImage(index: number) {
         @init-api="apiTumb = $event"
       >
         <CarouselContent
-          class="mt-0 divide-y-2"
+          class="m-0 h-fit gap-[4px]"
           :style="{ maxHeight: `${mainCarouselHeight}px` }"
         >
           <CarouselItem
@@ -80,7 +79,7 @@ function scrollToImage(index: number) {
             :key="img.id"
             class="cursor-grab p-0"
 
-            :class="[index === current ? 'outline outline-[16px] xl:outline-8 xl:-outline-offset-8 outline-secondary -outline-offset-[16px]' : '']"
+            :class="[index === current ? 'outline outline-8 outline-black -outline-offset-8' : '']"
             @click="current = index"
           >
             <NuxtImg
@@ -116,7 +115,6 @@ function scrollToImage(index: number) {
         </CarouselContent>
       </Carousel>
     </section>
-    <Separator />
     <NuxtImg
       :key="project.images[0].id"
       :src="project.images[0].url"

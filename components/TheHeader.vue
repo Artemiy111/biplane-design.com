@@ -97,7 +97,7 @@ async function singOut() {
         </DropdownMenu>
       </ClientOnly>
       <NavigationMenu>
-        <NavigationMenuList class="gap-4 sm:gap-0 md:gap-2">
+        <NavigationMenuList class="gap-6">
           <NavigationMenuItem
             v-for="r in routes"
             :key="r.link"
@@ -106,8 +106,7 @@ async function singOut() {
               :to="r.link"
               class="cursor-pointer"
               :class="[
-                md ? navigationMenuTriggerStyle({ size: 'sm' }) : navigationMenuTriggerStyle(),
-                r.link === route.path ? 'bg-primary-foreground font-semibold' : '']"
+                r.link === route.path ? 'font-semibold' : '']"
             >
               {{ r.title }}
             </NuxtLink>
@@ -115,6 +114,6 @@ async function singOut() {
         </NavigationMenuList>
       </NavigationMenu>
     </div>
-    <Separator class="z-50" />
+    <Separator />
   </header>
 </template>

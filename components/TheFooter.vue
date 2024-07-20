@@ -1,17 +1,13 @@
-<script setup lang="ts">
-import { SquareArrowOutUpRight } from 'lucide-vue-next'
-</script>
-
 <template>
   <footer class="container flex flex-col">
     <Separator />
-    <section class="flex grid-cols-[repeat(4,fit-content(100%))] flex-wrap gap-x-32 gap-y-8 px-8 py-8 lg:gap-x-16 md:gap-y-4 sm:px-4 ">
+    <section class="flex flex-wrap gap-x-16 gap-y-8 px-8 py-16 lg:gap-x-16 md:gap-y-4 sm:px-4 ">
       <ul class="flex flex-col gap-1">
         <h6 class="text-lg font-semibold md:text-base sm:text-sm">
           Контакты
         </h6>
         <li>Biplane-design@mail.ru</li>
-        <li>(3473) 25-18-56</li>
+        <li>3473 25-18-56</li>
       </ul>
       <ul class="flex flex-col gap-1">
         <h6 class="text-lg font-semibold md:text-base sm:text-sm">
@@ -38,7 +34,7 @@ import { SquareArrowOutUpRight } from 'lucide-vue-next'
             target="_blank"
             class="flex gap-2 "
           >
-            Цветовая палитра <SquareArrowOutUpRight :stroke-width="1.5" />
+            Цветовая палитра →
           </NuxtLink>
         </li>
         <li>
@@ -48,7 +44,7 @@ import { SquareArrowOutUpRight } from 'lucide-vue-next'
             target="_blank"
             class="flex gap-2"
           >
-            Теория цвета <SquareArrowOutUpRight :stroke-width="1.5" />
+            Теория цвета →
           </NuxtLink>
         </li>
       </ul>
