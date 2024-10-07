@@ -25,6 +25,7 @@ declare module 'lucia' {
     DatabaseUserAttributes: DatabaseUserAttributes
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface DatabaseUserAttributes extends UserDb { }
 
 }
