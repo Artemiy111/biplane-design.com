@@ -20,4 +20,6 @@ export default withNuxt(
       ],
     },
   },
-).prepend()
+).prepend().override('nuxt/rules', {
+  rules: { 'vue/multi-word-component-names': 'off' },
+})
