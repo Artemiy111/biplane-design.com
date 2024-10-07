@@ -2,9 +2,11 @@
 import * as z from 'zod'
 import type { LocationQuery } from 'vue-router'
 import { LoaderCircle } from 'lucide-vue-next'
+import { useBreakpoints } from '@vueuse/core'
 import { Carousel } from '~/components/ui/carousel'
 import type { CategoryDto, GroupDto } from '~/server/use-cases/types'
 import { cn } from '~/lib/utils'
+import { screenBreakpoints } from '~/tailwind.config'
 
 useServerSeoMeta({
   title: 'Проекты',
@@ -18,13 +20,14 @@ useSeoMeta({
   description: 'Представлены различные категории проектов',
   ogDescription: 'Представлены различные категории проектов',
 })
+
 const querySchema = z.object({
   category: z.string().min(3),
 })
 
 const route = useRoute()
 const router = useRouter()
-const { md } = useScreenSize()
+
 const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
 const { data: groups, error: _error } = await useLazyFetch<GroupDto[] | null>('/api/groups', {
   key: 'groups',
@@ -35,9 +38,13 @@ const { data: groups, error: _error } = await useLazyFetch<GroupDto[] | null>('/
 const categories = computed(() => groups.value?.flatMap(g => g.categories) || [])
 
 const currentCategory = ref<CategoryDto | null>(getCurrentCategory(route.query))
-const currentGroup = computed(() => groups.value?.find(g => g.id === currentCategory.value?.groupId) || null)
+const currentGroup = computed(
+  () => groups.value?.find(g => g.id === currentCategory.value?.groupId) || null,
+)
 
-const currentCategoryProjects = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
+const currentCategoryProjects = computed(
+  () => currentCategory.value?.projects.filter(p => p.images.length) || null,
+)
 
 watch(groups, () => {
   if (groups.value && !currentCategory.value)
@@ -46,13 +53,11 @@ watch(groups, () => {
 
 function getCategoryFromFromRouteQuery(query: LocationQuery): CategoryDto | null {
   const validatedQuery = querySchema.safeParse(query)
-  if (!validatedQuery.success)
-    return null
+  if (!validatedQuery.success) return null
 
   const queryCategory = categories.value.find(c => c.uri === validatedQuery.data.category) || null
 
-  if (!queryCategory)
-    return null
+  if (!queryCategory) return null
 
   return queryCategory
 }
@@ -61,16 +66,16 @@ function getCurrentCategory(query: LocationQuery) {
   return getCategoryFromFromRouteQuery(query) || categories.value[0] || null
 }
 
-router.afterEach(guard => currentCategory.value = getCurrentCategory(guard.query))
+router.afterEach(guard => (currentCategory.value = getCurrentCategory(guard.query)))
 
 const categoriesCarouselRef = ref<InstanceType<typeof Carousel> | null>(null)
 const haveHiddenCategories = ref(false)
 
 function setHiddenCategories() {
-  if (!categoriesCarouselRef.value)
-    return false
+  if (!categoriesCarouselRef.value) return false
   const progress = categoriesCarouselRef.value.carouselApi!.scrollProgress()
-  haveHiddenCategories.value = progress < 0 || Object.is(-0, progress) || (progress > 0 && progress < 1)
+  haveHiddenCategories.value
+    = progress < 0 || Object.is(-0, progress) || (progress > 0 && progress < 1)
 }
 
 onMounted(() => {
@@ -85,19 +90,21 @@ function changeGroup(group: GroupDto) {
   }
 }
 
-const { size } = useScreenSize()
+const breakpoints = useBreakpoints(screenBreakpoints, { strategy: 'max-width' })
+const xs = breakpoints.smallerOrEqual('xs')
+const lg = breakpoints.smallerOrEqual('lg')
 
 const dummyProjects = computed(() => {
   if (!currentCategory.value) return 0
   const count = currentCategory.value.projects.length
   if (currentCategory.value.layout === 'mini') {
-    if (size.value === 'xs') return 0
-    if (size.value === 'sm' || size.value === 'md' || size.value === 'lg') return count % 2
-    else return count % 3
+    if (xs.value) return 0
+    if (lg.value) return count % 2
+    return count % 3
   }
   else {
-    if (size.value === 'default' || size.value === '2xl' || size.value === 'xl') return count % 2
-    else return 0
+    if (lg.value) return 0
+    else return count % 2
   }
 })
 </script>
@@ -121,10 +128,12 @@ const dummyProjects = computed(() => {
       <h2
         v-for="group in groups"
         :key="group.id"
-        :class="cn(
-          'w-full cursor-pointer px-8 py-4 transition-colors hover:bg-secondary md:py-3 sm:px-4 sm:py-2',
-          group.id === currentGroup?.id && ' font-semibold',
-        )"
+        :class="
+          cn(
+            'w-full cursor-pointer px-8 py-4 transition-colors hover:bg-secondary md:py-3 sm:px-4 sm:py-2',
+            group.id === currentGroup?.id && ' font-semibold',
+          )
+        "
         tabindex="0"
         @keypress.enter.space="changeGroup(group)"
         @click="changeGroup(group)"
@@ -167,11 +176,15 @@ const dummyProjects = computed(() => {
     </section>
     <section
       v-if="currentCategoryProjects?.length"
-      :class="cn('grid grid-cols-2 gap-x-8 lg:grid-cols-1',
-                 currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 xs:grid-cols-1')"
+      :class="
+        cn(
+          'grid grid-cols-2 gap-x-8 lg:grid-cols-1',
+          currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 xs:grid-cols-1',
+        )
+      "
     >
       <template
-        v-for="p in currentCategoryProjects "
+        v-for="p in currentCategoryProjects"
         :key="p.id"
       >
         <Carousel
@@ -201,7 +214,6 @@ const dummyProjects = computed(() => {
           :to="`/projects/${p.uri}`"
           class="flex flex-col transition-colors bg-white hover:bg-primary-foreground"
         >
-
           <NuxtImg
             loading="lazy"
             format="avif,webp,png,jpg"
@@ -211,9 +223,7 @@ const dummyProjects = computed(() => {
             :alt="p.images[0].alt"
             :class="cn('aspect-video w-full bg-white', p.images[0].fit)"
           />
-          <div
-            class="flex items-center justify-between gap-8 px-8 pt-4 pb-16 sm:px-4 sm:py-2"
-          >
+          <div class="flex items-center justify-between gap-8 px-8 pt-4 pb-16 sm:px-4 sm:py-2">
             <h4>{{ p.title }}</h4>
             <span class="text-slate-400">{{ p.yearStart }}</span>
           </div>
@@ -222,7 +232,7 @@ const dummyProjects = computed(() => {
       <div
         v-for="n in dummyProjects"
         :key="n"
-        class="bg-white"
+        class="bg-red-200"
       />
     </section>
     <section

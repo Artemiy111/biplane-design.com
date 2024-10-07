@@ -51,7 +51,7 @@ onMounted(() => {
       </h1>
       <span
         class="gsap-description font-medium pl-2 leading-[130%] md:text-xl sm:text-lg xs:text-base text-white text-3xl"
-      ><span>Первоклассные решения</span>&nbsp;<span class="whitespace-nowrap">в архитектуре и дизайне</span>
+      ><span>Первоклассные fff решения</span>&nbsp;<span class="whitespace-nowrap">в архитектуре и дизайне</span>
       </span>
       <NuxtLink
         to="/projects"

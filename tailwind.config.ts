@@ -1,5 +1,4 @@
 import animate from 'tailwindcss-animate'
-import typography from '@tailwindcss/typography'
 import type { Config } from 'tailwindcss'
 import pkg from 'tailwindcss/defaultTheme'
 
@@ -12,6 +11,15 @@ export const screens = {
   'md': { max: '767px' },
   'sm': { max: '639px' },
   'xs': { max: '479px' },
+} as const
+
+export const screenBreakpoints = {
+  '2xl': 1399,
+  'xl': 1279,
+  'lg': 1023,
+  'md': 767,
+  'sm': 639,
+  'xs': 479,
 } as const
 
 export type ScreenSize = keyof (typeof screens)
@@ -108,5 +116,5 @@ export default {
     },
   },
 
-  plugins: [animate, typography],
+  plugins: [animate],
 } satisfies Config

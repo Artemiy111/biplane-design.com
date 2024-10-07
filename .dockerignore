@@ -1,3 +1,6 @@
+.git
+Dockerfile
+
 # Nuxt dev/build outputs
 .output
 .data
@@ -17,11 +20,4 @@ logs
 .DS_Store
 .fleet
 .idea
-
-# Local env files
-.env
-.env.*
-!.env.example
-
-# My
-/server/db/data
+.vscode
