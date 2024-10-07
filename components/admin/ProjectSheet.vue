@@ -49,7 +49,7 @@ const formSchema = z.object({
         z.string().url().parse(url)
         return true
       }
-      catch (e) {
+      catch (_e) {
         return false
       }
     }, 'Не валидный Uri'),

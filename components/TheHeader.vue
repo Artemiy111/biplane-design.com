@@ -5,13 +5,10 @@ import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuList,
-  navigationMenuTriggerStyle,
 } from '~/components/ui/navigation-menu'
 
 const user = useUser()
 const route = useRoute()
-
-const { md } = useScreenSize()
 
 const routes = [{
   link: '/projects',
