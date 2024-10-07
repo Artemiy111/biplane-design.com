@@ -1,9 +1,11 @@
 // import antfu from '@antfu/eslint-config'
 import oxlint from 'eslint-plugin-oxlint'
+// import perfectionist from 'eslint-plugin-perfectionist'
+
 import { withNuxt } from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
-  oxlint.configs['flat/recommended'],
+  // perfectionist.configs['recommended-alphabetical'],
   {
     rules: {
       '@typescript-eslint/no-unused-vars': [
@@ -14,12 +16,13 @@ export default withNuxt(
           caughtErrors: 'all',
           caughtErrorsIgnorePattern: '^_',
           destructuredArrayIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
           ignoreRestSiblings: true,
+          varsIgnorePattern: '^_',
         },
       ],
+      'import/order': 'off',
+      'perfectionist/sort-vue-attributes': 'off',
+      'vue/multi-word-component-names': 'off',
     },
   },
-).prepend().override('nuxt/rules', {
-  rules: { 'vue/multi-word-component-names': 'off' },
-})
+).prepend(oxlint.configs['flat/recommended'])

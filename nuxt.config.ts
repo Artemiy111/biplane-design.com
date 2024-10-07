@@ -4,16 +4,6 @@ import '@total-typescript/ts-reset'
 // import eslintPlugin from 'vite-plugin-eslint'
 
 export default defineNuxtConfig({
-  ssr: true,
-  telemetry: { enabled: false },
-
-  devtools: {
-    enabled: false,
-    timeline: {
-      enabled: true,
-    },
-  },
-
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxtjs/partytown',
@@ -25,8 +15,18 @@ export default defineNuxtConfig({
     '@tresjs/nuxt',
     '@nuxtjs/seo',
   ],
+  devtools: {
+    enabled: true,
+    timeline: {
+      enabled: true,
+    },
+  },
 
-  // style
+  ssr: true,
+  runtimeConfig: {},
+
+  app: { head: { htmlAttrs: { lang: 'ru' } } },
+
   fonts: {
     families: [{
       name: 'Montserrat',
@@ -38,31 +38,30 @@ export default defineNuxtConfig({
     prefix: '',
   },
 
-  //
+  image: {
+    format: ['avif', 'webp', 'png', 'jpg'],
+    ipx: {
+    },
+  },
+
   eslint: {
     config: {
       stylistic: true,
     },
   },
 
-  app: { head: { htmlAttrs: { lang: 'ru' } } },
-
   imports: {
     dirs: [],
   },
 
+  // yandexMetrika: {
+  //   debug: false,
+  //   id: '61819282',
+  // },
+
   // components: {
   //   dirs: [],
   // },
-
-  runtimeConfig: {
-  },
-
-  image: {
-    ipx: {
-    },
-    format: ['avif', 'webp', 'png', 'jpg'],
-  },
 
   site: {
     url: 'https://biplane-design.com',
@@ -72,12 +71,11 @@ export default defineNuxtConfig({
     sources: ['/api/__sitemap__/urls'],
   },
 
-  // yandexMetrika: {
-  //   debug: false,
-  //   id: '61819282',
-  // },
   robots: {
     disallow: ['/admin/*'],
   },
+
+  telemetry: { enabled: false },
   compatibilityDate: '2024-07-20',
+
 })
