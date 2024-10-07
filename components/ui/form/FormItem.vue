@@ -1,14 +1,8 @@
-<script lang="ts">
-import type { HTMLAttributes, InjectionKey } from 'vue'
-</script>
-
 <script lang="ts" setup>
-import { provide } from 'vue'
+import { type HTMLAttributes, provide } from 'vue'
 import { useId } from 'radix-vue'
-import { cn } from '@/lib/utils'
-
-// eslint-disable-next-line vue/no-export-in-script-setup
-export const FORM_ITEM_INJECTION_KEY = Symbol() as InjectionKey<string>
+import { FORM_ITEM_INJECTION_KEY } from './injectionKeys'
+import { cn } from '~/lib/utils'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']

@@ -9,14 +9,15 @@ import {
   useForwardPropsEmits,
 } from 'radix-vue'
 import { SelectScrollDownButton, SelectScrollUpButton } from '.'
-import { cn } from '@/lib/utils'
+import { cn } from '~/lib/utils'
 
 defineOptions({
   inheritAttrs: false,
 })
 
 const props = withDefaults(
-  defineProps<SelectContentProps & { class?: HTMLAttributes['class'] }>(), {
+  defineProps<SelectContentProps & { class?: HTMLAttributes['class'] }>(),
+  {
     position: 'popper',
   },
 )
