@@ -88,7 +88,7 @@ async function uploadImages(images: File[]) {
       })
       toast.info(`Изображение загружено`)
     }
-    catch (e) {
+    catch (_e) {
       toast.error(`Не удалось загрузить изображение`)
     }
     refresh()

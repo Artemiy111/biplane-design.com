@@ -1,5 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import '@total-typescript/ts-reset'
+import oxlintPlugin from 'vite-plugin-oxlint'
+import eslintPlugin from 'vite-plugin-eslint'
 
 export default defineNuxtConfig({
   ssr: true,
