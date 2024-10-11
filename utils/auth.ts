@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 import { Lucia } from 'lucia'
 import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle'
 import { db } from '~/server/db'
@@ -25,6 +26,7 @@ declare module 'lucia' {
     DatabaseUserAttributes: DatabaseUserAttributes
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface DatabaseUserAttributes extends UserDb { }
 
 }

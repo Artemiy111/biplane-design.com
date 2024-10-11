@@ -21,7 +21,7 @@ export class ProjectS3Repo {
   //   }
   // }
 
-  getKey(id: ProjectId) {
+  getKey(id: ProjectId): string {
     return `${id}/`
   }
 
@@ -35,7 +35,7 @@ export class ProjectS3Repo {
   //   await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key }))
   // }
 
-  async deleteDir(id: ProjectId) {
+  async deleteDir(id: ProjectId): Promise<void> {
     const key = this.getKey(id)
     const listObjectsResponse = await this.s3.send(new ListObjectsV2Command({ Bucket: this.bucketName, Prefix: key }))
 

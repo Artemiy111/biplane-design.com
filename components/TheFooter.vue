@@ -29,20 +29,21 @@
         </h6>
         <li>
           <NuxtLink
-            href="https://coolors.co"
-            external
-            target="_blank"
             class="flex gap-2 "
+            :external="true"
+            href="https://coolors.co"
+            rel=""
+            target="_blank noopener noreferrer"
           >
             Цветовая палитра →
           </NuxtLink>
         </li>
         <li>
           <NuxtLink
-            href="https://habr.com/ru/companies/ruvds/articles/553582"
-            external
-            target="_blank"
             class="flex gap-2"
+            :external="true"
+            href="https://habr.com/ru/companies/ruvds/articles/553582"
+            target="_blank noopener noreferrer"
           >
             Теория цвета →
           </NuxtLink>
@@ -63,10 +64,11 @@
       <Separator />
       <iframe
         class="max-h-[65vh]"
-        src="https://yandex.ru/map-widget/v1/?um=constructor%3A3da4595a6346865d8223d34a3ff56c219a4f3852edd8bb18b888329ab0ba28fa&amp;source=constructor"
-        width="100%"
-        height="600"
         frameborder="0"
+        height="600"
+        src="https://yandex.ru/map-widget/v1/?um=constructor%3A3da4595a6346865d8223d34a3ff56c219a4f3852edd8bb18b888329ab0ba28fa&amp;source=constructor"
+        title="Карта"
+        width="100%"
       />
       <Separator />
     </section>

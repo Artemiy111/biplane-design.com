@@ -10,7 +10,7 @@ const { name, formMessageId } = useFormField()
   <ErrorMessage
     :id="formMessageId"
     as="p"
-    :name="toValue(name)"
     class="text-sm font-medium text-destructive"
+    :name="toValue(name)"
   />
 </template>
