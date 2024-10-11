@@ -75,7 +75,7 @@ async function changePassword(data: ChangePasswordSchema) {
         :open="isDialogOpen"
         @update:open="isDialogOpen = $event"
       >
-        <DialogTrigger as-child>
+        <DialogTrigger :as-child="true">
           <Button variant="outline">
             Сменить пароль
           </Button>
@@ -88,9 +88,9 @@ async function changePassword(data: ChangePasswordSchema) {
           </DialogHeader>
           <Form
             ref="formRef"
-            :validation-schema="formValidationSchema"
-            :initial-values="initialValues"
             class="flex flex-col gap-4"
+            :initial-values="initialValues"
+            :validation-schema="formValidationSchema"
             @submit="changePassword($event as ChangePasswordSchema)"
           >
             <FormField

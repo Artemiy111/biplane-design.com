@@ -41,7 +41,7 @@ watch(api, (api) => {
 }, { once: true })
 watch(current, () => scrollToImage(current.value))
 
-function scrollToImage(index: number) {
+function scrollToImage(index: number): void {
   apiTumb.value?.scrollTo(index)
   api.value?.scrollTo(index)
 }
@@ -62,12 +62,12 @@ function scrollToImage(index: number) {
     >
       <Carousel
         class="md:hidden"
-        orientation="vertical"
         :opts="{
           loop: false,
           align: 'start',
           dragFree: true,
         }"
+        orientation="vertical"
         @init-api="apiTumb = $event"
       >
         <CarouselContent
@@ -83,10 +83,10 @@ function scrollToImage(index: number) {
             @click="current = index"
           >
             <NuxtImg
-              :src="img.url"
               :alt="img.alt"
-              format="avif,webp,png,jpg"
               :class="cn('aspect-video w-full', img.fit)"
+              format="avif,webp,png,jpg"
+              :src="img.url"
             />
           </CarouselItem>
         </CarouselContent>
@@ -106,10 +106,10 @@ function scrollToImage(index: number) {
             class="flex items-center justify-center"
           >
             <NuxtImg
-              :src="img.url"
               :alt="img.alt"
-              format="avif,webp,png,jpg"
               :class="cn('aspect-video w-full', img.fit)"
+              format="avif,webp,png,jpg"
+              :src="img.url"
             />
           </CarouselItem>
         </CarouselContent>
@@ -117,10 +117,10 @@ function scrollToImage(index: number) {
     </section>
     <NuxtImg
       :key="project.images[0].id"
-      :src="project.images[0].url"
       :alt="project.images[0].alt"
-      format="avif,webp,png,jpg"
       :class="cn('w-full hidden md:block', project.images[0].fit)"
+      format="avif,webp,png,jpg"
+      :src="project.images[0].url"
     />
     <section class="grid grid-cols-[repeat(2,max-content)] gap-x-16 gap-y-2 px-8 py-8 sm:px-4">
       <span>Статус</span>
@@ -142,10 +142,10 @@ function scrollToImage(index: number) {
       <NuxtImg
         v-for="img in project.images.slice(1, -1)"
         :key="img.id"
-        :src="img.url"
         :alt="img.alt"
-        format="avif,webp,png,jpg"
         :class="cn('w-full max-h-[70vh]', img.fit)"
+        format="avif,webp,png,jpg"
+        :src="img.url"
       />
     </div>
   </main>
