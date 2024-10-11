@@ -101,7 +101,7 @@ async function open(data:
       groupId: GroupId
       categoryId: CategoryId }
   }
-    |
+  |
   { mode: 'update', initial: FormSchema }) {
   isOpen.value = true
 
@@ -149,8 +149,8 @@ defineExpose({
     @update:open="isOpen = $event"
   >
     <SheetContent
-      side="left"
       class="w-full max-w-3xl overflow-auto"
+      side="left"
       @pointer-down-outside="$event.preventDefault(), handleClose()"
     >
       <SheetHeader>
@@ -162,9 +162,9 @@ defineExpose({
       <Form
         ref="formRef"
         v-slot="{ setFieldValue }"
+        class="grid gap-4"
         :initial-values="initialValues"
         :validation-schema="validationSchema"
-        class="grid gap-4"
         @submit="submit($event as FormSchema)"
       >
         <FormField
@@ -177,8 +177,8 @@ defineExpose({
               <Input
                 :model-value="field.value"
                 placeholder="Мой новый дом"
-                @change="handleChange"
                 @blur="handleBlur"
+                @change="handleChange"
               />
             </FormControl>
             <FormMessage />
@@ -259,8 +259,8 @@ defineExpose({
               <Input
                 :model-value="componentField.modelValue"
                 placeholder="my-new-house"
-                @change="handleChange(toUri($event.target.value))"
                 @blur="handleBlur"
+                @change="handleChange(toUri($event.target.value))"
               />
             </FormControl>
             <FormMessage />
@@ -314,10 +314,10 @@ defineExpose({
             <FormControl>
               <Input
                 :model-value="componentField.modelValue"
-                type="number"
                 placeholder=""
-                @change="handleChange"
+                type="number"
                 @blur="handleBlur"
+                @change="handleChange"
               />
             </FormControl>
             <FormMessage />
@@ -332,10 +332,10 @@ defineExpose({
             <FormControl>
               <Input
                 :model-value="componentField.modelValue"
-                type="number"
                 placeholder=""
-                @change="handleChange"
+                type="number"
                 @blur="handleBlur"
+                @change="handleChange"
               />
             </FormControl>
             <FormMessage />
@@ -351,8 +351,8 @@ defineExpose({
               <Input
                 :model-value="componentField.modelValue"
                 placeholder="Уфа"
-                @change="handleChange($event.target.value.trim() || null)"
                 @blur="handleBlur"
+                @change="handleChange($event.target.value.trim() || null)"
               />
             </FormControl>
             <FormMessage />

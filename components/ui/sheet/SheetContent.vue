@@ -13,10 +13,10 @@ import { X } from 'lucide-vue-next'
 import { type SheetVariants, sheetVariants } from '.'
 import { cn } from '~/lib/utils'
 
-interface SheetContentProps extends DialogContentProps {
+type SheetContentProps = {
   class?: HTMLAttributes['class']
   side?: SheetVariants['side']
-}
+} & DialogContentProps
 
 defineOptions({
   inheritAttrs: false,

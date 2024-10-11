@@ -1,14 +1,14 @@
 import type { CategoryDbUpdate, CategoryId, CategoryLayout, GroupDbUpdate, GroupId, ImageDbUpdate, ImageFit, ProjectDbCreate, ProjectDbUpdate, ProjectId, ProjectStatus } from '../db/schema'
 
 //
-export interface IUseCase {
+export type IUseCase = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   execute: (...params: any[]) => void
 }
 
 //
 
-export interface GroupDto {
+export type GroupDto = {
   id: GroupId
   title: string
   uri: string
@@ -22,7 +22,7 @@ export type UpdateGroupDto = GroupDbUpdate
 export type ChangeGroupOrder = (id: GroupId, order: number) => Promise<void>
 //
 
-export interface CategoryDto {
+export type CategoryDto = {
   groupId: GroupId
   id: CategoryId
   title: string
@@ -37,7 +37,7 @@ export type UpdateCategoryDto = CategoryDbUpdate
 
 //
 
-export interface ProjectDto {
+export type ProjectDto = {
   categoryId: CategoryId
   id: ProjectId
   title: string
@@ -56,7 +56,7 @@ export type UpdateProjectDto = ProjectDbUpdate
 
 //
 
-export interface ImageDto {
+export type ImageDto = {
   projectId: ProjectId
   id: string
   url: string
@@ -65,7 +65,7 @@ export interface ImageDto {
   order: number
 }
 
-export interface ImageFile {
+export type ImageFile = {
   filename: string
   projectUri: string
   file: File
@@ -79,21 +79,21 @@ export type UpdateImageDto = ImageDbUpdate
 //
 
 export type UserId = number
-export interface UserDto {
+export type UserDto = {
   id: UserId
   username: string
 }
 
-export interface LoginUserDto {
+export type LoginUserDto = {
   email: string
   password: string
 }
 
-export interface CreateUserDto {
+export type CreateUserDto = {
   username: string
   password: string
 }
 
-export interface UpdateUserDto {
+export type UpdateUserDto = {
   password: string
 }

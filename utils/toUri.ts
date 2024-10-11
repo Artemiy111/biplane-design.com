@@ -40,7 +40,7 @@ function isCyrillicLetter(letter: string): letter is CyrillicLetter {
   return letter in cyrillicToLatinMap
 }
 
-export function toTransliterated(str: string) {
+export function toTransliterated(str: string): string {
   return str
     .trim()
     .toLowerCase()
@@ -49,6 +49,6 @@ export function toTransliterated(str: string) {
     .join('')
 }
 
-export function toUri(str: string) {
+export function toUri(str: string): string {
   return encodeURI(toTransliterated(str))
 }

@@ -1,14 +1,14 @@
 import { and, count, eq, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import type { Db } from '../db'
 import { projectDbMapper } from '../mappers/projectDb.mapper'
-import type { CategoryId, ProjectId, ProjectDbUpdate } from '~/server/db/schema'
+import type { CategoryId, ProjectId, ProjectDbUpdate, ProjectDb } from '~/server/db/schema'
 import { projects } from '~/server/db/schema'
 import type { CreateProjectDto } from '~/server/use-cases/types'
 
 export class ProjectDbRepo {
   constructor(private db: Db) { }
 
-  async getOne(id: ProjectId) {
+  async getOne(id: ProjectId): Promise<ProjectDb> {
     const model = await this.db.query.projects.findFirst({
       where: eq(projects.id, id), with: {
         images: {

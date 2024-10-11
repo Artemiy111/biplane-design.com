@@ -40,10 +40,11 @@ function onKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
+  <!-- eslint-disable vuejs-accessibility/no-static-element-interactions -->
   <div
+    aria-roledescription="carousel"
     :class="cn('relative', props.class)"
     role="region"
-    aria-roledescription="carousel"
     tabindex="0"
     @keydown="onKeyDown"
   >

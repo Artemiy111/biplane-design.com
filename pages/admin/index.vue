@@ -160,9 +160,9 @@ function openProjectSheet(project: ProjectDto) {
       class="container flex flex-grow flex-col items-center justify-center"
     >
       <LoaderCircle
+        class="animate-spin"
         :size="60"
         :stroke-width="1.5"
-        class="animate-spin"
       />
     </main>
     <main
@@ -184,7 +184,10 @@ function openProjectSheet(project: ProjectDto) {
               :key="category.id"
               :class="cn('cursor-pointer ml-2 lg:m-0 px-2 py-1 hover:bg-primary-foreground',
                          category.id === selectedCategory?.id && 'font-semibold bg-primary-foreground')"
+              role="button"
+              tabindex="0"
               @click="selectedCategory = category"
+              @keypress.enter.space="selectedCategory = category"
             >
               <span>{{ category.title }}</span>
             </li>
@@ -204,8 +207,8 @@ function openProjectSheet(project: ProjectDto) {
         />
 
         <Button
-          :size="md ? 'sm' : 'default'"
           class="w-fit"
+          :size="md ? 'sm' : 'default'"
           @click="projectSheetRef?.open({
             mode: 'create',
             initial: selectedCategory
@@ -243,9 +246,9 @@ function openProjectSheet(project: ProjectDto) {
             <TableRow
               v-for="project in selectedCategoryProjects"
               :key="project.id"
-              :data-project-id="project.id"
-              :data-order="project.order"
               class="items-center w-max grid grid-cols-subgrid col-span-9"
+              :data-order="project.order"
+              :data-project-id="project.id"
             >
               <TableCell
                 class="flex gap-2 cursor-grab"
@@ -259,6 +262,7 @@ function openProjectSheet(project: ProjectDto) {
                 @click.stop
               >
                 <button
+                  type="button"
                   @click="openProjectSheet(project)"
                 >
                   <Pen />
@@ -267,6 +271,7 @@ function openProjectSheet(project: ProjectDto) {
                   <PopoverTrigger>
                     <button
                       class="text-red-500"
+                      type="button"
                     >
                       <Trash2 />
                     </button>
@@ -285,10 +290,10 @@ function openProjectSheet(project: ProjectDto) {
                 <NuxtLink :to="`/admin/projects/${project.uri}`">
                   <NuxtImg
                     v-if="project.images.length"
-                    format="avif,webp,png,jpg"
-                    :src="project.images[0].url"
                     :alt="project.images[0].alt"
                     :class="cn('aspect-video w-full', project.images[0].fit)"
+                    format="avif,webp,png,jpg"
+                    :src="project.images[0].url"
                   />
                 </NuxtLink>
               </TableCell>

@@ -11,12 +11,12 @@ const route = useRoute()
 const uri = route.params.uri as string
 const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
 const { data: project, refresh: refreshProject }
-= await useLazyFetch<ProjectDto | null>(`/api/projects/?uri=${uri}`, {
-  default() {
-    const cached = cachedGroups.value?.flatMap(g => g.categories.flatMap(c => c.projects)).find(p => p.uri === uri) || null
-    return cached
-  },
-})
+  = await useLazyFetch<ProjectDto | null>(`/api/projects/?uri=${uri}`, {
+    default() {
+      const cached = cachedGroups.value?.flatMap(g => g.categories.flatMap(c => c.projects)).find(p => p.uri === uri) || null
+      return cached
+    },
+  })
 
 definePageMeta({
   middleware: 'authenticated',
@@ -126,8 +126,8 @@ async function uploadImages(images: File[]) {
       <Dropzone
         class="h-full min-h-[25vh] "
         :clear-on-upload="true"
-        :show-icon="true"
         :multiple="true"
+        :show-icon="true"
         @upload="uploadImages"
       />
     </div>
@@ -167,16 +167,16 @@ async function uploadImages(images: File[]) {
               </TableCell>
               <TableCell>
                 <NuxtImg
-                  format="avif,webp,png,jpg"
-                  :class="cn('aspect-video w-[300px] object-contain border-primary border bg-white', image.fit)"
-                  :src="image.url"
                   :alt="image.alt"
+                  :class="cn('aspect-video w-[300px] object-contain border-primary border bg-white', image.fit)"
+                  format="avif,webp,png,jpg"
+                  :src="image.url"
                 />
               </TableCell>
               <TableCell>
                 <Select
-                  :model-value="image.fit"
                   class="w-fit"
+                  :model-value="image.fit"
                   @update:model-value="updateImage(image.id, { ...image, fit: $event as ImageFit })"
                 >
                   <SelectTrigger
@@ -185,16 +185,16 @@ async function uploadImages(images: File[]) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem :value="'object-none'">
+                    <SelectItem value="object-none">
                       обычный
                     </SelectItem>
-                    <SelectItem :value="'object-cover'">
+                    <SelectItem value="object-cover">
                       увеличить
                     </SelectItem>
-                    <SelectItem :value="'object-fill'">
+                    <SelectItem value="object-fill">
                       растянуть
                     </SelectItem>
-                    <SelectItem :value="'object-contain'">
+                    <SelectItem value="object-contain">
                       внутри
                     </SelectItem>
                   </SelectContent>
@@ -208,6 +208,7 @@ async function uploadImages(images: File[]) {
               </TableCell>
               <TableCell class="text-center">
                 <button
+                  type="button"
                   @click="deleteImage(image.id)"
                 >
                   <Trash2 class="text-red-500" />

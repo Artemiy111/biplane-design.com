@@ -115,9 +115,9 @@ const dummyProjects = computed(() => {
     class="container flex h-full flex-grow flex-col items-center justify-center"
   >
     <LoaderCircle
+      class="animate-spin"
       :size="60"
       :stroke-width="1.5"
-      class="animate-spin"
     />
   </main>
   <main
@@ -134,9 +134,10 @@ const dummyProjects = computed(() => {
             group.id === currentGroup?.id && ' font-semibold',
           )
         "
+        role="button"
         tabindex="0"
-        @keypress.enter.space="changeGroup(group)"
         @click="changeGroup(group)"
+        @keypress.enter.space="changeGroup(group)"
       >
         {{ group.title }}
       </h2>
@@ -147,8 +148,8 @@ const dummyProjects = computed(() => {
       class="relative mx-8 my-6 sm:mx-2 sm:my-2 md:my-3"
     >
       <div
-        :class="[haveHiddenCategories ? 'opacity-100' : 'opacity-0']"
         class="pointer-events-none absolute right-0 top-0 z-50 h-full w-24 border-primary-foreground bg-gradient-to-r from-transparent to-white transition"
+        :class="[haveHiddenCategories ? 'opacity-100' : 'opacity-0']"
       />
       <Carousel
         ref="categoriesCarouselRef"
@@ -165,8 +166,11 @@ const dummyProjects = computed(() => {
           >
             <div
               :class="cn('cursor-pointer', c.id === currentCategory?.id && 'font-semibold')"
+              role="link"
+              tabindex="0"
               variant="ghost"
               @click="navigateTo({ path: route.path, query: { category: c.uri } })"
+              @keypress.enter.space="navigateTo({ path: route.path, query: { category: c.uri } })"
             >
               {{ c.title }}
             </div>
@@ -189,8 +193,8 @@ const dummyProjects = computed(() => {
       >
         <Carousel
           v-if="p.isMinimal"
-          :opts="{ active: false }"
           class="w-full"
+          :opts="{ active: false }"
         >
           <CarouselContent>
             <CarouselItem
@@ -198,30 +202,30 @@ const dummyProjects = computed(() => {
               :key="img.id"
             >
               <img
-                loading="lazy"
-                format="avif,webp,png,jpg"
-                :width="500"
-                :height="500"
-                :src="img.url"
                 :alt="img.alt"
                 :class="cn('aspect-video w-full bg-white', img.fit)"
+                format="avif,webp,png,jpg"
+                :height="500"
+                loading="lazy"
+                :src="img.url"
+                :width="500"
               >
             </CarouselItem>
           </CarouselContent>
         </Carousel>
         <NuxtLink
           v-else
-          :to="`/projects/${p.uri}`"
           class="flex flex-col transition-colors bg-white hover:bg-primary-foreground"
+          :to="`/projects/${p.uri}`"
         >
           <NuxtImg
-            loading="lazy"
-            format="avif,webp,png,jpg"
-            :width="500"
-            :height="500"
-            :src="p.images[0].url"
             :alt="p.images[0].alt"
             :class="cn('aspect-video w-full bg-white', p.images[0].fit)"
+            format="avif,webp,png,jpg"
+            :height="500"
+            loading="lazy"
+            :src="p.images[0].url"
+            :width="500"
           />
           <div class="flex items-center justify-between gap-8 px-8 pt-4 pb-16 sm:px-4 sm:py-2">
             <h4>{{ p.title }}</h4>

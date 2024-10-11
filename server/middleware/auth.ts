@@ -34,6 +34,7 @@ export default defineEventHandler(async (event) => {
 })
 
 declare module 'h3' {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface H3EventContext {
     user: User | null
     session: Session | null

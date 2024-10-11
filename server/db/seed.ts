@@ -23,13 +23,13 @@ const createdGroups = await Promise.all(groupsToCreate.map(async (g, idx) => {
 logger.log(createdGroups)
 
 const createdCategories = createdGroups.map(async (g, idx) => {
-  if (g.ok) {
+  if (g) {
     const dtos: CreateCategoryDto[] = categoriesBiplane[idx].map(c => ({
       title: c,
       uri: toUri(c),
-      groupId: g.value.id,
+      groupId: g.id,
     }))
-    return Promise.all(dtos.map(async (dto, idx) => {
+    return Promise.all(dtos.map(async (dto, _idx) => {
       return await categoryRepo.create(dto)
     }))
   }

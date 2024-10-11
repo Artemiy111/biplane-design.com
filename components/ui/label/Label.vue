@@ -13,6 +13,7 @@ const delegatedProps = computed(() => {
 </script>
 
 <template>
+  <!-- eslint-disable vuejs-accessibility/label-has-for -->
   <Label
     v-bind="delegatedProps"
     :class="

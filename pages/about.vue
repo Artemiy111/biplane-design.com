@@ -1,4 +1,4 @@
-<script setup lan="ts">
+<script setup lang="ts">
 useServerSeoMeta({
   title: 'О нас',
   ogTitle: 'О нас',

@@ -38,12 +38,13 @@ async function singOut() {
   >
     <div class="z-50 flex items-center justify-between px-8 py-4 sm:px-4 sm:py-2">
       <NuxtLink
-        to="/"
         class="flex items-center gap-4"
+        to="/"
       >
         <img
-          src="/logo.svg"
+          alt="Логотип"
           class="h-10 dark:invert-[70%] md:h-8"
+          src="/logo.svg"
         >
         <span class="sm:hidden">Biplane-Design</span>
       </NuxtLink>
@@ -59,32 +60,33 @@ async function singOut() {
           <DropdownMenuContent>
             <DropdownMenuItem>
               <NuxtLink
-                to="/admin"
                 class="w-full"
+                to="/admin"
               >
                 Админ панель
               </NuxtLink>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <NuxtLink
-                to="/admin/account"
                 class="w-full"
+                to="/admin/account"
               >
                 Аккаунт
               </NuxtLink>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <NuxtLink
-                to="/admin/auth"
                 class="w-full"
+                to="/admin/auth"
               >
                 Вход/Регистрация
               </NuxtLink>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <button
-                variant="link"
                 class="w-full text-start text-red-500"
+                type="button"
+                variant="link"
                 @click="singOut"
               >
                 Выйти
@@ -100,10 +102,10 @@ async function singOut() {
             :key="r.link"
           >
             <NuxtLink
-              :to="r.link"
               class="cursor-pointer"
               :class="[
                 r.link === route.path ? 'font-semibold' : '']"
+              :to="r.link"
             >
               {{ r.title }}
             </NuxtLink>

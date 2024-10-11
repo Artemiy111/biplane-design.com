@@ -68,8 +68,8 @@ async function login(data: LoginForm) {
 <template>
   <main class="container flex flex-col items-center justify-center px-8 py-4 sm:px-4">
     <Tabs
-      default-value="register"
       class="w-full max-w-[600px]"
+      default-value="register"
     >
       <TabsList class="grid w-full grid-cols-2">
         <TabsTrigger value="register">

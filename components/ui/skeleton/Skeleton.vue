@@ -2,7 +2,7 @@
 import type { HTMLAttributes } from 'vue'
 import { cn } from '~/lib/utils'
 
-interface SkeletonProps {
+type SkeletonProps = {
   class?: HTMLAttributes['class']
 }
 

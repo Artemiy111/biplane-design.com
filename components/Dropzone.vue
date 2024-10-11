@@ -17,6 +17,8 @@ const emit = defineEmits<{
   upload: [files: File[]]
 }>()
 
+const id = useId()
+
 const inputRef = ref<InstanceType<typeof Input> | null>(null)
 const files = ref<File[]>([])
 const isDragging = ref(false)
@@ -67,11 +69,13 @@ defineExpose({
 </script>
 
 <template>
-  <Label
+  <label
     :class="cn('flex items-center justify-center rounded-md bg-secondary px-4 py-3 font-normal',
                props.class, isDragging && 'animate-pulse')"
-    @dragover.prevent="onDragover"
+    :for="id"
+    role="none"
     @dragleave="onDragleave"
+    @dragover.prevent="onDragover"
     @drop.prevent="onDrop"
   >
     <template v-if="!files.length">
@@ -84,12 +88,13 @@ defineExpose({
         <span>Загрузить изображения</span>
 
         <Input
+          :id="id"
           ref="inputRef"
-          type="file"
-          :multiple="props.multiple"
           accept=".avif,.webp,.png,.jpg,.jpeg"
           class="absolute h-[1px] w-[1px] overflow-hidden opacity-0"
+          :multiple="props.multiple"
+          type="file"
           @change="onChange"
         />
-      </div></template></Label>
+      </div></template></label>
 </template>

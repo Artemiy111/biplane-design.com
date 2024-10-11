@@ -37,9 +37,9 @@ onMounted(() => {
   <main class="container relative justify-center flex flex-col flex-grow h-full">
     <ClientOnly>
       <NuxtImg
+        class="w-full object-cover"
         src="/main.jpg"
         :style="{ height: `${mainScreenHeight}px` }"
-        class="w-full object-cover"
       />
     </ClientOnly>
     <section class="absolute mx-4 flex gap-4 flex-col flex-grow pb-[200px]">
@@ -54,8 +54,8 @@ onMounted(() => {
       ><span>Первоклассные fff решения</span>&nbsp;<span class="whitespace-nowrap">в архитектуре и дизайне</span>
       </span>
       <NuxtLink
-        to="/projects"
         :class="cn(buttonVariants({ variant: 'outline' }), 'w-fit ml-2 text-white hover:text-white bg-transparent hover:bg-black/30')"
+        to="/projects"
       >
         Смотреть проекты</NuxtLink>
     </section>
