@@ -1,9 +1,9 @@
 import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import type { Db } from '../db'
 import { categoryDbMapper } from '../mappers/categoryDb.mapper'
-import type { CategoryDbCreate, CategoryId, GroupId } from '~/server/db/schema'
-import { categories } from '~/server/db/schema'
-import type { UpdateCategoryDto } from '~/server/use-cases/types'
+import type { CategoryDbCreate, CategoryId, GroupId } from '~~/server/db/schema'
+import { categories } from '~~/server/db/schema'
+import type { UpdateCategoryDto } from '~~/server/use-cases/types'
 
 export class CategoryDbRepo {
   constructor(private db: Db) { }

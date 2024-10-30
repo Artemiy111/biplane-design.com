@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { authRepo, userRepo } from '~/server/di'
+import { authRepo, userRepo } from '~~/server/di'
 
 const changePasswordSchema = z.object({
   newPassword: z.string().min(6),
