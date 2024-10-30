@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { authRepo, projectRepo } from '~/server/di'
+import { authRepo, projectRepo } from '~~/server/di'
 
 const changeOrderSchema = z.object({
   order: z.number().min(0),

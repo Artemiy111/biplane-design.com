@@ -14,12 +14,22 @@ export default defineNuxtConfig({
     // 'nuxt-yandex-metrika',
     '@tresjs/nuxt',
     '@nuxtjs/seo',
+    '@pinia/nuxt',
   ],
+
   devtools: {
     enabled: true,
     timeline: {
       enabled: true,
     },
+  },
+
+  future: {
+    compatibilityVersion: 4,
+  },
+
+  tailwindcss: {
+    cssPath: '~~/src/shared/assets/css/tailwind.css',
   },
 
   ssr: true,

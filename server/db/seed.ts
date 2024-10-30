@@ -2,7 +2,7 @@ import { logger } from '../shared/logger'
 import type { CreateCategoryDto, CreateGroupDto } from '../use-cases/types'
 import { categoryRepo, groupRepo } from '../di'
 
-import { toUri } from '../../utils/toUri'
+import { toUri } from '../../src/shared/lib/utils/to-uri'
 
 const groupsBiplane = ['Архитектура', 'Графика']
 const categoriesBiplane = [

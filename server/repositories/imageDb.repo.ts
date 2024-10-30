@@ -1,8 +1,8 @@
 import { and, count, eq, gt, gte, lt, lte, sql } from 'drizzle-orm'
 import { imageDbMapper } from '../mappers/imageDb.mapper'
-import type { Db } from '~/server/db'
-import type { ImageDbCreate, ImageDbUpdate, ImageId, ProjectId } from '~/server/db/schema'
-import { images } from '~/server/db/schema'
+import type { Db } from '~~/server/db'
+import type { ImageDbCreate, ImageDbUpdate, ImageId, ProjectId } from '~~/server/db/schema'
+import { images } from '~~/server/db/schema'
 
 export class ImageDbRepo {
   constructor(private db: Db) { }

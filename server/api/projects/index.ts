@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { authRepo, projectRepo } from '~/server/di'
+import { authRepo, projectRepo } from '~~/server/di'
 
 export default defineEventHandler(async (event) => {
   switch (event.method) {
