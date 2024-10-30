@@ -1,5 +1,5 @@
-import { authRepo } from '~/server/di'
-import { lucia } from '~/utils/auth'
+import { authRepo } from '~~/server/di'
+import { lucia } from '~~/src/shared/lib/utils/auth'
 
 export default eventHandler(async (event) => {
   const { session } = authRepo.assertAuthenticated(event)

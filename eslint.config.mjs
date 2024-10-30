@@ -23,11 +23,11 @@ export default withNuxt(
       //   fixMixedExportsWithInlineTypeSpecifier: false,
       // }],
       // '@typescript-eslint/consistent-type-imports': 'error',
-      '@typescript-eslint/explicit-function-return-type': ['error', {
-        allowConciseArrowFunctionExpressionsStartingWithVoid: true,
-        allowTypedFunctionExpressions: true,
-        allowExpressions: true,
-      }],
+      // '@typescript-eslint/explicit-function-return-type': ['error', {
+      //   allowConciseArrowFunctionExpressionsStartingWithVoid: true,
+      //   allowTypedFunctionExpressions: true,
+      //   allowExpressions: true,
+      // }],
       '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'no-public' }],
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -47,6 +47,7 @@ export default withNuxt(
       'vue/attributes-order': ['error', {
         alphabetical: true,
       }],
+      'vue/no-v-html': 'off',
       'vue/block-lang': ['error', { script: { lang: 'ts' } }],
       'vue/block-order': ['error', { order: ['script', 'template', 'style'] }],
       'vue/component-api-style': ['error', ['script-setup']],
@@ -83,4 +84,3 @@ export default withNuxt(
     },
   },
 ).append(oxlint.configs['flat/recommended'])
-// 5 Набойщиков

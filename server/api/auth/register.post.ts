@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { Argon2id } from 'oslo/password'
-import { userRepo } from '~/server/di'
-import { lucia } from '~/utils/auth'
+import { userRepo } from '~~/server/di'
+import { lucia } from '~~/src/shared/lib/utils/auth'
 
 const registerSchema = z.object({
   username: z.string().min(3),

@@ -3,10 +3,10 @@ import { groupDbMapper } from '../mappers/groupDb.mapper'
 import type {
   CreateGroupDto,
   UpdateGroupDto,
-} from '~/server/use-cases/types'
-import type { Db } from '~/server/db'
-import type { GroupId } from '~/server/db/schema'
-import { groups } from '~/server/db/schema'
+} from '~~/server/use-cases/types'
+import type { Db } from '~~/server/db'
+import type { GroupId } from '~~/server/db/schema'
+import { groups } from '~~/server/db/schema'
 
 export class GroupDbRepo {
   constructor(private db: Db) { }

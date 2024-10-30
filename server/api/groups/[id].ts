@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { authRepo, groupRepo } from '~/server/di'
+import { authRepo, groupRepo } from '~~/server/di'
 
 export default defineEventHandler(async (event) => {
   const id = Number(event.context.params!.id! as string)

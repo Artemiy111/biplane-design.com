@@ -1,7 +1,7 @@
 import type { S3ServiceException, S3Client } from '@aws-sdk/client-s3'
 import { HeadObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import type { ProjectId } from '../db/schema'
-import { env } from '~/server/shared/env'
+import { env } from '~~/server/shared/env'
 
 export class ImageS3Repo {
   constructor(private bucketName: string, private s3: S3Client) { }
