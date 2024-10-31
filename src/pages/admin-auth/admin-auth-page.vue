@@ -1,68 +1,73 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import * as z from 'zod'
 import { toast } from 'vue-sonner'
-import { Form } from '~~/src/shared/ui/kit/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form' 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~~/src/shared/ui/kit/tabs'
+import { loginSchema, registerSchema } from '~~/src/shared/config/validation'
+import { useForm } from 'vee-validate'
+import { Button } from '~~/src/shared/ui/kit/button'
+import {Input} from '~~/src/shared/ui/kit/input'
+import { useUserModel } from '~~/src/shared/model/user'
 
-useServerSeoMeta({
-  title: 'Вход/Регистрация',
-  ogTitle: 'Вход/Регистрация',
-  description: 'Вход для администратора',
-  ogDescription: 'Вход для администратора',
+
+const title = 'Вход/Регистрация'
+const description = 'Вход для администратора'
+useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+
+const userModel = useUserModel()
+
+const { meta: loginMeta,handleSubmit: handleLoginSubmit, defineField, resetForm: resetLoginForm} = useForm({
+  validationSchema: toTypedSchema(loginSchema)
 })
-useSeoMeta({
-  title: 'Вход/Регистрация',
-  ogTitle: 'Вход/Регистрация',
-  description: 'Вход для администратора',
-  ogDescription: 'Вход для администратора',
-})
 
-const loginFormRef = ref<InstanceType<typeof Form> | null>(null)
-const registerFormRef = ref<InstanceType<typeof Form> | null>(null)
+const [loginUsername, loginUsernameAttrs] = defineField('username')
+const [loginPassword, loginPasswordAttrs] = defineField('password')
 
-const loginFormSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6, 'Пароль должен содержать не менее 6 символов'),
-})
-type LoginForm = z.infer<typeof loginFormSchema>
-const loginValidationSchema = toTypedSchema(loginFormSchema)
-
-const registerFormSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6, 'Пароль должен содержать не менее 6 символов'),
-  repeatPassword: z.string().min(6),
-}).refine(data => data.repeatPassword === data.password, {
-  message: 'Пароли не совпадают',
-  path: ['repeatPassword'],
-})
-type RegisterForm = z.infer<typeof registerFormSchema>
-const registerValidationSchema = toTypedSchema(registerFormSchema)
-
-async function register(data: RegisterForm) {
-  try {
-    await $fetch('/api/auth/register', { method: 'post', body: data })
-    loginFormRef.value?.resetForm()
-    toast.success('Аккаунт успешно создан')
-    await refreshNuxtData('user')
-    await navigateTo('/admin')
-  }
-  catch (_e) {
-    toast.error('Не удалось создать аккаунт')
+const toastMessages = {
+  login: {
+    success: 'Вход выполнен',
+    error: 'Не удалось войти в аккаунт',
+  },
+  register: {
+    success: 'Аккаунт успешно создан',
+    error: 'Не удалось создать аккаунт',
   }
 }
 
-async function login(data: LoginForm) {
+const onLoginSubmit = handleLoginSubmit(async (values) => {
   try {
-    await $fetch('/api/auth/login', { method: 'post', body: data })
-    loginFormRef.value?.resetForm()
-    toast.success('Вход выполнен')
-    await refreshNuxtData('user')
+    await userModel.login(values)
+    resetLoginForm()
+    toast.success(toastMessages.login.success)
     await navigateTo('/admin')
   }
   catch (_e) {
-    toast.error('Не удалось войти в аккаунт')
+    toast.error(toastMessages.login.error)
   }
-}
+})
+
+const {meta: registerMeta, handleSubmit: handleRegisterSubmit, defineField: defineRegisterField, resetForm: resetRegisterForm} = useForm({
+  validationSchema: toTypedSchema(registerSchema),
+})
+
+const onRegisterSubmit = handleRegisterSubmit(async (values) => {
+  try {
+    await userModel.register(values)
+    // await $fetch('/api/auth/register', { method: 'post', body: values })
+    resetRegisterForm()
+    toast.success(toastMessages.register.success)
+    // await refreshNuxtData('user')
+    await navigateTo('/admin')
+  }
+  catch (_e) {
+    toast.error(toastMessages.register.error)
+  }
+})
+
+const [registerUsername, registerUsernameAttrs] = defineRegisterField('username')
+const [registerPassword, registerPasswordAttrs] = defineRegisterField('password')
+const [registerRepeatPassword, registerRepeatPasswordAttrs] = defineRegisterField('repeatPassword')
 </script>
 
 <template>
@@ -80,55 +85,50 @@ async function login(data: LoginForm) {
         </TabsTrigger>
       </TabsList>
       <TabsContent value="register">
-        <Form
-          ref="registerFormRef"
+        <form
           class="flex flex-col gap-4"
-          :validation-schema="registerValidationSchema"
-          @submit="register($event as RegisterForm)"
+          @submit="onRegisterSubmit"
         >
           <FormField
-            v-slot="{ field, handleChange }"
             name="username"
           >
             <FormItem>
               <FormLabel>Имя администратора</FormLabel>
               <FormControl>
                 <Input
-                  :model-value="field.value"
+                  v-model="registerUsername"
+                  v-bind="registerUsernameAttrs"
                   placeholder="admin"
-                  @change="handleChange"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
           <FormField
-            v-slot="{ field }"
             name="password"
           >
             <FormItem>
               <FormLabel>Пароль</FormLabel>
               <FormControl>
                 <Input
-                  :model-value="field.value"
+                  v-model="registerPassword"
+                  v-bind="registerPasswordAttrs"
                   type="password"
-                  @change="field.onChange"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
           <FormField
-            v-slot="{ field }"
             name="repeatPassword"
           >
             <FormItem>
               <FormLabel>Повторите пароль</FormLabel>
               <FormControl>
                 <Input
-                  :model-value="field.value"
+                  v-model="registerRepeatPassword"
+                  v-bind="registerRepeatPasswordAttrs"
                   type="password"
-                  @change="field.onChange"
                 />
               </FormControl>
               <FormMessage />
@@ -136,54 +136,52 @@ async function login(data: LoginForm) {
           </FormField>
           <Button
             class="w-max"
+            :disabled="!registerMeta.valid"
           >
             Зарегистрироваться
           </Button>
-        </Form>
+        </form>
       </TabsContent>
+
       <TabsContent value="login">
-        <Form
-          ref="loginFormRef"
-          class="flex flex-col gap-4"
-          :validation-schema="loginValidationSchema"
-          @submit="login($event as LoginForm)"
+        <form
+        class="flex flex-col gap-4"
+        @submit.prevent="onLoginSubmit"
         >
           <FormField
-            v-slot="{ field }"
             name="username"
           >
             <FormItem>
               <FormLabel>Имя администратора</FormLabel>
-              <FormControl>
+              <FormControl  >
                 <Input
-                  :model-value="field.value"
+                  v-model="loginUsername"
+                  v-bind="loginUsernameAttrs"
                   placeholder="admin"
-                  @change="field.onChange"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
           <FormField
-            v-slot="{ field }"
             name="password"
           >
             <FormItem>
               <FormLabel>Пароль</FormLabel>
               <FormControl>
                 <Input
-                  :model-value="field.value"
+                  v-model="loginPassword"
+                  v-bind="loginPasswordAttrs"
                   type="password"
-                  @change="field.onChange"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
-          <Button class="w-max">
+          <Button type="submit" class="w-max" :disabled="!loginMeta.valid">
             Войти
           </Button>
-        </Form>
+        </form>
       </TabsContent>
     </Tabs>
   </main>

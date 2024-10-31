@@ -1,36 +1,29 @@
 <script setup lang="ts">
-import { useElementSize } from '@vueuse/core'
-import type { ComponentPublicInstance } from 'vue'
+import { useElementSize, watchOnce } from '@vueuse/core'
 import { Carousel, type CarouselApi, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
-import type { GroupDto, ProjectDto } from '~~/server/use-cases/types'
 import { cn } from '~~/src/shared/lib/utils'
+import { useProjectModel } from '~~/src/shared/model/project'
 
-const projectUri = useRoute().params.uri! as string
-const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
-const { data: project, error: _error } = await useLazyFetch<ProjectDto | null>(`/api/projects/?uri=${projectUri}`, {
-  default() {
-    const cached = cachedGroups.value?.flatMap(g => g.categories.flatMap(c => c.projects)).find(p => p.uri === projectUri) || null
-    return cached
-  },
-})
+const projectUri = computed(() => useRoute().params.uri! as string)
+const projectModel = useProjectModel()
+useAsyncData(`project-${projectUri.value}`, () => projectModel.load(projectUri.value), {watch: [projectUri]})
 
-const api = ref<CarouselApi | null>(null)
-const apiTumb = ref<CarouselApi | null>(null)
-const mainCarouselRef = ref<ComponentPublicInstance | null>(null)
-const { height: mainCarouselHeight } = useElementSize(mainCarouselRef)
+const project = computed(() => projectModel.project)
+
+const api = ref<CarouselApi >()
+const apiTumb = ref<CarouselApi>()
+const mainCarouselRef = ref<InstanceType<typeof Carousel> | null>(null)
+const { height: mainCarouselHeight } = useElementSize(toRef(() => mainCarouselRef.value?.carouselRef))
 const totalCount = ref(0)
 const current = ref(0)
 
-useSeoMeta({
-  title: () => `Проекты | ${project.value?.title}`,
-  ogTitle: () => `Проекты | ${project.value?.title}`,
-  description: () => `${project.value?.title}. Расположение: ${project.value?.location}`,
-  ogDescription: () => `${project.value?.title}. Расположение: ${project.value?.location}`,
-})
+const title = computed(() => `Проекты | ${project.value?.title}`)
+const description = computed(() => `${project.value?.title}. Расположение: ${project.value?.location}`)
+useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
-watch(api, (api) => {
-  if (!api)
-    return
+watchOnce(api, (api) => {
+  if (!api) return
 
   totalCount.value = api.scrollSnapList().length
   current.value = api.selectedScrollSnap()
@@ -38,7 +31,7 @@ watch(api, (api) => {
   api.on('select', (api) => {
     current.value = api.selectedScrollSnap()
   })
-}, { once: true })
+})
 watch(current, () => scrollToImage(current.value))
 
 function scrollToImage(index: number): void {
@@ -49,7 +42,7 @@ function scrollToImage(index: number): void {
 
 <template>
   <main
-    v-if="project"
+    v-if="project !== null"
     class="container flex flex-col"
   >
     <section class="flex justify-between px-8 py-4 text-xl lg:text-lg sm:py-2 sm:px-4 sm:text-base">
@@ -115,6 +108,7 @@ function scrollToImage(index: number): void {
         </CarouselContent>
       </Carousel>
     </section>
+    
     <NuxtImg
       :key="project.images[0].id"
       :alt="project.images[0].alt"

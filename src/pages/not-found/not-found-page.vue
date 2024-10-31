@@ -1,18 +1,10 @@
 <script setup lang="ts">
 import { buttonVariants } from '~~/src/shared/ui/kit/button'
 
-useServerSeoMeta({
-  title: 'Страница не найдена',
-  ogTitle: 'Страница не найдена',
-  description: 'Ошибка 404',
-  ogDescription: 'Ошибка 404',
-})
-useSeoMeta({
-  title: 'Страница не найдена',
-  ogTitle: 'Страница не найдена',
-  description: 'Ошибка 404',
-  ogDescription: 'Ошибка 404',
-})
+const title = 'Страница не найдена'
+const description = 'Ошибка 404'
+useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 </script>
 
 <template>

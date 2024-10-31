@@ -4,18 +4,16 @@ import { authRepo, projectRepo } from '~~/server/di'
 export default defineEventHandler(async (event) => {
   switch (event.method) {
     case 'GET': {
-      const QuerySchema = z.object({
+      const querySchema = z.object({
         uri: z.string().optional(),
       })
-      const query = await getValidatedQuery(event, QuerySchema.parse)
-      if (query.uri) {
-        return await projectRepo.getOneByUri(query.uri)
-      }
+      const query = await getValidatedQuery(event, querySchema.parse)
+      if (query.uri) return await projectRepo.getOneByUri(query.uri)
 
       return await projectRepo.getAll()
     }
     case 'POST': {
-      const Body = z.object({
+      const bodySchema = z.object({
         categoryId: z.number(),
         title: z.string(),
         uri: z.string(),
@@ -26,7 +24,7 @@ export default defineEventHandler(async (event) => {
         isMinimal: z.boolean().optional(),
       })
       authRepo.assertAuthenticated(event)
-      const body = await readValidatedBody(event, Body.parse)
+      const body = await readValidatedBody(event, bodySchema.parse)
       return await projectRepo.create(body)
     }
   }

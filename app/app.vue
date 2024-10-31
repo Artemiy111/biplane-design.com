@@ -3,6 +3,11 @@ import { SpeedInsights } from '@vercel/speed-insights/nuxt'
 import { Header } from '~~/src/widgets/header'
 import { Footer } from '~~/src/widgets/footer'
 import { Toaster } from '~~/src/shared/ui/kit/sonner'
+import { useGroupsModel } from '~~/src/shared/model/groups'
+
+
+const groupsModel = useGroupsModel()
+useLazyAsyncData('groups', () => groupsModel.load())
 
 const yandexMetrika = import.meta.dev
   ? {}
@@ -31,7 +36,6 @@ const yandexMetrika = import.meta.dev
       }],
     }
 
-console.log('dev', import.meta.dev)
 useHead(yandexMetrika)
 </script>
 

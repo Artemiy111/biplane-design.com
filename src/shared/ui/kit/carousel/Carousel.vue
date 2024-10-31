@@ -6,7 +6,6 @@ import { cn } from '~~/src/shared/lib/utils'
 const props = withDefaults(defineProps<CarouselProps & WithClassAsProps>(), {
   orientation: 'horizontal',
 })
-
 const emits = defineEmits<CarouselEmits>()
 
 const { canScrollNext, canScrollPrev, carouselApi, carouselRef, orientation, scrollNext, scrollPrev } = useProvideCarousel(props, emits)

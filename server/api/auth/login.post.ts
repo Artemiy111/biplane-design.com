@@ -1,15 +1,10 @@
-import { z } from 'zod'
 import { Argon2id } from 'oslo/password'
 import { userRepo } from '~~/server/di'
 import { lucia } from '~~/src/shared/lib/utils/auth'
-
-const loginScema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
-})
+import { loginSchema } from '~~/src/shared/config/validation'
 
 export default defineEventHandler(async (event) => {
-  const data = await readValidatedBody(event, loginScema.parse)
+  const data = await readValidatedBody(event, loginSchema.parse)
 
   const existingUser = await userRepo.getByUsername(data.username)
   if (!existingUser) throw createError({

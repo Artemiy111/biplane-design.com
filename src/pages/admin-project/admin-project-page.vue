@@ -2,67 +2,43 @@
 import { toast } from 'vue-sonner'
 import { GripVertical, Trash2 } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
-import type { GroupDto, ImageDto, ProjectDto, UpdateImageDto } from '~~/server/use-cases/types'
+import type {  UpdateImageDto } from '~~/server/use-cases/types'
 import Dropzone from '~~/src/shared/ui/blocks/dropzone/dropzone.vue'
 import type { ImageFit, ImageId } from '~~/server/db/schema'
 import { cn } from '~~/src/shared/lib/utils'
+import { useProjectModel } from '~~/src/shared/model/project'
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '~~/src/shared/ui/kit/table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~~/src/shared/ui/kit/select'
+import { Input } from '~~/src/shared/ui/kit/input'
 
-const route = useRoute()
-const uri = route.params.uri as string
-const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
-const { data: project, refresh: refreshProject }
-  = await useLazyFetch<ProjectDto | null>(`/api/projects/?uri=${uri}`, {
-    default() {
-      const cached = cachedGroups.value?.flatMap(g => g.categories.flatMap(c => c.projects)).find(p => p.uri === uri) || null
-      return cached
-    },
-  })
 
-definePageMeta({
-  middleware: 'authenticated',
-})
+const uri = computed(() => useRoute().params.uri as string)
 
-useSeoMeta({
-  title: () => `Админ-панель | ${project.value?.title}`,
-  ogTitle: () => `Админ-панель | ${project.value?.title}`,
-  description: () => `Админ-панель | ${project.value?.title}`,
-  ogDescription: () => `Админ-панель | ${project.value?.title}`,
-})
+const projectModel = useProjectModel()
+const project = computed(() => projectModel.project)
 
-async function refresh() {
-  refreshProject()
-  refreshNuxtData('groups')
-}
+await useAsyncData(`project-${uri.value}`, () => projectModel.load(uri.value), {watch: [uri]})
+
+const title = computed(() => `Админ-панель | ${project.value?.title}`)
+const description = computed(() => `Админ-панель | ${project.value?.title}`)
+useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 async function deleteImage(id: ImageId) {
-  if (!project.value) return
-  project.value.images = project.value.images.filter(img => img.id !== id)
   try {
-    await $fetch(`/api/images/${id}`, {
-      method: 'DELETE',
-    })
+    await projectModel.deleteImage(id)
   }
   catch (_e) {
     toast.error(`Не удалось удалить изображение`)
-    refresh()
   }
 }
 
 async function updateImage(id: ImageId, dto: UpdateImageDto) {
-  if (!project.value) return
-  const imageIdx = project.value.images.findIndex(img => img.id === id)
-  const [image] = project.value.images.splice(imageIdx, 1)
-  project.value.images.splice(dto.order - 1, 0, { ...image, ...dto })
-  project.value.images.forEach((img, idx) => img.order = idx + 1)
   try {
-    await $fetch(`/api/images/${id}`, {
-      method: 'PUT',
-      body: dto,
-    })
+    await projectModel.updateImage(id, dto)
   }
   catch (_e) {
     toast.error('Не удалось обновить изображение')
-    refresh()
   }
 }
 
@@ -70,29 +46,12 @@ async function updateImageOrder(e: SortableEvent) {
   if (!project.value) return
   const imageIdx = e.oldDraggableIndex!
   const newIdx = e.newDraggableIndex!
-  const image = project.value.images[imageIdx]
+  const image = project.value.images[imageIdx]!
   await updateImage(image.id, { ...image, order: newIdx + 1 })
 }
 
 async function uploadImages(images: File[]) {
-  if (!project.value) return
-  images.forEach(async (image) => {
-    const formData = new FormData()
-    formData.append('file', image, image.name)
-    formData.append('projectId', project.value!.id.toString())
-
-    try {
-      await $fetch<ImageDto[]>(`/api/images`, {
-        method: 'POST',
-        body: formData,
-      })
-      toast.info(`Изображение загружено`)
-    }
-    catch (_e) {
-      toast.error(`Не удалось загрузить изображение`)
-    }
-    refresh()
-  })
+  projectModel.uploadImages(images)
 }
 </script>
 

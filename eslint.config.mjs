@@ -3,7 +3,7 @@ import oxlint from 'eslint-plugin-oxlint'
 import pluginVueA11y from 'eslint-plugin-vuejs-accessibility'
 // import tseslint from 'typescript-eslint'
 // import perfectionist from 'eslint-plugin-perfectionist'
-import { withNuxt } from './.nuxt/eslint.config.mjs'
+import { withNuxt } from '.nuxt/eslint.config.mjs'
 
 export default withNuxt(
   // perfectionist.configs['recommended-alphabetical'],

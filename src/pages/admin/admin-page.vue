@@ -10,22 +10,11 @@ import { Button } from '~~/src/shared/ui/kit/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
 import { useScreenSize } from '~~/src/shared/model/use-screen-size'
 
-definePageMeta({
-  middleware: 'authenticated',
-})
+const title = 'Админ-панель'
+const description = 'Менеджмент базы-данных'
+useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
-useServerSeoMeta({
-  title: 'Админ-панель',
-  ogTitle: 'Админ-панель',
-  description: 'Менеджмент базы-данных',
-  ogDescription: 'Менеджмент базы-данных',
-})
-useSeoMeta({
-  title: 'Админ-панель',
-  ogTitle: 'Админ-панель',
-  description: 'Менеджмент базы-данных',
-  ogDescription: 'Менеджмент базы-данных',
-})
 const { md } = useScreenSize()
 const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
 

@@ -1,13 +1,8 @@
-import { z } from 'zod'
 import { Argon2id } from 'oslo/password'
 import { userRepo } from '~~/server/di'
 import { lucia } from '~~/src/shared/lib/utils/auth'
+import { registerSchema } from '~~/src/shared/config/validation'
 
-const registerSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
-
-})
 
 export default defineEventHandler(async (event) => {
   throw createError({ statusCode: 500, message: 'Нельзя зарегистрировать нового администратора' })

@@ -6,18 +6,10 @@ import { buttonVariants } from '~~/src/shared/ui/kit/button'
 import { cn } from '~~/src/shared/lib/utils'
 import { useHeaderSize } from '~~/src/shared/model/use-header-size'
 
-useServerSeoMeta({
-  title: 'Biplane-Design | Главная',
-  ogTitle: 'Biplane-Design | Главная',
-  description: 'Студия дизайна',
-  ogDescription: 'Студия дизайна',
-})
-useSeoMeta({
-  title: 'Biplane-Design | Главная',
-  ogTitle: 'Biplane-Design | Главная',
-  description: 'Студия дизайна',
-  ogDescription: 'Студия дизайна',
-})
+const title = 'Biplane-Design | Главная'
+const description = 'Студия дизайна'
+useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 const { height: _windowHeight } = useWindowSize()
 const windowHeight = computed(() => Number.isFinite(_windowHeight.value) ? _windowHeight.value : 1080)

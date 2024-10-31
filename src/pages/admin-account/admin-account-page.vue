@@ -1,64 +1,45 @@
 <script setup lang="ts">
-import * as z from 'zod'
 import { toTypedSchema } from '@vee-validate/zod'
 import { toast } from 'vue-sonner'
-import { Form } from '~~/src/shared/ui/kit/form'
-import { Dialog } from '~~/src/shared/ui/kit/dialog'
-import { useAuthenticatedUser } from '~~/src/shared/model/user'
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '~~/src/shared/ui/kit/form'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger , DialogDescription } from '~~/src/shared/ui/kit/dialog'
+import { useAuthenticatedUser, useUserModel } from '~~/src/shared/model/user'
+import {changePasswordSchema} from '~~/src/shared/config/validation'
+import { Button } from '~~/src/shared/ui/kit/button'
+import { Input } from '~~/src/shared/ui/kit/input'
+import { useForm } from 'vee-validate'
 
-definePageMeta({
-  middleware: 'authenticated',
-})
-useServerSeoMeta({
-  title: 'Аккаунт администратора',
-  ogTitle: 'Аккаунт администратора',
-  description: 'Настройки аккаунта администратора',
-  ogDescription: 'Настройки аккаунта администратора',
-})
-useSeoMeta({
-  title: 'Аккаунт администратора',
-  ogTitle: 'Аккаунт администратора',
-  description: 'Настройки аккаунта администратора',
-  ogDescription: 'Настройки аккаунта администратора',
-})
+const title = 'Аккаунт администратора'
+const description = 'Настройки аккаунта администратора'
+useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
+const userModel = useUserModel()
 const user = useAuthenticatedUser()
 
-const changePasswordSchema = z.object({
-  currentPassword: z.string().min(6),
-  newPassword: z.string().min(6),
-  repeatNewPassword: z.string().min(6),
-}).refine(data => data.newPassword === data.repeatNewPassword, {
-  message: 'Пароли не совпадают',
-  path: ['repeatNewPassword'],
-})
-
-const initialValues: ChangePasswordSchema = {
-  currentPassword: '',
-  newPassword: '',
-  repeatNewPassword: '',
-}
-type ChangePasswordSchema = z.infer<typeof changePasswordSchema>
-
-const formRef = ref<InstanceType<typeof Form> | null>(null)
 const isDialogOpen = ref(false)
 
-const formValidationSchema = toTypedSchema(changePasswordSchema)
+const {meta, handleSubmit, defineField, resetForm} = useForm({
+  validationSchema: toTypedSchema(changePasswordSchema),
+})
 
-async function changePassword(data: ChangePasswordSchema) {
+const toastMessages = {
+  success: 'Пароль изменён',
+  error: 'Не удaлось сменить пароль',
+}
+
+const onSubmit = handleSubmit(async (values) => {
   try {
-    await $fetch('/api/user/change-password', {
-      method: 'post',
-      body: {
-        newPassword: data.newPassword,
-      } })
-    toast.success('Пароль изменён')
+    await userModel.changePassword(values)
+    toast.success(toastMessages.success)
+    resetForm()
     isDialogOpen.value = false
   }
   catch (_e) {
-    toast.error('Не удaлось сменить пароль')
+    toast.error(toastMessages.error)
   }
-}
+})
+
 </script>
 
 <template>
@@ -87,60 +68,54 @@ async function changePassword(data: ChangePasswordSchema) {
             <DialogTitle>Сменить пароль</DialogTitle>
             <DialogDescription>Заполните поля</DialogDescription>
           </DialogHeader>
-          <Form
-            ref="formRef"
+          <form
             class="flex flex-col gap-4"
-            :initial-values="initialValues"
-            :validation-schema="formValidationSchema"
-            @submit="changePassword($event as ChangePasswordSchema)"
+            @submit.prevent="onSubmit"
           >
             <FormField
-              v-slot="{ field }"
+              v-slot="{ componentField }"
               name="currentPassword"
             >
               <FormItem>
                 <FormLabel>Текущий пароль</FormLabel>
                 <FormControl>
                   <Input
-                    :model-value="field.value"
-                    @change="field.onChange"
+                    v-bind="componentField"
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
             <FormField
-              v-slot="{ field }"
+              v-slot="{ componentField }"
               name="newPassword"
             >
               <FormItem>
                 <FormLabel>Новый пароль</FormLabel>
                 <FormControl>
                   <Input
-                    :model-value="field.value"
-                    @change="field.onChange"
+                    v-bind="componentField"
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
             <FormField
-              v-slot="{ field }"
+              v-slot="{ componentField }"
               name="repeatNewPassword"
             >
               <FormItem>
                 <FormLabel>Повторите пароль</FormLabel>
                 <FormControl>
                   <Input
-                    :model-value="field.value"
-                    @change="field.onChange"
+                    v-bind="componentField"
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
-            <Button>Сменить пароль</Button>
-          </Form>
+            <Button :disabled="!meta.valid" >Сменить пароль</Button>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

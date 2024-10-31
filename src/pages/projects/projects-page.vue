@@ -7,20 +7,13 @@ import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/ca
 import type { CategoryDto, GroupDto } from '~~/server/use-cases/types'
 import { cn } from '~~/src/shared/lib/utils'
 import { screenBreakpoints } from '~~/tailwind.config'
-import { useGroups } from '~~/src/shared/model/groups'
+import { useGroupsModel } from '~~/src/shared/model/groups'
+import { Separator } from '~~/src/shared/ui/kit/separator'
 
-useServerSeoMeta({
-  title: 'Проекты',
-  ogTitle: 'Проекты',
-  description: 'Представлены различные категории проектов',
-  ogDescription: 'Представлены различные категории проектов',
-})
-useSeoMeta({
-  title: 'Проекты',
-  ogTitle: 'Проекты',
-  description: 'Представлены различные категории проектов',
-  ogDescription: 'Представлены различные категории проектов',
-})
+const title = 'Проекты'
+const description = 'Представлены различные категории проектов'
+useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 const querySchema = z.object({
   category: z.string().min(3),
@@ -29,15 +22,8 @@ const querySchema = z.object({
 const route = useRoute()
 const router = useRouter()
 
-const groups = useGroups()
-// const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
-// const { data: groups, error: _error } = await useLazyFetch<GroupDto[] | null>('/api/groups', {
-//   key: 'groups',
-//   default() {
-//     return cachedGroups.value
-//   },
-// })
-const categories = computed(() => groups.value?.flatMap(g => g.categories) || [])
+const groupsModel = useGroupsModel()
+const {groups, categories} = storeToRefs(groupsModel)
 
 const currentCategory = ref<CategoryDto | null>(getCurrentCategory(route.query))
 const currentGroup = computed(
@@ -53,7 +39,7 @@ watch(groups, () => {
     navigateTo({ path: route.path, query: { category: groups.value?.[0]?.categories[0]?.uri } })
 })
 
-function getCategoryFromFromRouteQuery(query: LocationQuery): CategoryDto | null {
+function getCategoryFromRouteQuery(query: LocationQuery): CategoryDto | null {
   const validatedQuery = querySchema.safeParse(query)
   if (!validatedQuery.success) return null
 
@@ -65,7 +51,7 @@ function getCategoryFromFromRouteQuery(query: LocationQuery): CategoryDto | null
 }
 
 function getCurrentCategory(query: LocationQuery) {
-  return getCategoryFromFromRouteQuery(query) || categories.value[0] || null
+  return getCategoryFromRouteQuery(query) || categories.value[0] || null
 }
 
 router.afterEach(guard => (currentCategory.value = getCurrentCategory(guard.query)))
@@ -238,7 +224,7 @@ const dummyProjects = computed(() => {
       <div
         v-for="n in dummyProjects"
         :key="n"
-        class="bg-red-200"
+        class=""
       />
     </section>
     <section
