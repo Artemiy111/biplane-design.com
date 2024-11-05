@@ -17,20 +17,20 @@ export const validationErrors = {
   passwordsDoNotMatch: 'Пароли не совпадают',
 }
 
-const requiredStringSchema = z.string({ message: validationErrors.required })
-const requiredNumberSchema = z.number({ message: validationErrors.required })
+export const requiredStringSchema = z.string({ message: validationErrors.required })
+export const requiredNumberSchema = z.number({ message: validationErrors.required })
 
-const getMinMaxStringSchema = (min: number, max: number) => requiredStringSchema.min(min, validationErrors.minLength(min)).max(max, validationErrors.maxLength(max))
-const getMinMaxNumberSchema = (min: number, max: number) => requiredNumberSchema.min(min, validationErrors.minValue(min)).max(max, validationErrors.maxValue(max))
+export const getMinMaxStringSchema = (min: number, max: number) => requiredStringSchema.min(min, validationErrors.minLength(min)).max(max, validationErrors.maxLength(max))
+export const getMinMaxNumberSchema = (min: number, max: number) => requiredNumberSchema.min(min, validationErrors.minValue(min)).max(max, validationErrors.maxValue(max))
 
-const passwordSchema = getMinMaxStringSchema(6, 20)
+export const passwordSchema = getMinMaxStringSchema(6, 20)
 
 export const loginSchema = z.object({
   username: getMinMaxStringSchema(3, 64),
   password: passwordSchema,
 })
 
-export type LoginRequest = z.infer<typeof loginSchema>
+export type LoginDto = z.infer<typeof loginSchema>
 
 export const registerSchema = z.object({
   username: getMinMaxStringSchema(3, 64),
@@ -41,7 +41,7 @@ export const registerSchema = z.object({
   path: ['repeatPassword'],
 })
 
-export type RegisterRequest = z.infer<typeof registerSchema>
+export type RegisterDto = z.infer<typeof registerSchema>
 
 
 export const changePasswordSchema = z.object({
@@ -53,7 +53,7 @@ export const changePasswordSchema = z.object({
   path: ['repeatNewPassword'],
 })
 
-export type ChangePasswordRequest = z.infer<typeof changePasswordSchema>
+export type ChangePasswordDto = z.infer<typeof changePasswordSchema>
 
 const dateSchema = z
   .coerce.date({

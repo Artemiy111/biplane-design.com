@@ -9,4 +9,5 @@ export default {
   dialect: 'postgresql',
   out: './server/db/migrations',
   schema: './server/db/schema.ts',
+  casing: 'snake_case',
 } satisfies Config

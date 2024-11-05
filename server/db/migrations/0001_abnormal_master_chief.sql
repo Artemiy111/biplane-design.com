@@ -1,1 +1,0 @@
-ALTER TABLE "images" RENAME COLUMN "title" TO "alt";

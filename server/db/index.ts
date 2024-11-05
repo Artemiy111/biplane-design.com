@@ -4,6 +4,6 @@ import { env } from '../shared/env'
 import * as schema from './schema'
 
 export const client = postgres(env.DATABASE_URL, { prepare: false })
-export const db = drizzle(client, { schema: schema })
+export const db = drizzle(client, { schema: schema, logger: false })
 
 export type Db = typeof db

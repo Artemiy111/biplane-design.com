@@ -54,10 +54,8 @@ const {meta: registerMeta, handleSubmit: handleRegisterSubmit, defineField: defi
 const onRegisterSubmit = handleRegisterSubmit(async (values) => {
   try {
     await userModel.register(values)
-    // await $fetch('/api/auth/register', { method: 'post', body: values })
     resetRegisterForm()
     toast.success(toastMessages.register.success)
-    // await refreshNuxtData('user')
     await navigateTo('/admin')
   }
   catch (_e) {

@@ -1,6 +1,7 @@
-import type { ImageDto, ProjectDto, UpdateImageDto } from '~~/server/use-cases/types'
+import type { ProjectDto, UpdateImageDto, UpdateProjectDto } from '~~/server/use-cases/types'
 import { useProjectsModel } from './projects'
-import type { ImageId } from '~~/server/db/schema'
+import type { ImageId, } from '~~/server/db/schema'
+import { api } from '../api'
 
 export const useProjectModel = defineStore('project', () => {
   const projectsModel = useProjectsModel()
@@ -8,7 +9,8 @@ export const useProjectModel = defineStore('project', () => {
 
   const load = async (uri: string) => {
     if (project.value === null) project.value = projectsModel.getOneByUri(uri)
-    project.value = await $fetch<ProjectDto>(`/api/projects/?uri=${uri}`)
+    project.value = await api.projects.getByUri(uri)
+    console.log(project.value)
     return project.value
   }
 

@@ -1,5 +1,6 @@
 import type { UserDto } from '~~/server/use-cases/types'
-import type { ChangePasswordRequest, LoginRequest } from '../config/validation'
+import type { ChangePasswordDto, LoginDto, RegisterDto } from '../config/validation'
+import { api } from '../api'
 
 export const useUserModel = defineStore('user', () => {
   const user = ref<UserDto | null>(null)
@@ -9,21 +10,21 @@ export const useUserModel = defineStore('user', () => {
     return user.value
   }
 
-  const login = async (body: LoginRequest) => {
-    await $fetch('/api/auth/login', { method: 'POST', body })
+  const login = async (dto: LoginDto) => {
+    await api.auth.login(dto)
   }
 
-  const register = async (body: LoginRequest) => {
-    await $fetch('/api/auth/register', { method: 'POST', body })
+  const register = async (dto: RegisterDto) => {
+    await api.auth.register(dto)
   }
 
   const logout = async () => {
-    await $fetch('/api/auth/logout')
+    await api.auth.logout()
     user.value = null
   }
 
-  const changePassword = async (body: ChangePasswordRequest) => {
-    await $fetch('/api/user/change-password', { method: 'POST', body })
+  const changePassword = async (dto: ChangePasswordDto) => {
+    await api.user.changePassword(dto)
   }
 
   return {

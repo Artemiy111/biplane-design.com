@@ -81,6 +81,8 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
   projects: many(projects),
 }))
 
+export const projectStatus = ['завершён', 'строится', 'в разработке'] as const
+
 export const projects = pgTable(
   'projects',
   {
@@ -90,7 +92,7 @@ export const projects = pgTable(
     id: serial('id').primaryKey(),
     title: text('title').notNull(),
     uri: text('uri').notNull().unique(),
-    status: text('status', { enum: ['завершён', 'строится', 'в разработке'] }).notNull(),
+    status: text('status', { enum: projectStatus }).notNull(),
     yearStart: integer('year_start'),
     yearEnd: integer('year_end'),
     location: text('location'),
@@ -105,10 +107,10 @@ export const projects = pgTable(
 )
 
 export type ProjectId = ProjectDb['id']
+export type ProjectStatus = ProjectDb['status']
 export type ProjectDb = typeof projects.$inferSelect
 export type ProjectDbCreate = typeof projects.$inferInsert
 export type ProjectDbUpdate = Omit<ProjectDb, 'id'>
-export type ProjectStatus = ProjectDb['status']
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   category: one(categories, {
@@ -119,13 +121,15 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   images: many(images),
 }))
 
+export const imageFit = ['object-fill', 'object-contain', 'object-cover', 'object-none'] as const
+
 export const images = pgTable(
   'images',
   {
     projectId: integer('project_id').notNull().references(() => projects.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     id: text('id').primaryKey().notNull(),
     alt: text('alt').notNull(),
-    fit: text('fit', { enum: ['object-fill', 'object-contain', 'object-cover', 'object-none'] }).notNull(),
+    fit: text('fit', { enum: imageFit }).notNull(),
     order: integer('order').notNull(),
   },
   (t) => {
