@@ -1,9 +1,11 @@
 import { eq } from 'drizzle-orm'
 import { Argon2id } from 'oslo/password'
-import { db } from '../db'
+
 import type { CreateUserDb, UserDb } from '../db/schema'
-import { users } from '../db/schema'
 import type { UserId } from '../use-cases/types'
+
+import { db } from '../db'
+import { users } from '../db/schema'
 
 export class UserRepo {
   async getByUsername(username: string): Promise<UserDb | null> {

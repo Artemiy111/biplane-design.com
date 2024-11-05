@@ -1,23 +1,26 @@
 <script setup lang="ts">
-import { toast } from 'vue-sonner'
 import { GripVertical, Trash2 } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
-import type {  UpdateImageDto } from '~~/server/use-cases/types'
-import Dropzone from '~~/src/shared/ui/blocks/dropzone/dropzone.vue'
+import { toast } from 'vue-sonner'
+
 import type { ImageFit, ImageId } from '~~/server/db/schema'
+import type { UpdateImageDto } from '~~/server/use-cases/types'
+
 import { cn } from '~~/src/shared/lib/utils'
 import { useProjectModel } from '~~/src/shared/model/project'
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '~~/src/shared/ui/kit/table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~~/src/shared/ui/kit/select'
+import Dropzone from '~~/src/shared/ui/blocks/dropzone/dropzone.vue'
 import { Input } from '~~/src/shared/ui/kit/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~~/src/shared/ui/kit/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
 
-
-const uri = computed(() => useRoute().params.uri as string)
+const props = defineProps<{
+  uri: string
+}>()
 
 const projectModel = useProjectModel()
 const project = computed(() => projectModel.project)
 
-await useAsyncData(`project-${uri.value}`, () => projectModel.load(uri.value), {watch: [uri]})
+await useAsyncData(`project-${props.uri}`, () => projectModel.load(props.uri), { watch: [toRef(() => props.uri)] })
 
 const title = computed(() => `Админ-панель | ${project.value?.title}`)
 const description = computed(() => `Админ-панель | ${project.value?.title}`)

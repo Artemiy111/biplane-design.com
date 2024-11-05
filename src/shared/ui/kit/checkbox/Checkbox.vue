@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { type HTMLAttributes, computed } from 'vue'
 import type { CheckboxRootEmits, CheckboxRootProps } from 'radix-vue'
-import { CheckboxIndicator, CheckboxRoot, useForwardPropsEmits } from 'radix-vue'
+
 import { Check } from 'lucide-vue-next'
+import { CheckboxIndicator, CheckboxRoot, useForwardPropsEmits } from 'radix-vue'
+import { computed, type HTMLAttributes } from 'vue'
+
 import { cn } from '~~/src/shared/lib/utils'
 
 const props = defineProps<CheckboxRootProps & { class?: HTMLAttributes['class'] }>()

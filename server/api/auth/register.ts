@@ -1,8 +1,8 @@
 import { Argon2id } from 'oslo/password'
-import { userRepo } from '~~/server/di'
-import { lucia } from '~~/src/shared/lib/utils/auth'
-import { registerSchema } from '~~/src/shared/config/validation'
 
+import { userRepo } from '~~/server/di'
+import { registerSchema } from '~~/src/shared/config/validation'
+import { lucia } from '~~/src/shared/lib/utils/auth'
 
 export default defineEventHandler(async (event) => {
   throw createError({ statusCode: 500, message: 'Нельзя зарегистрировать нового администратора' })

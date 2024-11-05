@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
 import type { z } from 'zod'
-import { Select, SelectContent, SelectItem, SelectValue, SelectGroup, SelectTrigger } from '~~/src/shared/ui/kit/select'
-import { Checkbox } from '~~/src/shared/ui/kit/checkbox'
-import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~~/server/use-cases/types'
+
+import { toTypedSchema } from '@vee-validate/zod'
+
 import type { CategoryId, GroupId, ProjectId } from '~~/server/db/schema'
+import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~~/server/use-cases/types'
+
 import { toUri } from '~~/src/shared/lib/utils/to-uri'
-import { schema } from './config'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '~~/src/shared/ui/kit/form'
-import { Input } from '~~/src/shared/ui/kit/input'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '~~/src/shared/ui/kit/sheet'
 import { Button } from '~~/src/shared/ui/kit/button'
+import { Checkbox } from '~~/src/shared/ui/kit/checkbox'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form'
+import { Input } from '~~/src/shared/ui/kit/input'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '~~/src/shared/ui/kit/select'
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '~~/src/shared/ui/kit/sheet'
+
+import { schema } from './config'
 
 const props = defineProps<{
   groups: GroupDto[]

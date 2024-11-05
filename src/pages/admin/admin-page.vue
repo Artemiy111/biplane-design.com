@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { toast } from 'vue-sonner'
+import { watchOnce } from '@vueuse/core'
 import { GripVertical, LoaderCircle, Pen, Trash2 } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
-import ProjectSheet from './ui/project-sheet.vue'
-import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~~/server/use-cases/types'
-import type { ProjectId } from '~~/server/db/schema'
-import { cn } from '~~/src/shared/lib/utils'
-import { Button } from '~~/src/shared/ui/kit/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
-import { useScreenSize } from '~~/src/shared/model/use-screen-size'
-import { useProjects, useProjectsModel } from '~~/src/shared/model/projects'
-import { useCategories, useGroups, useGroupsModel } from '~~/src/shared/model/groups'
-import { watchOnce } from '@vueuse/core'
-import { Popover, PopoverContent, PopoverTrigger } from '~~/src/shared/ui/kit/popover'
+import { toast } from 'vue-sonner'
 
+import type { ProjectId } from '~~/server/db/schema'
+import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~~/server/use-cases/types'
+
+import { cn } from '~~/src/shared/lib/utils'
+import { useCategories, useGroups, useGroupsModel } from '~~/src/shared/model/groups'
+import { useProjects, useProjectsModel } from '~~/src/shared/model/projects'
+import { useScreenSize } from '~~/src/shared/model/use-screen-size'
+import { Button } from '~~/src/shared/ui/kit/button'
+import { Popover, PopoverContent, PopoverTrigger } from '~~/src/shared/ui/kit/popover'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
+
+import ProjectSheet from './ui/project-sheet.vue'
 
 const title = 'Админ-панель'
 const description = 'Менеджмент базы-данных'
@@ -36,7 +38,6 @@ watchOnce(groups, () => {
   if (!groups.value.length) return
   selectedCategory.value = groups.value[0]?.categories[0] || null
 })
-
 
 function getCategoryById(id: number) {
   return categories.value.find(c => c.id === id)!
@@ -72,7 +73,7 @@ const toastMessages = {
 }
 
 async function createProject(dto: CreateProjectDto) {
-  try { 
+  try {
     await projectsModel.create(dto)
     projectSheetRef.value?.close()
     toast.success(toastMessages.create.success)
@@ -130,7 +131,7 @@ function openProjectSheet(project: ProjectDto) {
       id: project.id,
       uri: project.uri,
       title: project.title,
-      groupId: groupsModel.getById(getCategoryById(project.categoryId).groupId)!.id, 
+      groupId: groupsModel.getById(getCategoryById(project.categoryId).groupId)!.id,
       location: project.location,
       status: project.status,
       yearStart: project.yearStart,

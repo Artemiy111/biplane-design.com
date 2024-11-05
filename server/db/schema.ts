@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm'
 import {
   boolean,
   integer,
@@ -8,7 +9,6 @@ import {
   unique,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm'
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),

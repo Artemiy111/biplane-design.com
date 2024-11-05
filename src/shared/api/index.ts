@@ -1,6 +1,8 @@
 import type { CreateGroupDto, CreateProjectDto, UpdateGroupDto, UpdateProjectDto } from '~~/server/use-cases/types'
-import { api } from './instance'
+
 import type { ChangePasswordDto, LoginDto, RegisterDto } from '../config/validation'
+
+import { api } from './instance'
 
 const authApi = {
   login: (dto: LoginDto) => api('/api/auth/login', { body: dto, method: 'POST' }),
@@ -12,7 +14,6 @@ const userApi = {
   get: () => api('/api/user'),
   changePassword: (dto: ChangePasswordDto) => api('/api/user/change-password', { body: dto, method: 'POST' }),
 }
-
 
 const groupsApi = {
   getAll: () => api('/api/groups/get-all'),

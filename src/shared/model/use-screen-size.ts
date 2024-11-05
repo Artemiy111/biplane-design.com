@@ -1,5 +1,6 @@
 import { useEventListener } from '@vueuse/core'
-import { type ScreenSize, screens } from '~~/tailwind.config'
+
+import { screens, type ScreenSize } from '~~/tailwind.config'
 
 function getMaxScreenWidth(size: ScreenSize) {
   const width = Number.parseFloat(screens[size].max)

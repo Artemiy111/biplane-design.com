@@ -1,5 +1,7 @@
 import type { UserDto } from '~~/server/use-cases/types'
+
 import type { ChangePasswordDto, LoginDto, RegisterDto } from '../config/validation'
+
 import { api } from '../api'
 
 export const useUserModel = defineStore('user', () => {
@@ -33,7 +35,7 @@ export const useUserModel = defineStore('user', () => {
     login,
     register,
     logout,
-    changePassword
+    changePassword,
   }
 })
 

@@ -17,6 +17,12 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
   ],
 
+  ssr: true,
+
+  imports: {
+    dirs: [],
+  },
+
   devtools: {
     enabled: true,
     timeline: {
@@ -24,45 +30,7 @@ export default defineNuxtConfig({
     },
   },
 
-  future: {
-    compatibilityVersion: 4,
-  },
-
-  tailwindcss: {
-    cssPath: '~~/src/shared/assets/css/tailwind.css',
-  },
-
-  ssr: true,
-  runtimeConfig: {},
-
   app: { head: { htmlAttrs: { lang: 'ru' } } },
-
-  fonts: {
-    families: [{
-      name: 'Montserrat',
-    }],
-  },
-
-  shadcn: {
-    componentDir: './components/ui',
-    prefix: '',
-  },
-
-  image: {
-    format: ['avif', 'webp', 'png', 'jpg'],
-    ipx: {
-    },
-  },
-
-  eslint: {
-    config: {
-      stylistic: true,
-    },
-  },
-
-  imports: {
-    dirs: [],
-  },
 
   // yandexMetrika: {
   //   debug: false,
@@ -76,16 +44,48 @@ export default defineNuxtConfig({
   site: {
     url: 'https://biplane-design.com',
   },
+  runtimeConfig: {},
 
-  sitemap: {
-    sources: ['/api/__sitemap__/urls'],
+  future: {
+    compatibilityVersion: 4,
+  },
+  compatibilityDate: '2024-07-20',
+
+  telemetry: { enabled: false },
+
+  eslint: {
+    config: {
+      stylistic: true,
+    },
+  },
+
+  fonts: {
+    families: [{
+      name: 'Montserrat',
+    }],
+  },
+
+  image: {
+    format: ['avif', 'webp', 'png', 'jpg'],
+    ipx: {
+    },
   },
 
   robots: {
     disallow: ['/admin/*'],
   },
 
-  telemetry: { enabled: false },
-  compatibilityDate: '2024-07-20',
+  shadcn: {
+    componentDir: './components/ui',
+    prefix: '',
+  },
+
+  sitemap: {
+    sources: ['/api/__sitemap__/urls'],
+  },
+
+  tailwindcss: {
+    cssPath: '~~/src/shared/assets/css/tailwind.css',
+  },
 
 })

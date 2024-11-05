@@ -1,9 +1,9 @@
 // import antfu from '@antfu/eslint-config'
 import oxlint from 'eslint-plugin-oxlint'
+import perfectionist from 'eslint-plugin-perfectionist'
 import pluginVueA11y from 'eslint-plugin-vuejs-accessibility'
-// import tseslint from 'typescript-eslint'
-// import perfectionist from 'eslint-plugin-perfectionist'
-import { withNuxt } from '.nuxt/eslint.config.mjs'
+
+import { withNuxt } from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
   // perfectionist.configs['recommended-alphabetical'],
@@ -11,8 +11,33 @@ export default withNuxt(
   // {
   //   rules: tseslint.configs.strict.at(-1).rules
   // },
+
   {
+    plugins: { perfectionist },
+
     rules: {
+
+      'import/order': 'off',
+      'perfectionist/sort-vue-attributes': 'off',
+      'perfectionist/sort-imports': ['error', {
+        type: 'alphabetical',
+        internalPattern: ['~/**', '~~/**'],
+      }],
+      'perfectionist/sort-named-imports': [
+        'error',
+        {
+          type: 'alphabetical',
+          groupKind: 'values-first',
+        },
+      ],
+      'perfectionist/sort-exports': [
+        'error',
+        {
+          type: 'alphabetical',
+          groupKind: 'values-first',
+        },
+      ],
+
       '@typescript-eslint/adjacent-overload-signatures': 'error',
       '@typescript-eslint/array-type': ['error', { default: 'array-simple', readonly: 'array-simple' }],
       '@typescript-eslint/method-signature-style': ['error', 'property'],
@@ -41,8 +66,7 @@ export default withNuxt(
           varsIgnorePattern: '^_',
         },
       ],
-      'import/order': 'off',
-      'perfectionist/sort-vue-attributes': 'off',
+
       'vue/multi-word-component-names': 'off',
       'vue/attributes-order': ['error', {
         alphabetical: true,

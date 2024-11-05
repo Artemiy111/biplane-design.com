@@ -1,9 +1,10 @@
 import type { ImageId, ProjectId } from '../db/schema'
-import { imageMapper } from '../mappers/image.mapper'
-import { imageDbMapper } from '../mappers/imageDb.mapper'
 import type { CreateImageDto, UpdateImageDto } from '../use-cases/types'
 import type { ImageDbRepo } from './imageDb.repo'
 import type { ImageS3Repo } from './imageS3.repo'
+
+import { imageMapper } from '../mappers/image.mapper'
+import { imageDbMapper } from '../mappers/imageDb.mapper'
 
 export class ImageRepo {
   constructor(private dbRepo: ImageDbRepo, private s3Repo: ImageS3Repo) { }

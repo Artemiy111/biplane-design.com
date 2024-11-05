@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { toast } from 'vue-sonner'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form' 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~~/src/shared/ui/kit/tabs'
-import { loginSchema, registerSchema } from '~~/src/shared/config/validation'
 import { useForm } from 'vee-validate'
-import { Button } from '~~/src/shared/ui/kit/button'
-import {Input} from '~~/src/shared/ui/kit/input'
-import { useUserModel } from '~~/src/shared/model/user'
+import { toast } from 'vue-sonner'
 
+import { loginSchema, registerSchema } from '~~/src/shared/config/validation'
+import { useUserModel } from '~~/src/shared/model/user'
+import { Button } from '~~/src/shared/ui/kit/button'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form'
+import { Input } from '~~/src/shared/ui/kit/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~~/src/shared/ui/kit/tabs'
 
 const title = 'Вход/Регистрация'
 const description = 'Вход для администратора'
@@ -17,8 +17,8 @@ useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 const userModel = useUserModel()
 
-const { meta: loginMeta,handleSubmit: handleLoginSubmit, defineField, resetForm: resetLoginForm} = useForm({
-  validationSchema: toTypedSchema(loginSchema)
+const { meta: loginMeta, handleSubmit: handleLoginSubmit, defineField, resetForm: resetLoginForm } = useForm({
+  validationSchema: toTypedSchema(loginSchema),
 })
 
 const [loginUsername, loginUsernameAttrs] = defineField('username')
@@ -32,7 +32,7 @@ const toastMessages = {
   register: {
     success: 'Аккаунт успешно создан',
     error: 'Не удалось создать аккаунт',
-  }
+  },
 }
 
 const onLoginSubmit = handleLoginSubmit(async (values) => {
@@ -47,7 +47,7 @@ const onLoginSubmit = handleLoginSubmit(async (values) => {
   }
 })
 
-const {meta: registerMeta, handleSubmit: handleRegisterSubmit, defineField: defineRegisterField, resetForm: resetRegisterForm} = useForm({
+const { meta: registerMeta, handleSubmit: handleRegisterSubmit, defineField: defineRegisterField, resetForm: resetRegisterForm } = useForm({
   validationSchema: toTypedSchema(registerSchema),
 })
 
@@ -143,15 +143,15 @@ const [registerRepeatPassword, registerRepeatPasswordAttrs] = defineRegisterFiel
 
       <TabsContent value="login">
         <form
-        class="flex flex-col gap-4"
-        @submit.prevent="onLoginSubmit"
+          class="flex flex-col gap-4"
+          @submit.prevent="onLoginSubmit"
         >
           <FormField
             name="username"
           >
             <FormItem>
               <FormLabel>Имя администратора</FormLabel>
-              <FormControl  >
+              <FormControl>
                 <Input
                   v-model="loginUsername"
                   v-bind="loginUsernameAttrs"
@@ -176,7 +176,11 @@ const [registerRepeatPassword, registerRepeatPasswordAttrs] = defineRegisterFiel
               <FormMessage />
             </FormItem>
           </FormField>
-          <Button type="submit" class="w-max" :disabled="!loginMeta.valid">
+          <Button
+            class="w-max"
+            :disabled="!loginMeta.valid"
+            type="submit"
+          >
             Войти
           </Button>
         </form>

@@ -1,5 +1,6 @@
 import type { GroupId } from '~~/server/db/schema'
 import type { GroupDto } from '~~/server/use-cases/types'
+
 import { api } from '../api'
 
 export const useGroupsModel = defineStore('groups', () => {
@@ -17,7 +18,7 @@ export const useGroupsModel = defineStore('groups', () => {
     groups,
     categories,
     load,
-    getById
+    getById,
   }
 })
 

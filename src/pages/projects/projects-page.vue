@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import * as z from 'zod'
 import type { LocationQuery } from 'vue-router'
-import { LoaderCircle } from 'lucide-vue-next'
+
 import { useBreakpoints } from '@vueuse/core'
-import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
+import { LoaderCircle } from 'lucide-vue-next'
+import * as z from 'zod'
+
 import type { CategoryDto, GroupDto } from '~~/server/use-cases/types'
+
 import { cn } from '~~/src/shared/lib/utils'
-import { screenBreakpoints } from '~~/tailwind.config'
 import { useGroupsModel } from '~~/src/shared/model/groups'
+import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
 import { Separator } from '~~/src/shared/ui/kit/separator'
+import { screenBreakpoints } from '~~/tailwind.config'
 
 const title = 'Проекты'
 const description = 'Представлены различные категории проектов'
@@ -23,7 +26,7 @@ const route = useRoute()
 const router = useRouter()
 
 const groupsModel = useGroupsModel()
-const {groups, categories} = storeToRefs(groupsModel)
+const { groups, categories } = storeToRefs(groupsModel)
 
 const currentCategory = ref<CategoryDto | null>(getCurrentCategory(route.query))
 const currentGroup = computed(

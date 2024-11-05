@@ -1,7 +1,9 @@
 import type { ProjectId } from '~~/server/db/schema'
-import type { UpdateProjectDto, CreateProjectDto } from '~~/server/use-cases/types'
-import { useGroupsModel } from './groups'
+import type { CreateProjectDto, UpdateProjectDto } from '~~/server/use-cases/types'
+
 import { api } from '~~/src/shared/api'
+
+import { useGroupsModel } from './groups'
 
 export const useProjectsModel = defineStore('projects', () => {
   const groupsModel = useGroupsModel()
@@ -36,7 +38,7 @@ export const useProjectsModel = defineStore('projects', () => {
     create,
     update,
     updateOrder,
-    delete: deleteOne
+    delete: deleteOne,
   }
 })
 

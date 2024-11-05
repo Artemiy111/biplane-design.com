@@ -1,7 +1,8 @@
 import { Argon2id } from 'oslo/password'
+
 import { userRepo } from '~~/server/di'
-import { lucia } from '~~/src/shared/lib/utils/auth'
 import { loginSchema } from '~~/src/shared/config/validation'
+import { lucia } from '~~/src/shared/lib/utils/auth'
 
 export default defineEventHandler(async (event) => {
   const data = await readValidatedBody(event, loginSchema.parse)

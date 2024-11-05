@@ -2,9 +2,10 @@
 import { useWindowSize } from '@vueuse/core'
 import { gsap } from 'gsap'
 import SplitType from 'split-type'
-import { buttonVariants } from '~~/src/shared/ui/kit/button'
+
 import { cn } from '~~/src/shared/lib/utils'
 import { useHeaderSize } from '~~/src/shared/model/use-header-size'
+import { buttonVariants } from '~~/src/shared/ui/kit/button'
 
 const title = 'Biplane-Design | Главная'
 const description = 'Студия дизайна'

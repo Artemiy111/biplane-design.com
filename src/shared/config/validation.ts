@@ -43,7 +43,6 @@ export const registerSchema = z.object({
 
 export type RegisterDto = z.infer<typeof registerSchema>
 
-
 export const changePasswordSchema = z.object({
   currentPassword: passwordSchema,
   newPassword: passwordSchema,
@@ -63,4 +62,3 @@ const dateSchema = z
   })
   .min(new Date('1900-01-01'), validationErrors.minDate(new Date('1900-01-01')))
   .max(new Date(), validationErrors.maxDate(new Date()))
-

@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { toast } from 'vue-sonner'
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '~~/src/shared/ui/kit/form'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger , DialogDescription } from '~~/src/shared/ui/kit/dialog'
-import { useAuthenticatedUser, useUserModel } from '~~/src/shared/model/user'
-import {changePasswordSchema} from '~~/src/shared/config/validation'
-import { Button } from '~~/src/shared/ui/kit/button'
-import { Input } from '~~/src/shared/ui/kit/input'
 import { useForm } from 'vee-validate'
+import { toast } from 'vue-sonner'
+
+import { changePasswordSchema } from '~~/src/shared/config/validation'
+import { useAuthenticatedUser, useUserModel } from '~~/src/shared/model/user'
+import { Button } from '~~/src/shared/ui/kit/button'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '~~/src/shared/ui/kit/dialog'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form'
+import { Input } from '~~/src/shared/ui/kit/input'
 
 const title = 'Аккаунт администратора'
 const description = 'Настройки аккаунта администратора'
@@ -19,7 +20,7 @@ const user = useAuthenticatedUser()
 
 const isDialogOpen = ref(false)
 
-const {meta, handleSubmit, defineField, resetForm} = useForm({
+const { meta, handleSubmit, defineField, resetForm } = useForm({
   validationSchema: toTypedSchema(changePasswordSchema),
 })
 
@@ -39,7 +40,6 @@ const onSubmit = handleSubmit(async (values) => {
     toast.error(toastMessages.error)
   }
 })
-
 </script>
 
 <template>
@@ -114,7 +114,9 @@ const onSubmit = handleSubmit(async (values) => {
                 <FormMessage />
               </FormItem>
             </FormField>
-            <Button :disabled="!meta.valid" >Сменить пароль</Button>
+            <Button :disabled="!meta.valid">
+              Сменить пароль
+            </Button>
           </form>
         </DialogContent>
       </Dialog>

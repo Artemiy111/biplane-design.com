@@ -1,9 +1,10 @@
 import type { CategoryId, GroupId } from '../db/schema'
-import { categoryMapper } from '../mappers/category.mapper'
-import { categoryDbMapper } from '../mappers/categoryDb.mapper'
 import type { CreateCategoryDto, UpdateCategoryDto } from '../use-cases/types'
 import type { CategoryDbRepo } from './categoryDb.repo'
 import type { ProjectRepo } from './project.repo'
+
+import { categoryMapper } from '../mappers/category.mapper'
+import { categoryDbMapper } from '../mappers/categoryDb.mapper'
 
 export class CategoryRepo {
   constructor(private dbRepo: CategoryDbRepo, private projectRepo: ProjectRepo) { }

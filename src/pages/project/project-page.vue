@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { useElementSize, watchOnce } from '@vueuse/core'
-import { Carousel, type CarouselApi, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
+
 import { cn } from '~~/src/shared/lib/utils'
 import { useProjectModel } from '~~/src/shared/model/project'
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '~~/src/shared/ui/kit/carousel'
 
-const projectUri = computed(() => useRoute().params.uri! as string)
+const props = defineProps<{
+  uri: string
+}>()
+
 const projectModel = useProjectModel()
-useAsyncData(`project-${projectUri.value}`, () => projectModel.load(projectUri.value), {watch: [projectUri]})
+useAsyncData(`project-${props.uri}`, () => projectModel.load(props.uri), { watch: [toRef(() => props.uri)] })
 
 const project = computed(() => projectModel.project)
 
@@ -108,13 +112,13 @@ function scrollToImage(index: number): void {
         </CarouselContent>
       </Carousel>
     </section>
-    
+
     <NuxtImg
-      :key="project.images[0].id"
-      :alt="project.images[0].alt"
-      :class="cn('w-full hidden md:block', project.images[0].fit)"
+      :key="project.images[0]!.id"
+      :alt="project.images[0]!.alt"
+      :class="cn('w-full hidden md:block', project.images[0]!.fit)"
       format="avif,webp,png,jpg"
-      :src="project.images[0].url"
+      :src="project.images[0]!.url"
     />
     <section class="grid grid-cols-[repeat(2,max-content)] gap-x-16 gap-y-2 px-8 py-8 sm:px-4">
       <span>Статус</span>

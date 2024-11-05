@@ -1,12 +1,15 @@
 import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
-import { groupDbMapper } from '../mappers/groupDb.mapper'
+
+import type { Db } from '~~/server/db'
+import type { GroupId } from '~~/server/db/schema'
 import type {
   CreateGroupDto,
   UpdateGroupDto,
 } from '~~/server/use-cases/types'
-import type { Db } from '~~/server/db'
-import type { GroupId } from '~~/server/db/schema'
+
 import { groups } from '~~/server/db/schema'
+
+import { groupDbMapper } from '../mappers/groupDb.mapper'
 
 export class GroupDbRepo {
   constructor(private db: Db) { }

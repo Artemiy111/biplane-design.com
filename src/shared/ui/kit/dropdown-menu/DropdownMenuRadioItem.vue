@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { type HTMLAttributes, computed } from 'vue'
+import { Circle } from 'lucide-vue-next'
 import {
   DropdownMenuItemIndicator,
   DropdownMenuRadioItem,
+  useForwardPropsEmits,
   type DropdownMenuRadioItemEmits,
   type DropdownMenuRadioItemProps,
-  useForwardPropsEmits,
 } from 'radix-vue'
-import { Circle } from 'lucide-vue-next'
+import { computed, type HTMLAttributes } from 'vue'
+
 import { cn } from '~~/src/shared/lib/utils'
 
 const props = defineProps<DropdownMenuRadioItemProps & { class?: HTMLAttributes['class'] }>()

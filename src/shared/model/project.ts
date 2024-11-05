@@ -1,7 +1,8 @@
+import type { ImageId } from '~~/server/db/schema'
 import type { ProjectDto, UpdateImageDto, UpdateProjectDto } from '~~/server/use-cases/types'
-import { useProjectsModel } from './projects'
-import type { ImageId, } from '~~/server/db/schema'
+
 import { api } from '../api'
+import { useProjectsModel } from './projects'
 
 export const useProjectModel = defineStore('project', () => {
   const projectsModel = useProjectsModel()
@@ -22,7 +23,8 @@ export const useProjectModel = defineStore('project', () => {
       await $fetch(`/api/images/${id}`, {
         method: 'DELETE',
       })
-    } catch (_e) {
+    }
+    catch (_e) {
       project.value.images = snapshot
       throw _e
     }
@@ -70,6 +72,6 @@ export const useProjectModel = defineStore('project', () => {
     load,
     deleteImage,
     updateImage,
-    uploadImages
+    uploadImages,
   }
 })
