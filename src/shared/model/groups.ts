@@ -1,14 +1,15 @@
 import type { GroupId } from '~~/server/db/schema'
 import type { GroupDto } from '~~/server/use-cases/types'
 
-import { api } from '../api'
+import { useApi } from '../api'
 
 export const useGroupsModel = defineStore('groups', () => {
+  const api = useApi()
   const groups = ref<GroupDto[]>([])
   const categories = computed(() => groups.value.flatMap(g => g.categories))
 
   const load = async () => {
-    groups.value = await api.groups.getAll()
+    groups.value = await api.groups.getAll.query()
     return groups.value
   }
 

@@ -32,8 +32,8 @@ export class ImageDbRepo {
       const returned = await tx.query.images.findFirst({ where: eq(images.id, create.id) })
       return returned!
     }, {
-      deferrable: true,
-      isolationLevel: 'read uncommitted',
+      // deferrable: true,
+      // isolationLevel: 'read uncommitted',
     })
   }
 
@@ -65,8 +65,8 @@ export class ImageDbRepo {
       await tx.update(images).set({ order: newOrder }).where(eq(images.id, id))
       await tx.update(images).set({ order: sql`${images.order} / 1000` }).where(gte(images.order, 1000))
     }, {
-      deferrable: true,
-      isolationLevel: 'read uncommitted',
+      // deferrable: true,
+      // isolationLevel: 'read uncommitted',
     })
   }
 
@@ -89,8 +89,8 @@ export class ImageDbRepo {
       await tx.update(images).set({ order: sql`(${images.order} - 1) * 1000` }).where(and(eq(images.projectId, toDelete.projectId), gt(images.order, toDelete.order)))
       await tx.update(images).set({ order: sql`${images.order} / 1000` }).where(and(eq(images.projectId, toDelete.projectId), gte(images.order, 1000)))
     }, {
-      deferrable: true,
-      isolationLevel: 'read uncommitted',
+      // deferrable: true,
+      // isolationLevel: 'read uncommitted',
     })
   }
 }

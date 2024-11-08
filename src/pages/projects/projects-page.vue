@@ -7,8 +7,9 @@ import * as z from 'zod'
 
 import type { CategoryDto, GroupDto } from '~~/server/use-cases/types'
 
+import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
-import { useGroupsModel } from '~~/src/shared/model/groups'
+import { useCategories, useGroups, useGroupsModel } from '~~/src/shared/model/groups'
 import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
 import { Separator } from '~~/src/shared/ui/kit/separator'
 import { screenBreakpoints } from '~~/tailwind.config'
@@ -21,12 +22,16 @@ useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 const querySchema = z.object({
   category: z.string().min(3),
 })
-
 const route = useRoute()
 const router = useRouter()
 
 const groupsModel = useGroupsModel()
-const { groups, categories } = storeToRefs(groupsModel)
+groupsModel.load()
+
+const groups = useGroups()
+const categories = useCategories()
+// const { data: groups } = useAsyncData('groups', () => api.groups.getAll.query())
+// const categories = computed(() => groups.value?.flatMap(g => g.categories) || [])
 
 const currentCategory = ref<CategoryDto | null>(getCurrentCategory(route.query))
 const currentGroup = computed(

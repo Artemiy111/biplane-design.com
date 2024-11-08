@@ -6,7 +6,7 @@ export default {
   dbCredentials: {
     url: env.DATABASE_URL,
   },
-  dialect: 'postgresql',
+  dialect: 'turso',
   out: './server/db/migrations',
   schema: './server/db/schema.ts',
   casing: 'snake_case',

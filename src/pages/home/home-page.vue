@@ -46,7 +46,7 @@ onMounted(() => {
       </h1>
       <span
         class="gsap-description font-medium pl-2 leading-[130%] md:text-xl sm:text-lg xs:text-base text-white text-3xl"
-      ><span>Первоклассные fff решения</span>&nbsp;<span class="whitespace-nowrap">в архитектуре и дизайне</span>
+      ><span>Первоклассные решения</span>&nbsp;<span class="whitespace-nowrap">в архитектуре и дизайне</span>
       </span>
       <NuxtLink
         :class="cn(buttonVariants({ variant: 'outline' }), 'w-fit ml-2 text-white hover:text-white bg-transparent hover:bg-black/30')"
