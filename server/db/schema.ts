@@ -11,30 +11,25 @@ import {
 } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  username: text('username').notNull(),
-  passwordHash: text('password_hash').notNull(),
+  id: serial().primaryKey(),
+  username: text().notNull(),
+  passwordHash: text().notNull(),
 })
 
 export type UserDb = typeof users.$inferSelect
 export type CreateUserDb = typeof users.$inferInsert
 
 export const sessions = pgTable('sessions', {
-  id: text('id').primaryKey(),
-  userId: integer('user_id')
-    .notNull()
-    .references(() => users.id),
-  expiresAt: timestamp('expires_at', {
-    withTimezone: true,
-    mode: 'date',
-  }).notNull(),
+  id: text().primaryKey(),
+  userId: integer().notNull().references(() => users.id),
+  expiresAt: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
 })
 
 export const groups = pgTable('groups', {
-  id: serial('id').primaryKey(),
-  title: text('title').notNull().unique(),
-  uri: text('uri').notNull().unique(),
-  order: integer('order').notNull().unique(),
+  id: serial().primaryKey(),
+  title: text().notNull().unique(),
+  uri: text().notNull().unique(),
+  order: integer().notNull().unique(),
 })
 
 export type GroupId = GroupDb['id']
@@ -46,17 +41,17 @@ export const groupsRelations = relations(groups, ({ many }) => ({
   categories: many(categories),
 }))
 
+export const categoryLayout = ['base', 'mini'] as const
+
 export const categories = pgTable(
   'categories',
   {
-    groupId: integer('group_id')
-      .notNull()
-      .references(() => groups.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
-    id: serial('id').primaryKey(),
-    title: text('title').notNull().unique(),
-    uri: text('uri').notNull(),
-    order: integer('order').notNull(),
-    layout: text('layout', { enum: ['base', 'mini'] }).notNull(),
+    groupId: integer().notNull().references(() => groups.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
+    id: serial().primaryKey(),
+    title: text().notNull().unique(),
+    uri: text().notNull(),
+    order: integer().notNull(),
+    layout: text({ enum: categoryLayout }).notNull(),
   },
   (t) => {
     return {
@@ -89,15 +84,15 @@ export const projects = pgTable(
     categoryId: integer('category_id')
       .notNull()
       .references(() => categories.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
-    id: serial('id').primaryKey(),
-    title: text('title').notNull(),
-    uri: text('uri').notNull().unique(),
-    status: text('status', { enum: projectStatus }).notNull(),
-    yearStart: integer('year_start'),
-    yearEnd: integer('year_end'),
-    location: text('location'),
-    order: integer('order').notNull(),
-    isMinimal: boolean('is_minimal').notNull().default(false),
+    id: serial().primaryKey(),
+    title: text().notNull(),
+    uri: text().notNull().unique(),
+    status: text({ enum: projectStatus }).notNull(),
+    yearStart: integer(),
+    yearEnd: integer(),
+    location: text(),
+    order: integer().notNull(),
+    isMinimal: boolean().notNull().default(false),
   },
   (t) => {
     return {
@@ -126,11 +121,11 @@ export const imageFit = ['object-fill', 'object-contain', 'object-cover', 'objec
 export const images = pgTable(
   'images',
   {
-    projectId: integer('project_id').notNull().references(() => projects.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
-    id: text('id').primaryKey().notNull(),
-    alt: text('alt').notNull(),
-    fit: text('fit', { enum: imageFit }).notNull(),
-    order: integer('order').notNull(),
+    projectId: integer().notNull().references(() => projects.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
+    id: text().primaryKey().notNull(),
+    alt: text().notNull(),
+    fit: text({ enum: imageFit }).notNull(),
+    order: integer().notNull(),
   },
   (t) => {
     return {

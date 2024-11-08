@@ -1,6 +1,6 @@
 import type { CreateGroupDto, CreateProjectDto, UpdateGroupDto, UpdateProjectDto } from '~~/server/use-cases/types'
 
-import type { ChangePasswordDto, LoginDto, RegisterDto } from '../config/validation'
+import type { ChangePasswordDto, LoginDto, RegisterDto } from '../config/validation/validation'
 
 import { api } from './instance'
 

@@ -2,6 +2,7 @@
 import type { z } from 'zod'
 
 import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
 
 import type { CategoryId, GroupId, ProjectId } from '~~/server/db/schema'
 import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~~/server/use-cases/types'
@@ -24,43 +25,52 @@ const emit = defineEmits<{
   create: [dto: CreateProjectDto]
   update: [id: ProjectId, dto: UpdateProjectDto]
 }>()
+
 export type SheetMode = 'create' | 'update'
 const mode = ref<SheetMode>('create')
 
-const initialValues = ref<FormSchema>({
-  title: '',
-  uri: '',
-  groupId: props.groups?.[0].id,
-  categoryId: props.groups?.[0].categories[0].id,
-  status: 'завершён',
-  yearStart: null,
-  yearEnd: null,
-  location: null,
-  id: -1,
-  order: -1,
-  isMinimal: false,
+type FormSchema = z.infer<typeof schema>
+
+const { values, meta, setFieldValue, setValues, resetForm, handleSubmit } = useForm({
+  validationSchema: toTypedSchema(schema),
+  initialValues: {
+    groupId: props.groups[0]?.id,
+    categoryId: props.groups[0]?.categories[0]?.id,
+  },
 })
 
-export type FormSchema = z.infer<typeof schema>
+// const initialValues = ref<FormSchema>({
+//   title: '',
+//   uri: '',
+//   groupId: props.groups?.[0].id,
+//   categoryId: props.groups?.[0].categories[0].id,
+//   status: 'завершён',
+//   yearStart: null,
+//   yearEnd: null,
+//   location: null,
+//   id: -1,
+//   order: -1,
+//   isMinimal: false,
+// })
 
-const validationSchema = toTypedSchema(schema)
-const formRef = ref<InstanceType<typeof Form> | null>(null)
+// export type FormSchema = z.infer<typeof schema>
+
+// const validationSchema = toTypedSchema(schema)
+// const formRef = ref<InstanceType<typeof Form> | null>(null)
 const selectedGroup = computed<NonNullable<typeof props.groups>[number] | null>(
-  () => props.groups.find(g => g.id === formRef.value?.values.groupId as number) || null,
+  () => props.groups.find(g => g.id === values.groupId as number) || null,
 )
 
-const title = computed(() => formRef.value?.values?.title as string || '')
+const title = computed(() => values.title as string || '')
 const uri = computed(() => toUri(title.value))
 
 watch(title, () => {
-  if (!formRef.value)
-    return
-  formRef.value.setFieldValue('uri', uri.value)
+  setFieldValue('uri', uri.value)
 })
 
 const isOpen = ref(false)
 function handleClose() {
-  if (formRef.value?.meta.dirty && formRef.value.meta.touched && isOpen.value)
+  if (meta.value.dirty && meta.value.touched && isOpen.value)
     return
 
   isOpen.value = false
@@ -79,13 +89,13 @@ async function open(data:
   if (data.mode === 'update') {
     mode.value = 'update'
     await nextTick()
-    formRef.value?.setValues(data.initial, false)
+    setValues(data.initial, false)
   }
   else {
     mode.value = 'create'
     await nextTick()
-    formRef.value?.resetForm()
-    if (data.initial) formRef.value?.setValues(data.initial, false)
+    resetForm()
+    if (data.initial) setValues(data.initial, false)
   }
 }
 
@@ -93,20 +103,16 @@ function close() {
   isOpen.value = false
 }
 
-function submit(values: FormSchema) {
-  switch (mode.value) {
-    case 'create': {
-      const createDto: CreateProjectDto = values
-      emit('create', createDto)
-      break
-    }
-    case 'update': {
-      const updateDto: UpdateProjectDto = values
-      emit('update', values.id, updateDto)
-      break
-    }
+const onSubmit = handleSubmit((values) => {
+  if (mode.value === 'create') {
+    const createDto: CreateProjectDto = values
+    emit('create', createDto)
   }
-}
+  else {
+    const updateDto: UpdateProjectDto = values
+    emit('update', values.id, updateDto)
+  }
+})
 
 defineExpose({
   open,
@@ -130,26 +136,20 @@ defineExpose({
           Заполните поля
         </SheetDescription>
       </SheetHeader>
-      <Form
-        ref="formRef"
-        v-slot="{ setFieldValue }"
+      <form
         class="grid gap-4"
-        :initial-values="initialValues"
-        :validation-schema="validationSchema"
-        @submit="submit($event as FormSchema)"
+        @submit="onSubmit()"
       >
         <FormField
-          v-slot="{ field, handleChange, handleBlur }"
+          v-slot="{ componentField }"
           name="title"
         >
           <FormItem>
             <FormLabel>Название проекта *</FormLabel>
             <FormControl>
               <Input
-                :model-value="field.value"
                 placeholder="Мой новый дом"
-                @blur="handleBlur"
-                @change="handleChange"
+                v-bind="componentField"
               />
             </FormControl>
             <FormMessage />
@@ -165,7 +165,7 @@ defineExpose({
               :model-value="String(field.value)"
               @update:model-value="(v) => {
                 handleChange(props.groups.find(g => g.id === Number(v))!.id)
-                setFieldValue('categoryId', selectedGroup?.categories[0].id)
+                setFieldValue('categoryId', selectedGroup?.categories[0]?.id)
                 handleBlur()
               }"
             >
@@ -238,37 +238,26 @@ defineExpose({
           </FormItem>
         </FormField>
         <FormField
-          v-slot="{ field, handleChange, handleBlur }"
+          v-slot="{ componentField }"
           name="status"
         >
           <FormItem>
             <FormLabel>Статус *</FormLabel>
-            <Select
-              :model-value="String(field.value)"
-              @update:model-value="(v) => {
-                handleChange(v)
-                handleBlur()
-              }"
-            >
+            <Select v-bind="componentField">
+              ⌦ >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Выберите статус" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem
-                  value="завершён"
-                >
+                <SelectItem value="завершён">
                   завершён
                 </SelectItem>
-                <SelectItem
-                  value="строится"
-                >
+                <SelectItem value="строится">
                   строится
                 </SelectItem>
-                <SelectItem
-                  value="в разработке"
-                >
+                <SelectItem value="в разработке">
                   в разработке
                 </SelectItem>
               </SelectContent>
@@ -277,53 +266,46 @@ defineExpose({
           </FormItem>
         </FormField>
         <FormField
-          v-slot="{ componentField, handleChange, handleBlur }"
+          v-slot="{ componentField }"
           name="yearStart"
         >
           <FormItem>
             <FormLabel>Год начала</FormLabel>
             <FormControl>
               <Input
-                :model-value="componentField.modelValue"
+                v-bind="componentField"
                 placeholder=""
                 type="number"
-                @blur="handleBlur"
-                @change="handleChange"
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
         <FormField
-          v-slot="{ componentField, handleChange, handleBlur }"
+          v-slot="{ componentField }"
           name="yearEnd"
         >
           <FormItem>
             <FormLabel>Год завершения</FormLabel>
             <FormControl>
               <Input
-                :model-value="componentField.modelValue"
-                placeholder=""
                 type="number"
-                @blur="handleBlur"
-                @change="handleChange"
+                v-bind="componentField"
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
         <FormField
-          v-slot="{ componentField, handleChange, handleBlur }"
+          v-slot="{ componentField }"
           name="location"
         >
           <FormItem>
             <FormLabel>Расположение</FormLabel>
             <FormControl>
               <Input
-                :model-value="componentField.modelValue"
+                v-bind="componentField"
                 placeholder="Уфа"
-                @blur="handleBlur"
-                @change="handleChange($event.target.value.trim() || null)"
               />
             </FormControl>
             <FormMessage />
@@ -351,7 +333,7 @@ defineExpose({
             {{ mode === 'create' ? 'Создать' : "Сохранить изменения" }}
           </Button>
         </SheetFooter>
-      </Form>
+      </form>
     </SheetContent>
   </Sheet>
 </template>

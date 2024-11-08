@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watchOnce } from '@vueuse/core'
+import { useBreakpoints, watchImmediate, watchOnce } from '@vueuse/core'
 import { GripVertical, LoaderCircle, Pen, Trash2 } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import { toast } from 'vue-sonner'
@@ -10,10 +10,10 @@ import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProject
 import { cn } from '~~/src/shared/lib/utils'
 import { useCategories, useGroups, useGroupsModel } from '~~/src/shared/model/groups'
 import { useProjects, useProjectsModel } from '~~/src/shared/model/projects'
-import { useScreenSize } from '~~/src/shared/model/use-screen-size'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~~/src/shared/ui/kit/popover'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
+import { screenBreakpoints } from '~~/tailwind.config'
 
 import ProjectSheet from './ui/project-sheet.vue'
 
@@ -24,7 +24,9 @@ useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 const projectsModel = useProjectsModel()
 
-const { md } = useScreenSize()
+const breakpoints = useBreakpoints(screenBreakpoints, { strategy: 'max-width' })
+const md = breakpoints.isSmallerOrEqual('md')
+
 const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
 
 const selectedCategory = ref<CategoryDto | null>(cachedGroups.value?.[0]?.categories[0] || null)
@@ -44,12 +46,10 @@ function getCategoryById(id: number) {
 }
 
 const selectedCategoryProjects = ref<ProjectDto[]>([])
-watch(() => [selectedCategory.value, projects.value], () => {
+watchImmediate(() => [selectedCategory.value, projects.value], () => {
   selectedCategoryProjects.value = projects.value.filter((project) => {
     return project.categoryId === selectedCategory.value?.id
   })
-}, {
-  immediate: true,
 })
 
 const projectSheetRef = ref<InstanceType<typeof ProjectSheet> | null>(null)

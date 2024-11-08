@@ -3,7 +3,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { toast } from 'vue-sonner'
 
-import { loginSchema, registerSchema } from '~~/src/shared/config/validation'
+import { authSchemas } from '~~/src/shared/config/validation'
 import { useUserModel } from '~~/src/shared/model/user'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form'
@@ -18,7 +18,7 @@ useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 const userModel = useUserModel()
 
 const { meta: loginMeta, handleSubmit: handleLoginSubmit, defineField, resetForm: resetLoginForm } = useForm({
-  validationSchema: toTypedSchema(loginSchema),
+  validationSchema: toTypedSchema(authSchemas.loginSchema),
 })
 
 const [loginUsername, loginUsernameAttrs] = defineField('username')
@@ -48,7 +48,7 @@ const onLoginSubmit = handleLoginSubmit(async (values) => {
 })
 
 const { meta: registerMeta, handleSubmit: handleRegisterSubmit, defineField: defineRegisterField, resetForm: resetRegisterForm } = useForm({
-  validationSchema: toTypedSchema(registerSchema),
+  validationSchema: toTypedSchema(authSchemas.registerSchema),
 })
 
 const onRegisterSubmit = handleRegisterSubmit(async (values) => {

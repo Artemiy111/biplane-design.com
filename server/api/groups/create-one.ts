@@ -1,15 +1,9 @@
-import { z } from 'zod'
-
 import { authRepo, groupRepo } from '~~/server/di'
-
-const createSchema = z.object({
-  title: z.string(),
-  uri: z.string(),
-})
+import { groupSchemas } from '~~/src/shared/config/validation/group'
 
 export default defineEventHandler(async (event) => {
   authRepo.assertAuthenticated(event)
-  const body = await readValidatedBody(event, createSchema.parse)
+  const body = await readValidatedBody(event, groupSchemas.createSchema.parse)
 
   return await groupRepo.create(body)
 })

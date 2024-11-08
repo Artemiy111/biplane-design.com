@@ -3,7 +3,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { toast } from 'vue-sonner'
 
-import { changePasswordSchema } from '~~/src/shared/config/validation'
+import { changePasswordSchema } from '~~/src/shared/config/validation/validation'
 import { useAuthenticatedUser, useUserModel } from '~~/src/shared/model/user'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '~~/src/shared/ui/kit/dialog'

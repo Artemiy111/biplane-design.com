@@ -210,12 +210,12 @@ const dummyProjects = computed(() => {
           :to="`/projects/${p.uri}`"
         >
           <NuxtImg
-            :alt="p.images[0].alt"
-            :class="cn('aspect-video w-full bg-white', p.images[0].fit)"
+            :alt="p.images[0]!.alt"
+            :class="cn('aspect-video w-full bg-white', p.images[0]!.fit)"
             format="avif,webp,png,jpg"
             :height="500"
             loading="lazy"
-            :src="p.images[0].url"
+            :src="p.images[0]!.url"
             :width="500"
           />
           <div class="flex items-center justify-between gap-8 px-8 pt-4 pb-16 sm:px-4 sm:py-2">

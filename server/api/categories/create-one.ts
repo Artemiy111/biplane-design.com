@@ -1,18 +1,9 @@
-import { z } from 'zod'
-
 import { authRepo, categoryRepo } from '~~/server/di'
-
-const createSchema = z.object({
-  groupId: z.number(),
-  title: z.string(),
-  uri: z.string(),
-  order: z.number(),
-  layout: z.enum(['base', 'mini']),
-})
+import { categorySchemas } from '~~/src/shared/config/validation'
 
 export default defineEventHandler(async (event) => {
   authRepo.assertAuthenticated(event)
-  const body = await readValidatedBody(event, createSchema.parse)
+  const body = await readValidatedBody(event, categorySchemas.createSchema.parse)
 
   return await categoryRepo.create(body)
 })
