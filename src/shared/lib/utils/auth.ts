@@ -1,8 +1,9 @@
+import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle'
+
+import { db } from '~~/server/db'
+import { sessions, users, type UserDb } from '~~/server/db/schema'
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import { Lucia } from 'lucia'
-import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle'
-import { db } from '~~/server/db'
-import { users, sessions, type UserDb } from '~~/server/db/schema'
 
 const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users)
 

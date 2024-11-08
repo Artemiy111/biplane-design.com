@@ -1,26 +1,22 @@
 <script setup lang="ts">
-import * as z from 'zod'
 import type { LocationQuery } from 'vue-router'
-import { LoaderCircle } from 'lucide-vue-next'
-import { useBreakpoints } from '@vueuse/core'
-import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
-import type { CategoryDto, GroupDto } from '~~/server/use-cases/types'
-import { cn } from '~~/src/shared/lib/utils'
-import { screenBreakpoints } from '~~/tailwind.config'
-import { useGroups } from '~~/src/shared/model/groups'
 
-useServerSeoMeta({
-  title: 'Проекты',
-  ogTitle: 'Проекты',
-  description: 'Представлены различные категории проектов',
-  ogDescription: 'Представлены различные категории проектов',
-})
-useSeoMeta({
-  title: 'Проекты',
-  ogTitle: 'Проекты',
-  description: 'Представлены различные категории проектов',
-  ogDescription: 'Представлены различные категории проектов',
-})
+import { useBreakpoints } from '@vueuse/core'
+import { LoaderCircle } from 'lucide-vue-next'
+import * as z from 'zod'
+
+import type { CategoryDto, GroupDto } from '~~/server/use-cases/types'
+
+import { cn } from '~~/src/shared/lib/utils'
+import { useGroupsModel } from '~~/src/shared/model/groups'
+import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
+import { Separator } from '~~/src/shared/ui/kit/separator'
+import { screenBreakpoints } from '~~/tailwind.config'
+
+const title = 'Проекты'
+const description = 'Представлены различные категории проектов'
+useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 const querySchema = z.object({
   category: z.string().min(3),
@@ -29,15 +25,8 @@ const querySchema = z.object({
 const route = useRoute()
 const router = useRouter()
 
-const groups = useGroups()
-// const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
-// const { data: groups, error: _error } = await useLazyFetch<GroupDto[] | null>('/api/groups', {
-//   key: 'groups',
-//   default() {
-//     return cachedGroups.value
-//   },
-// })
-const categories = computed(() => groups.value?.flatMap(g => g.categories) || [])
+const groupsModel = useGroupsModel()
+const { groups, categories } = storeToRefs(groupsModel)
 
 const currentCategory = ref<CategoryDto | null>(getCurrentCategory(route.query))
 const currentGroup = computed(
@@ -53,7 +42,7 @@ watch(groups, () => {
     navigateTo({ path: route.path, query: { category: groups.value?.[0]?.categories[0]?.uri } })
 })
 
-function getCategoryFromFromRouteQuery(query: LocationQuery): CategoryDto | null {
+function getCategoryFromRouteQuery(query: LocationQuery): CategoryDto | null {
   const validatedQuery = querySchema.safeParse(query)
   if (!validatedQuery.success) return null
 
@@ -65,7 +54,7 @@ function getCategoryFromFromRouteQuery(query: LocationQuery): CategoryDto | null
 }
 
 function getCurrentCategory(query: LocationQuery) {
-  return getCategoryFromFromRouteQuery(query) || categories.value[0] || null
+  return getCategoryFromRouteQuery(query) || categories.value[0] || null
 }
 
 router.afterEach(guard => (currentCategory.value = getCurrentCategory(guard.query)))
@@ -221,12 +210,12 @@ const dummyProjects = computed(() => {
           :to="`/projects/${p.uri}`"
         >
           <NuxtImg
-            :alt="p.images[0].alt"
-            :class="cn('aspect-video w-full bg-white', p.images[0].fit)"
+            :alt="p.images[0]!.alt"
+            :class="cn('aspect-video w-full bg-white', p.images[0]!.fit)"
             format="avif,webp,png,jpg"
             :height="500"
             loading="lazy"
-            :src="p.images[0].url"
+            :src="p.images[0]!.url"
             :width="500"
           />
           <div class="flex items-center justify-between gap-8 px-8 pt-4 pb-16 sm:px-4 sm:py-2">
@@ -238,7 +227,7 @@ const dummyProjects = computed(() => {
       <div
         v-for="n in dummyProjects"
         :key="n"
-        class="bg-red-200"
+        class=""
       />
     </section>
     <section

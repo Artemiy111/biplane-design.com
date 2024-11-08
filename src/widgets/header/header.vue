@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { useUser } from '~~/src/shared/model/user'
 import { UserRound } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
+import { useUser } from '~~/src/shared/model/user'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '~~/src/shared/ui/kit/dropdown-menu'
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuList,
 } from '~~/src/shared/ui/kit/navigation-menu'
-
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '~~/src/shared/ui/kit/dropdown-menu'
 import { Separator } from '~~/src/shared/ui/kit/separator'
 
 const user = useUser()

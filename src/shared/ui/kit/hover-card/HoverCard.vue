@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { HoverCardRoot, type HoverCardRootEmits, type HoverCardRootProps, useForwardPropsEmits } from 'radix-vue'
+import { HoverCardRoot, useForwardPropsEmits, type HoverCardRootEmits, type HoverCardRootProps } from 'radix-vue'
 
 const props = defineProps<HoverCardRootProps>()
 const emits = defineEmits<HoverCardRootEmits>()

@@ -1,5 +1,7 @@
-import { verifyRequestOrigin } from 'lucia'
 import type { Session, User } from 'lucia'
+
+import { verifyRequestOrigin } from 'lucia'
+
 import { lucia } from '~~/src/shared/lib/utils/auth'
 
 export default defineEventHandler(async (event) => {

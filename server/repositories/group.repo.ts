@@ -1,8 +1,9 @@
 import type { GroupId } from '../db/schema'
-import { groupMapper } from '../mappers/group.mapper'
 import type { CreateGroupDto, GroupDto, UpdateGroupDto } from '../use-cases/types'
 import type { CategoryRepo } from './category.repo'
 import type { GroupDbRepo } from './groupDb.repo'
+
+import { groupMapper } from '../mappers/group.mapper'
 
 export class GroupRepo {
   constructor(private dbRepo: GroupDbRepo, private categoryRepo: CategoryRepo) { }

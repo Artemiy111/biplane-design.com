@@ -1,4 +1,5 @@
 import { asSitemapUrl, defineSitemapEventHandler } from '#imports'
+
 import { projectRepo } from '~~/server/di'
 
 export default defineSitemapEventHandler(async () => {

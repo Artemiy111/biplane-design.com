@@ -1,5 +1,4 @@
-import type { ProjectId, CategoryId } from '../db/schema'
-import { projectMapper } from '../mappers/project.mapper'
+import type { CategoryId, ProjectId } from '../db/schema'
 import type {
   CreateProjectDto,
   UpdateProjectDto,
@@ -7,6 +6,8 @@ import type {
 import type { ImageRepo } from './image.repo'
 import type { ProjectDbRepo } from './projectDb.repo'
 import type { ProjectS3Repo } from './projectS3.repo'
+
+import { projectMapper } from '../mappers/project.mapper'
 
 export class ProjectRepo {
   constructor(private dbRepo: ProjectDbRepo, private bucketRepo: ProjectS3Repo, private imageRepo: ImageRepo) { }
