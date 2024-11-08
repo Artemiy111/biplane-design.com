@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { requiredStringSchema } from '../../src/shared/config/validation'
+import { requiredStringSchema } from '../../src/shared/config/validation/base'
 
 const envSchema = z.object({
   DATABASE_URL: requiredStringSchema.min(3),

@@ -12,7 +12,12 @@ const updateSchema = z.object({
   order: z.number().min(1),
 })
 
+const getOneSchema = z.object({
+  id: z.number(),
+})
+
 export const groupSchemas = {
+  getOneSchema: getOneSchema,
   createSchema,
   updateSchema,
 }

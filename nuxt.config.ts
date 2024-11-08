@@ -17,12 +17,9 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
   ],
 
-  ssr: true,
-
   imports: {
     dirs: [],
   },
-
   devtools: {
     enabled: true,
     timeline: {
@@ -44,13 +41,18 @@ export default defineNuxtConfig({
   site: {
     url: 'https://biplane-design.com',
   },
+
   runtimeConfig: {},
+
+  build: {
+    transpile: ['trpc-nuxt'],
+  },
 
   future: {
     compatibilityVersion: 4,
   },
-  compatibilityDate: '2024-07-20',
 
+  compatibilityDate: '2024-07-20',
   telemetry: { enabled: false },
 
   eslint: {
@@ -73,11 +75,6 @@ export default defineNuxtConfig({
 
   robots: {
     disallow: ['/admin/*'],
-  },
-
-  shadcn: {
-    componentDir: './components/ui',
-    prefix: '',
   },
 
   sitemap: {

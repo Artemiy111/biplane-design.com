@@ -74,8 +74,8 @@ export class ProjectDbRepo {
       })
       return returned!
     }, {
-      deferrable: true,
-      isolationLevel: 'read uncommitted',
+      // deferrable: true,
+      // isolationLevel: 'read uncommitted',
     })
   }
 
