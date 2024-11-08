@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { FolderUp } from 'lucide-vue-next'
 import type { HTMLAttributes } from 'vue'
-import { Input } from '~~/src/shared/ui/kit/input'
-import { cn } from '~~/src/shared/lib/utils'
+
+import { FolderUp } from 'lucide-vue-next'
+
 import type { ImageDto } from '~~/server/use-cases/types'
+
+import { cn } from '~~/src/shared/lib/utils'
+import { Input } from '~~/src/shared/ui/kit/input'
 
 const props = defineProps<{
   multiple?: boolean

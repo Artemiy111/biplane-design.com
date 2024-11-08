@@ -1,81 +1,82 @@
 <script setup lang="ts">
-import { toast } from 'vue-sonner'
+import { useBreakpoints, watchImmediate, watchOnce } from '@vueuse/core'
 import { GripVertical, LoaderCircle, Pen, Trash2 } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
-import ProjectSheet from './ui/project-sheet.vue'
-import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~~/server/use-cases/types'
+import { toast } from 'vue-sonner'
+
 import type { ProjectId } from '~~/server/db/schema'
+import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~~/server/use-cases/types'
+
 import { cn } from '~~/src/shared/lib/utils'
+import { useCategories, useGroups, useGroupsModel } from '~~/src/shared/model/groups'
+import { useProjects, useProjectsModel } from '~~/src/shared/model/projects'
 import { Button } from '~~/src/shared/ui/kit/button'
+import { Popover, PopoverContent, PopoverTrigger } from '~~/src/shared/ui/kit/popover'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
-import { useScreenSize } from '~~/src/shared/model/use-screen-size'
+import { screenBreakpoints } from '~~/tailwind.config'
 
-definePageMeta({
-  middleware: 'authenticated',
-})
+import ProjectSheet from './ui/project-sheet.vue'
 
-useServerSeoMeta({
-  title: 'Админ-панель',
-  ogTitle: 'Админ-панель',
-  description: 'Менеджмент базы-данных',
-  ogDescription: 'Менеджмент базы-данных',
-})
-useSeoMeta({
-  title: 'Админ-панель',
-  ogTitle: 'Админ-панель',
-  description: 'Менеджмент базы-данных',
-  ogDescription: 'Менеджмент базы-данных',
-})
-const { md } = useScreenSize()
+const title = 'Админ-панель'
+const description = 'Менеджмент базы-данных'
+useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+
+const projectsModel = useProjectsModel()
+
+const breakpoints = useBreakpoints(screenBreakpoints, { strategy: 'max-width' })
+const md = breakpoints.isSmallerOrEqual('md')
+
 const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
 
 const selectedCategory = ref<CategoryDto | null>(cachedGroups.value?.[0]?.categories[0] || null)
 
-const { data: groups, refresh } = await useLazyFetch<GroupDto[]>('/api/groups', {
-  key: 'groups',
-  default: () => {
-    if (!selectedCategory.value)
-      selectedCategory.value = cachedGroups.value?.[0]?.categories[0] || null
+const groupsModel = useGroupsModel()
+const groups = useGroups()
+const categories = useCategories()
+const projects = useProjects()
 
-    return cachedGroups.value || []
-  },
-})
-watch(groups, () => {
+watchOnce(groups, () => {
   if (!groups.value.length) return
   selectedCategory.value = groups.value[0]?.categories[0] || null
-}, { once: true })
-
-const categories = computed(() => groups.value.flatMap(g => g.categories) || [])
-const projects = computed(() => categories.value.flatMap(c => c.projects))
+})
 
 function getCategoryById(id: number) {
   return categories.value.find(c => c.id === id)!
 }
 
-function getGroupById(id: number) {
-  return groups.value.find(g => g.id === id)!
-}
-
 const selectedCategoryProjects = ref<ProjectDto[]>([])
-watch(() => [selectedCategory.value, projects.value], () => {
+watchImmediate(() => [selectedCategory.value, projects.value], () => {
   selectedCategoryProjects.value = projects.value.filter((project) => {
     return project.categoryId === selectedCategory.value?.id
   })
-}, {
-  immediate: true,
 })
 
 const projectSheetRef = ref<InstanceType<typeof ProjectSheet> | null>(null)
 
+const toastMessages = {
+  create: {
+    success: 'Проект создан',
+    error: 'Не удалось создать проект',
+  },
+  update: {
+    success: 'Проект изменён',
+    error: 'Не удалось изменить проект',
+  },
+  updateOrder: {
+    error: 'Не удалось переместить проект',
+  },
+  delete: {
+    success: 'Проект удалён',
+    error: 'Не удалось удалить проект',
+  },
+}
+
 async function createProject(dto: CreateProjectDto) {
   try {
-    await $fetch('/api/projects', {
-      method: 'POST',
-      body: dto,
-    })
+    await projectsModel.create(dto)
     projectSheetRef.value?.close()
-    toast.success('Проект создан')
-    refresh()
+    toast.success(toastMessages.create.success)
   }
   catch (_e) {
     const e = _e as Error
@@ -85,13 +86,9 @@ async function createProject(dto: CreateProjectDto) {
 
 async function updateProject(id: ProjectId, dto: UpdateProjectDto) {
   try {
-    await $fetch(`/api/projects/${id}`, {
-      method: 'PUT',
-      body: dto,
-    })
+    await projectsModel.update(id, dto)
     projectSheetRef.value?.close()
-    toast.success('Проект изменён')
-    refresh()
+    toast.success(toastMessages.update.success)
   }
   catch (_e) {
     const e = _e as Error
@@ -105,30 +102,21 @@ async function updateProjectOrder(e: SortableEvent) {
   const newOrder = e.newDraggableIndex! + 1
 
   const [project] = selectedCategoryProjects.value.splice(order - 1, 1)
-  selectedCategoryProjects.value.splice(newOrder - 1, 0, project)
+  selectedCategoryProjects.value.splice(newOrder - 1, 0, project!)
 
   try {
-    await $fetch(`/api/projects/${id}/update-order`, {
-      method: 'PATCH',
-      body: {
-        order: newOrder,
-      },
-    })
-    await refresh()
+    projectsModel.updateOrder(id, newOrder)
   }
   catch (_e) {
-    toast.error('Ну удалось переместить проект')
+    toast.error(toastMessages.updateOrder.error)
   }
 }
 
 async function deleteProject(id: number) {
   try {
-    await $fetch(`/api/projects/${id}`, {
-      method: 'DELETE',
-    })
+    await projectsModel.delete(id)
     projectSheetRef.value?.close()
-    toast.success('Проект удалён')
-    refresh()
+    toast.success(toastMessages.delete.success)
   }
   catch (_e) {
     const e = _e as Error
@@ -143,7 +131,7 @@ function openProjectSheet(project: ProjectDto) {
       id: project.id,
       uri: project.uri,
       title: project.title,
-      groupId: getGroupById(getCategoryById(project.categoryId).groupId).id,
+      groupId: groupsModel.getById(getCategoryById(project.categoryId).groupId)!.id,
       location: project.location,
       status: project.status,
       yearStart: project.yearStart,
@@ -293,10 +281,10 @@ function openProjectSheet(project: ProjectDto) {
                 <NuxtLink :to="`/admin/projects/${project.uri}`">
                   <NuxtImg
                     v-if="project.images.length"
-                    :alt="project.images[0].alt"
-                    :class="cn('aspect-video w-full', project.images[0].fit)"
+                    :alt="project.images[0]!.alt"
+                    :class="cn('aspect-video w-full', project.images[0]!.fit)"
                     format="avif,webp,png,jpg"
-                    :src="project.images[0].url"
+                    :src="project.images[0]!.url"
                   />
                 </NuxtLink>
               </TableCell>

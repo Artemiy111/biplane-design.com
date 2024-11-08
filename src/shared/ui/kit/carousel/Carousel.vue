@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { useProvideCarousel } from './useCarousel'
-import type { CarouselEmits, CarouselProps, WithClassAsProps } from './interface'
 import { cn } from '~~/src/shared/lib/utils'
+
+import type { CarouselEmits, CarouselProps, WithClassAsProps } from './interface'
+
+import { useProvideCarousel } from './useCarousel'
 
 const props = withDefaults(defineProps<CarouselProps & WithClassAsProps>(), {
   orientation: 'horizontal',
 })
-
 const emits = defineEmits<CarouselEmits>()
 
 const { canScrollNext, canScrollPrev, carouselApi, carouselRef, orientation, scrollNext, scrollPrev } = useProvideCarousel(props, emits)

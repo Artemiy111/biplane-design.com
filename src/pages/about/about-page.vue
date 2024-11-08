@@ -1,16 +1,8 @@
 <script setup lang="ts">
-useServerSeoMeta({
-  title: 'О нас',
-  ogTitle: 'О нас',
-  description: 'История развития студии',
-  ogDescription: 'История развития студии',
-})
-useSeoMeta({
-  title: 'О нас',
-  ogTitle: 'О нас',
-  description: 'История развития студии',
-  ogDescription: 'История развития студии',
-})
+const title = 'О нас'
+const description = 'История развития студии'
+useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
+useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 </script>
 
 <template>
