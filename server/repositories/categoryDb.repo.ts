@@ -77,8 +77,9 @@ export class CategoryDbRepo {
       await tx.update(categories).set({ order: curOrder.value }).where(eq(categories.id, createdInDb.id)).returning()
       return await this.getOne(createdInDb.id)
     }, {
-      deferrable: true,
-      isolationLevel: 'read uncommitted',
+      // deferrable: true,
+      // 'behavior': 'immediate'
+      // isolationLevel: 'read uncommitted',
     })
   }
 

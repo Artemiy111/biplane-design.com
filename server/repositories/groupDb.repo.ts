@@ -64,8 +64,8 @@ export class GroupDbRepo {
       await tx.update(groups).set({ order: curOrder.value }).where(eq(groups.id, createdInDb.id)).returning()
       return this.getOne(createdInDb.id)
     }, {
-      deferrable: true,
-      isolationLevel: 'read uncommitted',
+      // deferrable: true,
+      // isolationLevel: 'read uncommitted',
     })
   }
 

@@ -1,17 +1,8 @@
 import { relations } from 'drizzle-orm'
-import {
-  boolean,
-  integer,
-  pgTable,
-  serial,
-  text,
-  timestamp,
-  unique,
-  uniqueIndex,
-} from 'drizzle-orm/pg-core'
+import { int, sqliteTable, text, unique, uniqueIndex } from 'drizzle-orm/sqlite-core'
 
-export const users = pgTable('users', {
-  id: serial().primaryKey(),
+export const users = sqliteTable('users', {
+  id: int().primaryKey(),
   username: text().notNull(),
   passwordHash: text().notNull(),
 })
@@ -19,17 +10,17 @@ export const users = pgTable('users', {
 export type UserDb = typeof users.$inferSelect
 export type CreateUserDb = typeof users.$inferInsert
 
-export const sessions = pgTable('sessions', {
+export const sessions = sqliteTable('sessions', {
   id: text().primaryKey(),
-  userId: integer().notNull().references(() => users.id),
-  expiresAt: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
+  userId: int().notNull().references(() => users.id),
+  expiresAt: int({ mode: 'timestamp' }).notNull(),
 })
 
-export const groups = pgTable('groups', {
-  id: serial().primaryKey(),
+export const groups = sqliteTable('groups', {
+  id: int().primaryKey(),
   title: text().notNull().unique(),
   uri: text().notNull().unique(),
-  order: integer().notNull().unique(),
+  order: int().notNull().unique(),
 })
 
 export type GroupId = GroupDb['id']
@@ -43,14 +34,14 @@ export const groupsRelations = relations(groups, ({ many }) => ({
 
 export const categoryLayout = ['base', 'mini'] as const
 
-export const categories = pgTable(
+export const categories = sqliteTable(
   'categories',
   {
-    groupId: integer().notNull().references(() => groups.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
-    id: serial().primaryKey(),
+    groupId: int().notNull().references(() => groups.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
+    id: int().primaryKey(),
     title: text().notNull().unique(),
-    uri: text().notNull(),
-    order: integer().notNull(),
+    uri: text().notNull().unique(),
+    order: int().notNull(),
     layout: text({ enum: categoryLayout }).notNull(),
   },
   (t) => {
@@ -78,21 +69,20 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
 
 export const projectStatus = ['завершён', 'строится', 'в разработке'] as const
 
-export const projects = pgTable(
+export const projects = sqliteTable(
   'projects',
   {
-    categoryId: integer('category_id')
-      .notNull()
-      .references(() => categories.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
-    id: serial().primaryKey(),
+    categoryId: int('category_id').notNull().references(() => categories.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
+    id: int().primaryKey(),
     title: text().notNull(),
     uri: text().notNull().unique(),
     status: text({ enum: projectStatus }).notNull(),
-    yearStart: integer(),
-    yearEnd: integer(),
+    yearStart: int(),
+    yearEnd: int(),
     location: text(),
-    order: integer().notNull(),
-    isMinimal: boolean().notNull().default(false),
+    order: int().notNull(),
+    isMinimal: int({ mode: 'boolean' }).notNull().default(false),
+    visible: int({ mode: 'boolean' }).notNull().default(true),
   },
   (t) => {
     return {
@@ -118,14 +108,14 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
 
 export const imageFit = ['object-fill', 'object-contain', 'object-cover', 'object-none'] as const
 
-export const images = pgTable(
+export const images = sqliteTable(
   'images',
   {
-    projectId: integer().notNull().references(() => projects.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
+    projectId: int().notNull().references(() => projects.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     id: text().primaryKey().notNull(),
     alt: text().notNull(),
     fit: text({ enum: imageFit }).notNull(),
-    order: integer().notNull(),
+    order: int().notNull(),
   },
   (t) => {
     return {

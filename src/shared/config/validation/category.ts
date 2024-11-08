@@ -18,6 +18,12 @@ const updateSchema = z.object({
 })
 
 export const categorySchemas = {
+  getOneSchema: z.object({
+    id: z.number(),
+  }),
   createSchema,
   updateSchema,
+  deleteSchema: z.object({
+    id: z.number(),
+  }),
 }
