@@ -5,7 +5,7 @@ import { Separator } from '~~/src/shared/ui/kit/separator'
 <template>
   <footer class="container flex flex-col">
     <Separator />
-    <section class="flex flex-wrap gap-x-16 gap-y-8 px-8 py-16 lg:gap-x-16 md:gap-y-4 sm:px-4 ">
+    <section class="footer-columns grid  justify-center gap-x-16 gap-y-8 px-8 py-16 lg:gap-x-16 md:gap-y-4 sm:px-4 ">
       <ul class="flex flex-col gap-1">
         <h6 class="text-lg font-semibold md:text-base sm:text-sm">
           Контакты
@@ -17,14 +17,20 @@ import { Separator } from '~~/src/shared/ui/kit/separator'
         <h6 class="text-lg font-semibold md:text-base sm:text-sm">
           Время работы
         </h6>
-        <li>Пн - Пт&nbsp;&nbsp;&nbsp;&nbsp;8 - 18</li>
+        <li>Пн — Пт&nbsp;&nbsp;&nbsp;&nbsp;8 — 18</li>
       </ul>
       <ul class="flex flex-col gap-1">
         <h6 class="text-lg font-semibold md:text-base sm:text-sm">
           Адрес
         </h6>
         <li>
-          Стерлитамак, ул&nbsp;Карла&nbsp;Маркса&nbsp;101Б, офис&nbsp;313
+          <NuxtLink
+            :external="true"
+            target="_blank noopener noreferrer"
+            to="https://yandex.ru/map-widget/v1/?um=constructor%3A3da4595a6346865d8223d34a3ff56c219a4f3852edd8bb18b888329ab0ba28fa&amp;source=constructor"
+          >
+            Стерлитамак, ул&nbsp;Карла&nbsp;Маркса&nbsp;101Б, офис&nbsp;313&nbsp;&nbsp;→
+          </NuxtLink>
         </li>
       </ul>
       <ul class="flex flex-col gap-1">
@@ -39,7 +45,7 @@ import { Separator } from '~~/src/shared/ui/kit/separator'
             rel=""
             target="_blank noopener noreferrer"
           >
-            Цветовая палитра →
+            Цветовая палитра&nbsp;&nbsp;→
           </NuxtLink>
         </li>
         <li>
@@ -49,7 +55,7 @@ import { Separator } from '~~/src/shared/ui/kit/separator'
             href="https://habr.com/ru/companies/ruvds/articles/553582"
             target="_blank noopener noreferrer"
           >
-            Теория цвета →
+            Теория цвета&nbsp;&nbsp;→
           </NuxtLink>
         </li>
       </ul>
@@ -64,7 +70,7 @@ import { Separator } from '~~/src/shared/ui/kit/separator'
         </li>
       </ul> -->
     </section>
-    <section>
+    <!-- <section>
       <Separator />
       <iframe
         class="max-h-[65vh]"
@@ -75,9 +81,25 @@ import { Separator } from '~~/src/shared/ui/kit/separator'
         width="100%"
       />
       <Separator />
-    </section>
+    </section> -->
     <!-- <section class="flex px-8 py-4 sm:px-4">
       <span>© Biplane-Design 2000 - 2024</span>
     </section> -->
   </footer>
 </template>
+
+<style scoped>
+.footer-columns {
+  display: grid;
+  grid-template-columns: repeat(4,max-content);
+
+  @media (width <= 1500px) {
+    grid-template-columns: 400px 300px;
+  }
+
+  @media (width <= 920px) {
+    grid-template-columns: 1fr;
+  }
+
+}
+</style>

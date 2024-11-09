@@ -1,32 +1,50 @@
-/**
- * This is your entry point to setup the root configuration for tRPC on the server.
- * - `initTRPC` should only be used once per app.
- * - We export only the functionality that we use so we can enforce which base procedures should be used
- *
- * Learn how to create protected base procedures and other things below:
- * @see https://trpc.io/docs/server/routers
- * @see https://trpc.io/docs/server/procedures
- */
 import { initTRPC, TRPCError } from '@trpc/server'
+import { use, type H3Event } from 'h3'
+import { verifyRequestOrigin } from 'lucia'
 
-const t = initTRPC.create()
+import { lucia } from '~~/src/shared/lib/utils/auth'
 
-/**
- * Unprotected procedure
- **/
+const t = initTRPC.context<typeof createContext>().create()
+
 export const publicProcedure = t.procedure
 
 export const router = t.router
 export const middleware = t.middleware
 
-export const authedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (!ctx.user) {
-    throw new TRPCError({ code: 'UNAUTHORIZED' })
-  }
+export const authedProcedure = t.procedure.use(async ({ ctx, next }) => {
+  if (!ctx.user || !ctx.session) throw new TRPCError({ code: 'UNAUTHORIZED' })
 
   return next({
     ctx: {
+      session: ctx.session,
       user: ctx.user,
     },
   })
 })
+
+export async function createContext(event: H3Event) {
+  if (event.method !== 'GET') {
+    const originHeader = getHeader(event, 'Origin') ?? null
+    const hostHeader = getHeader(event, 'Host') ?? null
+    if (!originHeader || !hostHeader || !verifyRequestOrigin(originHeader, [hostHeader]))
+      throw new TRPCError({ code: 'FORBIDDEN' })
+  }
+
+  const sessionId = getCookie(event, lucia.sessionCookieName) ?? null
+  if (!sessionId) return {
+    event,
+    session: null,
+    user: null,
+  }
+
+  const { session, user } = await lucia.validateSession(sessionId)
+  if (session && session.fresh) appendResponseHeader(event, 'Set-Cookie', lucia.createSessionCookie(session.id).serialize())
+
+  if (!session) appendResponseHeader(event, 'Set-Cookie', lucia.createBlankSessionCookie().serialize())
+
+  return {
+    event,
+    session,
+    user,
+  }
+}
