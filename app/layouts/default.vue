@@ -1,15 +1,9 @@
 <script setup lang="ts">
-import { useGroupsModel } from '~~/src/shared/model/groups'
-import { useUserModel } from '~~/src/shared/model/user'
+import { useGroups } from '~~/src/shared/model/queries'
 import { Footer } from '~~/src/widgets/footer'
 import { Header } from '~~/src/widgets/header'
 
-const userModel = useUserModel()
-const groupsModel = useGroupsModel()
-// useLazyAsyncData('groups', () => groupsModel.load())
-useQuery({ key: ['user'], query: () => userModel.load() })
-useQuery({ key: ['groups'], query: () => groupsModel.load() })
-// onMounted(() => refresh())
+useGroups()
 </script>
 
 <template>

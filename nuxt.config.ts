@@ -82,6 +82,10 @@ export default defineNuxtConfig({
     disallow: ['/admin/*'],
   },
 
+  shadcn: {
+    componentDir: './src/shared/ui/kit',
+  },
+
   sitemap: {
     sources: ['/api/__sitemap__/urls'],
   },

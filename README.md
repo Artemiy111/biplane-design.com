@@ -11,6 +11,8 @@
   - Кэширование запросов
   - Drag&drop элементов в админке
 - Backend
+  - `tRPC`
+  - БД `libsql`
   - Clean architecture
   - `drizzle` + `s3`
   - Сессии на куках

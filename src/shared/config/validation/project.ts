@@ -7,11 +7,11 @@ const createSchema = z.object({
   title: z.string(),
   uri: z.string(),
   status: z.enum(projectStatus),
-  yearStart: z.number().nullable(),
-  yearEnd: z.number().nullable(),
-  location: z.string().min(3).nullable(),
+  yearStart: z.number().nullish(),
+  yearEnd: z.number().nullish(),
+  location: z.string().min(3).nullish(),
   isMinimal: z.boolean().optional().default(false),
-  visible: z.boolean().optional().default(true),
+  isVisible: z.boolean().optional().default(true),
 })
 
 const updateSchema = createSchema.extend({
