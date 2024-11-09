@@ -49,6 +49,7 @@ export type ProjectDto = {
   yearEnd: number | null
   status: ProjectStatus
   isMinimal: boolean
+  isVisible: boolean
 }
 
 export type CreateProjectDto = Omit<ProjectDbCreate, 'order'>

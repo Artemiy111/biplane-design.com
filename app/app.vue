@@ -1,18 +1,7 @@
 <script setup lang="ts">
 import { SpeedInsights } from '@vercel/speed-insights/nuxt'
 
-import { useGroupsModel } from '~~/src/shared/model/groups'
-import { useUserModel } from '~~/src/shared/model/user'
 import { Toaster } from '~~/src/shared/ui/kit/sonner'
-// import { Footer } from '~~/src/widgets/footer'
-// import { Header } from '~~/src/widgets/header'
-
-const groupsModel = useGroupsModel()
-const userModel = useUserModel()
-// console.log('wft')
-// useLazyAsyncData('groups', () => groupsModel.load())
-// await useAsyncData('user', () => userModel.load())
-const router = useRouter()
 
 const yandexMetrika = import.meta.dev
   ? {}
@@ -47,13 +36,7 @@ useHead(yandexMetrika)
 <template>
   <SpeedInsights />
   <Toaster :rich-colors="true" />
-  <!-- <div class="text-base font-normal md:text-sm">
-    <div class="flex h-full min-h-[100dvh] w-full flex-col">
-      <Header />
-      <NuxtPage />
-    </div>
-    <Footer />
-  </div> -->
+
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>

@@ -2,19 +2,16 @@
 import { useElementSize, watchOnce } from '@vueuse/core'
 
 import { cn } from '~~/src/shared/lib/utils'
-import { useProjectModel } from '~~/src/shared/model/project'
+import { useProject } from '~~/src/shared/model/queries'
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '~~/src/shared/ui/kit/carousel'
 
 const props = defineProps<{
   uri: string
 }>()
 
-const projectModel = useProjectModel()
-useAsyncData(`project-${props.uri}`, () => projectModel.load(props.uri), { watch: [toRef(() => props.uri)] })
+const { data: project } = useProject(toRefs(props).uri)
 
-const project = computed(() => projectModel.project)
-
-const api = ref<CarouselApi >()
+const api = ref<CarouselApi>()
 const apiTumb = ref<CarouselApi>()
 const mainCarouselRef = ref<InstanceType<typeof Carousel> | null>(null)
 const { height: mainCarouselHeight } = useElementSize(toRef(() => mainCarouselRef.value?.carouselRef))
@@ -46,7 +43,7 @@ function scrollToImage(index: number): void {
 
 <template>
   <main
-    v-if="project !== null"
+    v-if="project"
     class="container flex flex-col"
   >
     <section class="flex justify-between px-8 py-4 text-xl lg:text-lg sm:py-2 sm:px-4 sm:text-base">
