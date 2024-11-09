@@ -25,7 +25,7 @@ export const projectDbMapper = {
       status: dto.status,
       order: dto.order,
       isMinimal: dto.isMinimal,
-      visible: dto.visible,
+      isVisible: dto.isVisible,
     }
   },
   toDbUpdateWithoutOrder(db: ProjectDbUpdate): Omit<ProjectDbUpdate, 'order'> {

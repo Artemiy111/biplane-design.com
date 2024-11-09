@@ -82,7 +82,7 @@ export const projects = sqliteTable(
     location: text(),
     order: int().notNull(),
     isMinimal: int({ mode: 'boolean' }).notNull().default(false),
-    visible: int({ mode: 'boolean' }).notNull().default(true),
+    isVisible: int({ mode: 'boolean' }).notNull().default(true),
   },
   (t) => {
     return {

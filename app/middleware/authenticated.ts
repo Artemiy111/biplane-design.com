@@ -1,6 +1,6 @@
-import { useUser } from '~~/src/shared/model/user'
+import { useUser } from '~~/src/shared/model/queries'
 
 export default defineNuxtRouteMiddleware(async () => {
-  const user = useUser()
+  const { data: user } = useUser()
   if (!user.value) return await navigateTo('/admin/auth')
 })

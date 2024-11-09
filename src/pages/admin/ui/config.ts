@@ -1,10 +1,12 @@
 import { z } from 'zod'
 
+import { projectStatus } from '~~/server/db/schema'
+
 const MIN_YEAR = 2000
 const MAX_YEAR = 2050
 
 export const schema = z.object({
-  categoryId: z.union([z.string(), z.number()]).transform(v => Number(v)),
+  categoryId: z.coerce.number(),
   id: z.number(),
   title: z.string().trim().min(3, 'Минимум 3 символа'),
   uri: z
@@ -21,19 +23,20 @@ export const schema = z.object({
         return false
       }
     }, 'Не валидный Uri'),
-  status: z.enum(['строится', 'завершён', 'в разработке']),
+  status: z.enum(projectStatus),
   yearStart: z
     .number()
     .min(MIN_YEAR, `Год начала не может быть меньше ${MIN_YEAR}`)
     .max(MAX_YEAR, `Год начала не может быть больше ${MAX_YEAR}`)
-    .nullable(),
+    .nullish(),
   yearEnd: z
     .number()
     .min(MIN_YEAR, `Год завершения не может быть меньше ${MIN_YEAR}`)
     .max(MAX_YEAR, `Год завершения не может быть больше ${MAX_YEAR}`)
-    .nullable(),
-  location: z.string().trim().min(3, 'Минимум 3 символа').nullable(),
-  groupId: z.union([z.string(), z.number()]).transform(v => Number(v)),
+    .nullish(),
+  location: z.string().trim().min(3, 'Минимум 3 символа').nullish(),
+  groupId: z.coerce.number(),
   order: z.number(),
   isMinimal: z.boolean(),
+  isVisible: z.boolean(),
 })

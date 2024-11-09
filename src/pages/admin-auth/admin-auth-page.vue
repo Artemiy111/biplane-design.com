@@ -3,8 +3,10 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { toast } from 'vue-sonner'
 
+import type { LoginDto, RegisterDto } from '~~/src/shared/config/validation/auth'
+
+import { useApi } from '~~/src/shared/api'
 import { authSchemas } from '~~/src/shared/config/validation'
-import { useUserModel } from '~~/src/shared/model/user'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form'
 import { Input } from '~~/src/shared/ui/kit/input'
@@ -15,15 +17,7 @@ const description = 'Вход для администратора'
 useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
-const userModel = useUserModel()
-
-const { meta: loginMeta, handleSubmit: handleLoginSubmit, defineField, resetForm: resetLoginForm } = useForm({
-  validationSchema: toTypedSchema(authSchemas.loginSchema),
-  initialValues: { username: 'admin' },
-})
-
-const [loginUsername, loginUsernameAttrs] = defineField('username')
-const [loginPassword, loginPasswordAttrs] = defineField('password')
+const api = useApi()
 
 const toastMessages = {
   login: {
@@ -36,37 +30,59 @@ const toastMessages = {
   },
 }
 
+const { meta: loginMeta, handleSubmit: handleLoginSubmit, defineField, resetForm: resetLoginForm } = useForm({
+  validationSchema: toTypedSchema(authSchemas.loginSchema),
+  initialValues: { username: 'admin' },
+})
+
+const [loginUsername, loginUsernameAttrs] = defineField('username')
+const [loginPassword, loginPasswordAttrs] = defineField('password')
+
 const onLoginSubmit = handleLoginSubmit(async (values) => {
-  try {
-    await userModel.login(values)
+  login(values)
+})
+
+const { mutate: login } = useMutation({
+  mutation: (dto: LoginDto) => api.auth.login.mutate(dto),
+  onSuccess: () => {
     resetLoginForm()
     toast.success(toastMessages.login.success)
-    await navigateTo('/admin')
-  }
-  catch (_e) {
+    navigateTo('/admin')
+  },
+  onError: () => {
     toast.error(toastMessages.login.error)
-  }
+  },
+  onSettled: () => {
+    useQueryCache().invalidateQueries({ key: ['user'] })
+  },
 })
 
 const { meta: registerMeta, handleSubmit: handleRegisterSubmit, defineField: defineRegisterField, resetForm: resetRegisterForm } = useForm({
   validationSchema: toTypedSchema(authSchemas.registerSchema),
 })
 
-const onRegisterSubmit = handleRegisterSubmit(async (values) => {
-  try {
-    await userModel.register(values)
-    resetRegisterForm()
-    toast.success(toastMessages.register.success)
-    await navigateTo('/admin')
-  }
-  catch (_e) {
-    toast.error(toastMessages.register.error)
-  }
-})
-
 const [registerUsername, registerUsernameAttrs] = defineRegisterField('username')
 const [registerPassword, registerPasswordAttrs] = defineRegisterField('password')
 const [registerRepeatPassword, registerRepeatPasswordAttrs] = defineRegisterField('repeatPassword')
+
+const onRegisterSubmit = handleRegisterSubmit(async (values) => {
+  register(values)
+})
+
+const { mutate: register } = useMutation({
+  mutation: (dto: RegisterDto) => api.auth.register.mutate(dto),
+  onSuccess: () => {
+    resetRegisterForm()
+    toast.success(toastMessages.register.success)
+    navigateTo('/admin')
+  },
+  onError: () => {
+    toast.error(toastMessages.register.error)
+  },
+  onSettled: () => {
+    useQueryCache().invalidateQueries({ key: ['user'] })
+  },
+})
 </script>
 
 <template>

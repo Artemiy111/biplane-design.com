@@ -4,12 +4,12 @@ import { GripVertical, LoaderCircle, Pen, Trash2 } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import { toast } from 'vue-sonner'
 
-import type { ProjectId } from '~~/server/db/schema'
+import type { GroupId, ProjectId } from '~~/server/db/schema'
 import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~~/server/use-cases/types'
 
+import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
-import { useCategories, useGroups, useGroupsModel } from '~~/src/shared/model/groups'
-import { useProjects, useProjectsModel } from '~~/src/shared/model/projects'
+import { useGroups, useProjects } from '~~/src/shared/model/queries'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~~/src/shared/ui/kit/popover'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
@@ -22,23 +22,22 @@ const description = 'Менеджмент базы-данных'
 useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
-const projectsModel = useProjectsModel()
-
+const api = useApi()
+const queryCache = useQueryCache()
 const breakpoints = useBreakpoints(screenBreakpoints, { strategy: 'max-width' })
 const md = breakpoints.isSmallerOrEqual('md')
 
 const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
 
-const selectedCategory = ref<CategoryDto | null>(cachedGroups.value?.[0]?.categories[0] || null)
+const selectedCategory = ref<CategoryDto | null>(cachedGroups.value?.[0]?.categories[0] ?? null)
 
-const groupsModel = useGroupsModel()
-const groups = useGroups()
-const categories = useCategories()
-const projects = useProjects()
+const { data: groups } = useGroups()
+const categories = computed(() => groups.value?.flatMap(g => g.categories) ?? [])
+const { data: projects } = useProjects()
 
 watchOnce(groups, () => {
-  if (!groups.value.length) return
-  selectedCategory.value = groups.value[0]?.categories[0] || null
+  if (!groups.value?.length) return
+  selectedCategory.value = groups.value[0]?.categories[0] ?? null
 })
 
 function getCategoryById(id: number) {
@@ -47,12 +46,15 @@ function getCategoryById(id: number) {
 
 const selectedCategoryProjects = ref<ProjectDto[]>([])
 watchImmediate(() => [selectedCategory.value, projects.value], () => {
-  selectedCategoryProjects.value = projects.value.filter((project) => {
+  selectedCategoryProjects.value = projects.value?.filter((project) => {
     return project.categoryId === selectedCategory.value?.id
-  })
+  }) ?? []
 })
 
 const projectSheetRef = ref<InstanceType<typeof ProjectSheet> | null>(null)
+
+const projectsTableBody = ref<InstanceType<typeof TableBody> | null>(null)
+// FIXME TODO чтотоот
 
 const toastMessages = {
   create: {
@@ -72,31 +74,45 @@ const toastMessages = {
   },
 }
 
-async function createProject(dto: CreateProjectDto) {
-  try {
-    await projectsModel.create(dto)
+const { mutate: createProject } = useMutation({
+  mutation: (dto: CreateProjectDto) => api.projects.createOne.mutate(dto),
+  onSuccess: () => {
     projectSheetRef.value?.close()
     toast.success(toastMessages.create.success)
-  }
-  catch (_e) {
-    const e = _e as Error
-    toast.error(e.message)
-  }
-}
+  },
+  onError: () => {
+    toast.error(toastMessages.create.error)
+  },
+  onSettled: () => {
+    queryCache.invalidateQueries({ key: ['projects'] })
+  },
+})
 
-async function updateProject(id: ProjectId, dto: UpdateProjectDto) {
-  try {
-    await projectsModel.update(id, dto)
+const { mutate: updateProject } = useMutation({
+  mutation: ([id, dto]: [ProjectId, UpdateProjectDto]) => api.projects.updateOne.mutate({ id, ...dto }),
+  onSuccess: () => {
     projectSheetRef.value?.close()
     toast.success(toastMessages.update.success)
-  }
-  catch (_e) {
-    const e = _e as Error
-    toast.error(e.message)
-  }
-}
+  },
+  onError: (e) => {
+    toast.error(toastMessages.update.error)
+  },
+  onSettled() {
+    queryCache.invalidateQueries({ key: ['projects'] })
+  },
+})
 
-async function updateProjectOrder(e: SortableEvent) {
+const { mutate: updateProjectOrder } = useMutation({
+  mutation: ([id, order]: [ProjectId, number]) => api.projects.updateOrder.mutate({ id, order }),
+  onError: () => {
+    toast.error(toastMessages.updateOrder.error)
+  },
+  onSettled() {
+    queryCache.invalidateQueries({ key: ['projects'] })
+  },
+})
+
+async function onUpdateProjectOrder(e: SortableEvent) {
   const id = Number(e.item.dataset.projectId!)
   const order = e.oldDraggableIndex! + 1
   const newOrder = e.newDraggableIndex! + 1
@@ -104,24 +120,25 @@ async function updateProjectOrder(e: SortableEvent) {
   const [project] = selectedCategoryProjects.value.splice(order - 1, 1)
   selectedCategoryProjects.value.splice(newOrder - 1, 0, project!)
 
-  try {
-    projectsModel.updateOrder(id, newOrder)
-  }
-  catch (_e) {
-    toast.error(toastMessages.updateOrder.error)
-  }
+  updateProjectOrder([id, newOrder])
 }
 
-async function deleteProject(id: number) {
-  try {
-    await projectsModel.delete(id)
+const { mutate: deleteProject } = useMutation({
+  mutation: (id: ProjectId) => api.projects.deleteOne.mutate({ id }),
+  onSuccess: () => {
     projectSheetRef.value?.close()
     toast.success(toastMessages.delete.success)
-  }
-  catch (_e) {
-    const e = _e as Error
-    toast.error(e.message)
-  }
+  },
+  onError: () => {
+    toast.error(toastMessages.delete.error)
+  },
+  onSettled() {
+    queryCache.invalidateQueries({ key: ['projects'] })
+  },
+})
+
+function getGroupById(id: GroupId) {
+  return groups.value?.find(g => g.id === id) ?? null
 }
 
 function openProjectSheet(project: ProjectDto) {
@@ -131,7 +148,7 @@ function openProjectSheet(project: ProjectDto) {
       id: project.id,
       uri: project.uri,
       title: project.title,
-      groupId: groupsModel.getById(getCategoryById(project.categoryId).groupId)!.id,
+      groupId: getGroupById(getCategoryById(project.categoryId).groupId)!.id,
       location: project.location,
       status: project.status,
       yearStart: project.yearStart,
@@ -194,7 +211,7 @@ function openProjectSheet(project: ProjectDto) {
           ref="projectSheetRef"
           :groups="groups"
           @create="createProject"
-          @update="updateProject"
+          @update="(id, dto) => updateProject([id, dto])"
         />
 
         <Button
@@ -226,10 +243,11 @@ function openProjectSheet(project: ProjectDto) {
             </TableRow>
           </TableHeader>
           <TableBody
+            ref="projectsTableBody"
             v-draggable="[
               selectedCategoryProjects as any,
               {
-                onUpdate: updateProjectOrder,
+                onUpdate: onUpdateProjectOrder,
                 handle: `[data-draggable-handler='true']`,
               }]"
             class="grid grid-cols-subgrid col-span-9"

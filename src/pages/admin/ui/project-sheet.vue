@@ -39,24 +39,6 @@ const { values, meta, setFieldValue, setValues, resetForm, handleSubmit } = useF
   },
 })
 
-// const initialValues = ref<FormSchema>({
-//   title: '',
-//   uri: '',
-//   groupId: props.groups?.[0].id,
-//   categoryId: props.groups?.[0].categories[0].id,
-//   status: 'завершён',
-//   yearStart: null,
-//   yearEnd: null,
-//   location: null,
-//   id: -1,
-//   order: -1,
-//   isMinimal: false,
-// })
-
-// export type FormSchema = z.infer<typeof schema>
-
-// const validationSchema = toTypedSchema(schema)
-// const formRef = ref<InstanceType<typeof Form> | null>(null)
 const selectedGroup = computed<NonNullable<typeof props.groups>[number] | null>(
   () => props.groups.find(g => g.id === values.groupId as number) || null,
 )
@@ -70,8 +52,7 @@ watch(title, () => {
 
 const isOpen = ref(false)
 function handleClose() {
-  if (meta.value.dirty && meta.value.touched && isOpen.value)
-    return
+  if (meta.value.dirty && meta.value.touched && isOpen.value) return
 
   isOpen.value = false
 }

@@ -3,8 +3,11 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { toast } from 'vue-sonner'
 
+import type { ChangePasswordDto } from '~~/src/shared/config/validation/auth'
+
+import { useApi } from '~~/src/shared/api'
 import { authSchemas } from '~~/src/shared/config/validation/'
-import { useAuthenticatedUser, useUserModel } from '~~/src/shared/model/user'
+import { useAuthenticatedUser } from '~~/src/shared/model/user'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '~~/src/shared/ui/kit/dialog'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form'
@@ -15,12 +18,12 @@ const description = 'Настройки аккаунта администрат�
 useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
-const userModel = useUserModel()
+const api = useApi()
 const user = useAuthenticatedUser()
 
 const isDialogOpen = ref(false)
 
-const { meta, handleSubmit, defineField, resetForm } = useForm({
+const { meta, handleSubmit, resetForm } = useForm({
   validationSchema: toTypedSchema(authSchemas.changePasswordSchema),
 })
 
@@ -29,16 +32,21 @@ const toastMessages = {
   error: 'Не удaлось сменить пароль',
 }
 
-const onSubmit = handleSubmit(async (values) => {
-  try {
-    await userModel.changePassword(values)
+const onSubmit = handleSubmit(values => changePassword(values))
+
+const { mutate: changePassword } = useMutation({
+  mutation: (dto: ChangePasswordDto) => api.user.changePassword.mutate(dto),
+  onSuccess: () => {
     toast.success(toastMessages.success)
     resetForm()
     isDialogOpen.value = false
-  }
-  catch (_e) {
+  },
+  onError: () => {
     toast.error(toastMessages.error)
-  }
+  },
+  onSettled: () => {
+    useQueryCache().invalidateQueries({ key: ['user'] })
+  },
 })
 </script>
 
@@ -53,10 +61,7 @@ const onSubmit = handleSubmit(async (values) => {
     >
       <span>Имя администратора</span>
       <span>{{ user.username }}</span>
-      <Dialog
-        :open="isDialogOpen"
-        @update:open="isDialogOpen = $event"
-      >
+      <Dialog v-model:open="isDialogOpen">
         <DialogTrigger :as-child="true">
           <Button variant="outline">
             Сменить пароль

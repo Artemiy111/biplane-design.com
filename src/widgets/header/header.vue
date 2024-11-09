@@ -2,7 +2,8 @@
 import { UserRound } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
-import { useUser } from '~~/src/shared/model/user'
+import { useApi } from '~~/src/shared/api'
+import { useUser } from '~~/src/shared/model/queries'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '~~/src/shared/ui/kit/dropdown-menu'
 import {
   NavigationMenu,
@@ -11,8 +12,9 @@ import {
 } from '~~/src/shared/ui/kit/navigation-menu'
 import { Separator } from '~~/src/shared/ui/kit/separator'
 
-const user = useUser()
 const route = useRoute()
+const api = useApi()
+const { data: user } = useUser()
 
 const routes = [{
   link: '/projects',
@@ -22,15 +24,20 @@ const routes = [{
   title: 'О нас',
 }]
 
+const toastMessages = {
+  success: 'Вы вышли из аккаунта',
+  error: 'Не удалось выйти из аккаунта',
+}
+
 async function singOut() {
   try {
-    await $fetch('/api/auth/logout')
-    toast.success('Вы вышли из аккаунта')
-    await refreshNuxtData('user')
+    await api.auth.logout.query()
+    user.value = null
+    toast.success(toastMessages.success)
     if (useRoute().path.includes('admin')) await navigateTo('/admin/auth')
   }
   catch (_e) {
-    toast.error('Не удалось выйти из аккаунта')
+    toast.error(toastMessages.error)
   }
 }
 </script>

@@ -6,9 +6,10 @@ import { toast } from 'vue-sonner'
 import type { ImageFit, ImageId } from '~~/server/db/schema'
 import type { UpdateImageDto } from '~~/server/use-cases/types'
 
+import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
-import { useProjectModel } from '~~/src/shared/model/project'
-import Dropzone from '~~/src/shared/ui/blocks/dropzone/dropzone.vue'
+import { useProject } from '~~/src/shared/model/queries'
+import { Dropzone } from '~~/src/shared/ui/blocks/dropzone'
 import { Input } from '~~/src/shared/ui/kit/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~~/src/shared/ui/kit/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
@@ -17,44 +18,53 @@ const props = defineProps<{
   uri: string
 }>()
 
-const projectModel = useProjectModel()
-const project = computed(() => projectModel.project)
-
-await useAsyncData(`project-${props.uri}`, () => projectModel.load(props.uri), { watch: [toRef(() => props.uri)] })
+const queryCache = useQueryCache()
+const api = useApi()
+const { data: project } = useProject(toRefs(props).uri)
 
 const title = computed(() => `Админ-панель | ${project.value?.title}`)
 const description = computed(() => `Админ-панель | ${project.value?.title}`)
 useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
-async function deleteImage(id: ImageId) {
-  try {
-    await projectModel.deleteImage(id)
-  }
-  catch (_e) {
-    toast.error(`Не удалось удалить изображение`)
-  }
-}
+const { mutate: deleteImage } = useMutation({
+  mutation: (id: ImageId) => api.images.deleteOne.mutate({ id }),
+  onSuccess: () => {
+    toast.success('Изображение удалено')
+  },
+  onError: () => {
+    toast.error('Не удалось удалить изображение')
+  },
+  onSettled: () => {
+    queryCache.invalidateQueries({ key: ['groups'] })
+  },
+})
 
-async function updateImage(id: ImageId, dto: UpdateImageDto) {
-  try {
-    await projectModel.updateImage(id, dto)
-  }
-  catch (_e) {
+const { mutateAsync: updateImage } = useMutation({
+  mutation: ([id, dto]: [ImageId, UpdateImageDto]) => api.images.updateOne.mutate({ id, ...dto }),
+  onSuccess: () => {
+    toast.success('Изображение обновлено')
+  },
+  onError: () => {
     toast.error('Не удалось обновить изображение')
-  }
-}
+  },
+  onSettled: () => {
+    queryCache.invalidateQueries({ key: ['groups'] })
+  },
+})
 
 async function updateImageOrder(e: SortableEvent) {
   if (!project.value) return
   const imageIdx = e.oldDraggableIndex!
   const newIdx = e.newDraggableIndex!
   const image = project.value.images[imageIdx]!
-  await updateImage(image.id, { ...image, order: newIdx + 1 })
+  await updateImage([image.id, { ...image, order: newIdx + 1 }])
 }
 
+// FIXME: доделвть
+
 async function uploadImages(images: File[]) {
-  projectModel.uploadImages(images)
+  // projectModel.uploadImages(images)
 }
 </script>
 
@@ -139,7 +149,7 @@ async function uploadImages(images: File[]) {
                 <Select
                   class="w-fit"
                   :model-value="image.fit"
-                  @update:model-value="updateImage(image.id, { ...image, fit: $event as ImageFit })"
+                  @update:model-value="updateImage([image.id, { ...image, fit: $event as ImageFit }])"
                 >
                   <SelectTrigger
                     class="w-max"
@@ -165,7 +175,7 @@ async function uploadImages(images: File[]) {
               <TableCell>
                 <Input
                   :model-value="image.alt"
-                  @change="updateImage(image.id, { ...image, alt: ($event.target as HTMLInputElement).value }) "
+                  @change="updateImage([image.id, { ...image, alt: ($event.target as HTMLInputElement).value }]) "
                 />
               </TableCell>
               <TableCell class="text-center">
@@ -185,7 +195,7 @@ async function uploadImages(images: File[]) {
 </template>
 
 <style scoped>
-.row-move, /* apply transition to moving elements */
+.row-move,
 .row-enter-active,
 .row-leave-active {
   transition: all 0.5s ease;
@@ -196,8 +206,6 @@ async function uploadImages(images: File[]) {
   opacity: 0;
 }
 
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
 .row-leave-active {
   position: absolute;
 }
