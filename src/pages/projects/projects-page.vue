@@ -25,8 +25,8 @@ const querySchema = z.object({
 const route = useRoute()
 const router = useRouter()
 
-const groupsModel = useGroupsModel()
-groupsModel.load()
+// const groupsModel = useGroupsModel()
+// groupsModel.load()
 
 const groups = useGroups()
 const categories = useCategories()

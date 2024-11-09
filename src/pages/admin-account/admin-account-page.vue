@@ -3,7 +3,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { toast } from 'vue-sonner'
 
-import { changePasswordSchema } from '~~/src/shared/config/validation/validation'
+import { authSchemas } from '~~/src/shared/config/validation/'
 import { useAuthenticatedUser, useUserModel } from '~~/src/shared/model/user'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '~~/src/shared/ui/kit/dialog'
@@ -21,7 +21,7 @@ const user = useAuthenticatedUser()
 const isDialogOpen = ref(false)
 
 const { meta, handleSubmit, defineField, resetForm } = useForm({
-  validationSchema: toTypedSchema(changePasswordSchema),
+  validationSchema: toTypedSchema(authSchemas.changePasswordSchema),
 })
 
 const toastMessages = {
