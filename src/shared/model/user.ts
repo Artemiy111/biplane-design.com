@@ -1,32 +1,32 @@
 import type { UserDto } from '~~/server/use-cases/types'
+import type { ChangePasswordDto, LoginDto, RegisterDto } from '~~/src/shared/config/validation/auth'
 
-import type { ChangePasswordDto, LoginDto, RegisterDto } from '../config/validation/validation'
-
-import { api } from '../api'
+import { useApi } from '~~/src/shared/api'
 
 export const useUserModel = defineStore('user', () => {
+  const api = useApi()
   const user = ref<UserDto | null>(null)
 
   const load = async () => {
-    user.value = await $fetch<UserDto>('/api/user')
+    user.value = await api.user.whoami.query()
     return user.value
   }
 
   const login = async (dto: LoginDto) => {
-    await api.auth.login(dto)
+    await api.auth.login.mutate(dto)
   }
 
   const register = async (dto: RegisterDto) => {
-    await api.auth.register(dto)
+    await api.auth.register.mutate(dto)
   }
 
   const logout = async () => {
-    await api.auth.logout()
+    await api.auth.logout.query()
     user.value = null
   }
 
   const changePassword = async (dto: ChangePasswordDto) => {
-    await api.user.changePassword(dto)
+    await api.user.changePassword.mutate(dto)
   }
 
   return {

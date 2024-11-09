@@ -1,7 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import '@total-typescript/ts-reset'
 // import oxlintPlugin from 'vite-plugin-oxlint'
 // import eslintPlugin from 'vite-plugin-eslint'
+
+import { env } from './server/shared/env'
 
 export default defineNuxtConfig({
   modules: [
@@ -15,11 +16,13 @@ export default defineNuxtConfig({
     '@tresjs/nuxt',
     '@nuxtjs/seo',
     '@pinia/nuxt',
+    '@pinia/colada-nuxt',
   ],
 
   imports: {
     dirs: [],
   },
+
   devtools: {
     enabled: true,
     timeline: {
@@ -42,7 +45,9 @@ export default defineNuxtConfig({
     url: 'https://biplane-design.com',
   },
 
-  runtimeConfig: {},
+  runtimeConfig: {
+    BASE_URL: env.BASE_URL,
+  },
 
   build: {
     transpile: ['trpc-nuxt'],

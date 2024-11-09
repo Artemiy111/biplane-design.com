@@ -14,9 +14,8 @@ import { ProjectRepo } from './repositories/project.repo'
 import { ProjectDbRepo } from './repositories/projectDb.repo'
 import { ProjectS3Repo } from './repositories/projectS3.repo'
 import { UserRepo } from './repositories/user.repo'
-import { s3 } from './s3'
+import { s3 } from './shared/s3'
 
-export const authRepo = new AuthRepo()
 export const userRepo = new UserRepo()
 export const projectDbRepo = new ProjectDbRepo(db)
 export const projectS3Repo = new ProjectS3Repo(env.BUCKET_NAME, s3)
@@ -32,5 +31,7 @@ export const categoryRepo = new CategoryRepo(categoryDbRepo, projectRepo)
 
 export const groupDbRepo = new GroupDbRepo(db)
 export const groupRepo = new GroupRepo(groupDbRepo, categoryRepo)
+
+export const authRepo = new AuthRepo(userRepo)
 
 logger.log('di done')

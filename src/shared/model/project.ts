@@ -1,17 +1,17 @@
 import type { ImageId } from '~~/server/db/schema'
 import type { ProjectDto, UpdateImageDto, UpdateProjectDto } from '~~/server/use-cases/types'
 
-import { api } from '../api'
+import { useApi } from '../api'
 import { useProjectsModel } from './projects'
 
 export const useProjectModel = defineStore('project', () => {
+  const api = useApi()
   const projectsModel = useProjectsModel()
   const project = ref<ProjectDto | null>(null)
 
   const load = async (uri: string) => {
     if (project.value === null) project.value = projectsModel.getOneByUri(uri)
-    project.value = await api.projects.getByUri(uri)
-    console.log(project.value)
+    project.value = await api.projects.getOneByUri.query({ uri })
     return project.value
   }
 
@@ -20,9 +20,7 @@ export const useProjectModel = defineStore('project', () => {
     const snapshot = project.value.images
     project.value.images = project.value.images.filter(img => img.id !== id)
     try {
-      await $fetch(`/api/images/${id}`, {
-        method: 'DELETE',
-      })
+      await api.images.deleteOne.mutate({ id })
     }
     catch (_e) {
       project.value.images = snapshot
@@ -41,10 +39,7 @@ export const useProjectModel = defineStore('project', () => {
     project.value.images.splice(dto.order - 1, 0, { ...image, ...dto })
     project.value.images.forEach((img, idx) => img.order = idx + 1)
     try {
-      await $fetch(`/api/images/${id}`, {
-        method: 'PUT',
-        body: dto,
-      })
+      await api.images.updateOne.mutate({ id, ...dto })
     }
     catch (_e) {
       project.value.images = snapshot
@@ -55,14 +50,7 @@ export const useProjectModel = defineStore('project', () => {
   const uploadImages = async (images: File[]) => {
     if (!project.value) return
     const promises = images.map(async (image) => {
-      const formData = new FormData()
-      formData.append('file', image, image.name)
-      formData.append('projectId', project.value!.id.toString())
-
-      return await $fetch('/api/images', {
-        method: 'POST',
-        body: formData,
-      })
+      return await api.images.createOne.mutate({ file: image, projectId: project.value!.id })
     })
     return promises
   }

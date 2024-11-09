@@ -1,18 +1,32 @@
 import { createNuxtApiHandler } from 'trpc-nuxt'
 
-import { categoryRepo, groupRepo, imageRepo, projectRepo } from '~~/server/di'
-import { authedProcedure, publicProcedure, router } from '~~/server/trpc'
+import { authRepo, categoryRepo, groupRepo, imageRepo, projectRepo, userRepo } from '~~/server/di'
+import { authedProcedure, createContext, publicProcedure, router } from '~~/server/trpc'
 import { authSchemas, categorySchemas, groupSchemas, imageSchemas, projectSchemas } from '~~/src/shared/config/validation'
 
 export const appRouter = router({
-
+  user: {
+    whoami: publicProcedure.query(({ ctx }) => {
+      return ctx.user
+    }),
+    changePassword: authedProcedure.input(authSchemas.changePasswordSchema).mutation(({ input, ctx }) => {
+      return userRepo.changePassword(ctx.user.id, input.newPassword)
+    }),
+  },
   auth: {
-
+    login: publicProcedure.input(authSchemas.loginSchema).mutation(async ({ input, ctx }) => {
+      return authRepo.login(input, ctx.event)
+    }),
+    register: publicProcedure.input(authSchemas.registerSchema).mutation(async ({ input, ctx }) => {
+      return authRepo.register(input, ctx.event)
+    }),
+    logout: authedProcedure.query(async ({ ctx }) => {
+      return authRepo.logout(ctx.event, ctx.session.id)
+    }),
   },
 
   groups: {
     getAll: publicProcedure.query(() => {
-      console.log('getAll')
       return groupRepo.getAll()
     }),
     getOne: publicProcedure.input(groupSchemas.getOneSchema).query(({ input }) => {
@@ -66,6 +80,9 @@ export const appRouter = router({
     updateOrder: authedProcedure.input(projectSchemas.updateOrderSchema).mutation(({ input }) => {
       return projectRepo.updateOrder(input.id, input.order)
     }),
+    deleteOne: authedProcedure.input(projectSchemas.deleteSchema).mutation(({ input }) => {
+      return projectRepo.delete(input.id)
+    }),
   },
 
   images: {
@@ -88,5 +105,5 @@ export type AppRouter = typeof appRouter
 
 export default createNuxtApiHandler({
   router: appRouter,
-  createContext: () => ({}),
+  createContext,
 })

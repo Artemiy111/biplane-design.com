@@ -1,7 +1,7 @@
 import type { GroupId } from '~~/server/db/schema'
 import type { GroupDto } from '~~/server/use-cases/types'
 
-import { useApi } from '../api'
+import { useApi } from '~~/src/shared/api'
 
 export const useGroupsModel = defineStore('groups', () => {
   const api = useApi()

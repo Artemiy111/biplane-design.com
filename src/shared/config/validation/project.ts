@@ -34,4 +34,7 @@ export const projectSchemas = {
   createSchema,
   updateSchema,
   updateOrderSchema,
+  deleteSchema: z.object({
+    id: z.number(),
+  }),
 }

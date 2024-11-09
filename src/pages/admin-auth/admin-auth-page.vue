@@ -19,6 +19,7 @@ const userModel = useUserModel()
 
 const { meta: loginMeta, handleSubmit: handleLoginSubmit, defineField, resetForm: resetLoginForm } = useForm({
   validationSchema: toTypedSchema(authSchemas.loginSchema),
+  initialValues: { username: 'admin' },
 })
 
 const [loginUsername, loginUsernameAttrs] = defineField('username')
