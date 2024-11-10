@@ -7,7 +7,7 @@ import { useForm } from 'vee-validate'
 import type { CategoryId, GroupId, ProjectId } from '~~/server/db/schema'
 import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~~/server/use-cases/types'
 
-import { toUri } from '~~/src/shared/lib/utils/to-uri'
+import { getSlug } from '~~/src/shared/lib/utils/getSlug'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Checkbox } from '~~/src/shared/ui/kit/checkbox'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form'
@@ -44,10 +44,10 @@ const selectedGroup = computed<NonNullable<typeof props.groups>[number] | null>(
 )
 
 const title = computed(() => values.title as string || '')
-const uri = computed(() => toUri(title.value))
+const slug = computed(() => getSlug(title.value))
 
 watch(title, () => {
-  setFieldValue('uri', uri.value)
+  setFieldValue('slug', slug.value)
 })
 
 const isOpen = ref(false)
@@ -203,16 +203,16 @@ defineExpose({
         </FormField>
         <FormField
           v-slot="{ componentField, handleChange, handleBlur }"
-          name="uri"
+          name="slug"
         >
           <FormItem>
-            <FormLabel>Uri *</FormLabel>
+            <FormLabel>Slug *</FormLabel>
             <FormControl>
               <Input
                 :model-value="componentField.modelValue"
                 placeholder="my-new-house"
                 @blur="handleBlur"
-                @change="handleChange(toUri($event.target.value))"
+                @change="handleChange(getSlug($event.target.value))"
               />
             </FormControl>
             <FormMessage />

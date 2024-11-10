@@ -6,10 +6,10 @@ import { useProject } from '~~/src/shared/model/queries'
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '~~/src/shared/ui/kit/carousel'
 
 const props = defineProps<{
-  uri: string
+  slug: string
 }>()
 
-const { data: project } = useProject(toRefs(props).uri)
+const { data: project } = useProject(toRefs(props).slug)
 
 const api = ref<CarouselApi>()
 const apiTumb = ref<CarouselApi>()

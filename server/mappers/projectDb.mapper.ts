@@ -6,7 +6,7 @@ export const projectDbMapper = {
     return {
       categoryId: dto.categoryId,
       title: dto.title,
-      uri: dto.uri,
+      slug: dto.slug,
       yearStart: dto.yearStart,
       yearEnd: dto.yearEnd,
       location: dto.location,
@@ -18,7 +18,7 @@ export const projectDbMapper = {
     return {
       categoryId: dto.categoryId,
       title: dto.title,
-      uri: dto.uri,
+      slug: dto.slug,
       yearStart: dto.yearStart,
       yearEnd: dto.yearEnd,
       location: dto.location,

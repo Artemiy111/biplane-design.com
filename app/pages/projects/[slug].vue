@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ProjectPage } from '~~/src/pages/project'
 
-const uri = computed(() => useRoute().params.uri! as string)
+const slug = computed(() => useRoute('projects-slug').params.slug)
 </script>
 
 <template>
-  <ProjectPage :uri="uri" />
+  <ProjectPage :slug="slug" />
 </template>

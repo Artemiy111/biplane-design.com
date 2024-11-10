@@ -4,14 +4,14 @@ import type { CreateGroupDto, UpdateGroupDto } from '../use-cases/types'
 export const groupDbMapper = {
   toCreate(dto: CreateGroupDto): GroupDbCreate {
     return {
-      uri: dto.uri,
+      slug: dto.slug,
       title: dto.title,
     }
   },
   toUpdate(dto: UpdateGroupDto): GroupDbUpdate {
     return {
       title: dto.title,
-      uri: dto.uri,
+      slug: dto.slug,
       order: dto.order,
     }
   },

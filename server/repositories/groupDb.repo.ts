@@ -91,7 +91,7 @@ export class GroupDbRepo {
         ))
       }
 
-      await tx.update(groups).set({ order: newOrder }).where(eq(groups.uri, model.uri))
+      await tx.update(groups).set({ order: newOrder }).where(eq(groups.slug, model.slug))
       await tx.update(groups).set({ order: sql`${groups.order} / 1000` }).where(gte(groups.order, 1000))
     })
   }

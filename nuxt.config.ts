@@ -7,7 +7,7 @@ import { env } from './server/shared/env'
 export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',
-    '@nuxtjs/partytown',
+    // '@nuxtjs/partytown',
     '@nuxt/image',
     '@nuxt/eslint',
     '@nuxt/fonts',
@@ -55,6 +55,10 @@ export default defineNuxtConfig({
 
   future: {
     compatibilityVersion: 4,
+  },
+
+  experimental: {
+    typedPages: true,
   },
 
   compatibilityDate: '2024-07-20',

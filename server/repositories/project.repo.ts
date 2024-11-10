@@ -18,8 +18,8 @@ export class ProjectRepo {
     return projectMapper.toDto(model, images)
   }
 
-  async getOneByUri(uri: string) {
-    const model = await this.dbRepo.getOneByUri(uri)
+  async getOneBySlug(slug: string) {
+    const model = await this.dbRepo.getOneBySlug(slug)
     const images = await this.imageRepo.getAllByProjectId(model.id)
     return projectMapper.toDto(model, images)
   }

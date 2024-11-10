@@ -6,14 +6,14 @@ export const categoryDbMapper = {
     return {
       groupId: dto.groupId,
       title: dto.title,
-      uri: dto.uri,
+      slug: dto.slug,
       layout: dto.layout,
     }
   },
   toDbUpdate(dto: UpdateCategoryDto): CategoryDbUpdate {
     return {
       title: dto.title,
-      uri: dto.uri,
+      slug: dto.slug,
       layout: dto.layout,
       order: dto.order,
     }

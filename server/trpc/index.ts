@@ -1,8 +1,8 @@
-import { initTRPC, TRPCError } from '@trpc/server'
-import { use, type H3Event } from 'h3'
-import { verifyRequestOrigin } from 'lucia'
+import type { H3Event } from 'h3'
 
-import { lucia } from '~~/src/shared/lib/utils/auth'
+import { initTRPC, TRPCError } from '@trpc/server'
+
+import { sessionRepo } from '../di'
 
 const t = initTRPC.context<typeof createContext>().create()
 
@@ -26,21 +26,29 @@ export async function createContext(event: H3Event) {
   if (event.method !== 'GET') {
     const originHeader = getHeader(event, 'Origin') ?? null
     const hostHeader = getHeader(event, 'Host') ?? null
-    if (!originHeader || !hostHeader || !verifyRequestOrigin(originHeader, [hostHeader]))
+    if (!originHeader || !hostHeader)
       throw new TRPCError({ code: 'FORBIDDEN' })
   }
 
-  const sessionId = getCookie(event, lucia.sessionCookieName) ?? null
-  if (!sessionId) return {
+  const token = getCookie(event, 'token') ?? null
+  if (!token) return {
     event,
     session: null,
     user: null,
   }
 
-  const { session, user } = await lucia.validateSession(sessionId)
-  if (session && session.fresh) appendResponseHeader(event, 'Set-Cookie', lucia.createSessionCookie(session.id).serialize())
+  const { session, user } = await sessionRepo.validateSessionToken(token)
 
-  if (!session) appendResponseHeader(event, 'Set-Cookie', lucia.createBlankSessionCookie().serialize())
+  if (session)
+    setCookie(event, 'token', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      expires: session.expiresAt,
+      secure: import.meta.env.PROD as unknown as boolean,
+    })
+
+  if (!session) deleteCookie(event, 'token')
 
   return {
     event,

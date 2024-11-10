@@ -65,8 +65,8 @@ export const appRouter = router({
     getOne: publicProcedure.input(projectSchemas.getOneSchema).query(({ input }) => {
       return projectRepo.getOne(input.id)
     }),
-    getOneByUri: publicProcedure.input(projectSchemas.getOneByUriSchema).query(({ input }) => {
-      return projectRepo.getOneByUri(input.uri)
+    getOneBySlug: publicProcedure.input(projectSchemas.getOneBySlugSchema).query(({ input }) => {
+      return projectRepo.getOneBySlug(input.slug)
     }),
     getAll: publicProcedure.query(() => {
       return projectRepo.getAll()

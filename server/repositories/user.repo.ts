@@ -1,5 +1,5 @@
+import { hash } from 'argon2'
 import { eq } from 'drizzle-orm'
-import { Argon2id } from 'oslo/password'
 
 import type { CreateUserDb, UserDb } from '../db/schema'
 import type { UserId } from '../use-cases/types'
@@ -17,7 +17,7 @@ export class UserRepo {
   }
 
   async changePassword(userId: UserId, newPassword: string): Promise<UserDb> {
-    const passwordHash = await new Argon2id().hash(newPassword)
+    const passwordHash = await hash(newPassword)
 
     return (await db.update(users).set({
       passwordHash,

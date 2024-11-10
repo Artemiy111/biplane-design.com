@@ -5,7 +5,7 @@ import { projectStatus } from '~~/server/db/schema'
 const createSchema = z.object({
   categoryId: z.number(),
   title: z.string(),
-  uri: z.string(),
+  slug: z.string(),
   status: z.enum(projectStatus),
   yearStart: z.number().nullish(),
   yearEnd: z.number().nullish(),
@@ -28,8 +28,8 @@ export const projectSchemas = {
   getOneSchema: z.object({
     id: z.number(),
   }),
-  getOneByUriSchema: z.object({
-    uri: z.string(),
+  getOneBySlugSchema: z.object({
+    slug: z.string(),
   }),
   createSchema,
   updateSchema,

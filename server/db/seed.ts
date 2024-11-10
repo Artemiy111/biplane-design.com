@@ -1,6 +1,6 @@
 // import type { CreateCategoryDto, CreateGroupDto } from '../use-cases/types'
 
-// import { toUri } from '../../src/shared/lib/utils/to-uri'
+// import { toUri } from '../../src/shared/lib/utils/getSug'
 // import { categoryRepo, groupRepo } from '../di'
 // import { logger } from '../shared/logger'
 
@@ -13,7 +13,7 @@
 // const groupsToCreate: CreateGroupDto[] = groupsBiplane.map((g) => {
 //   return {
 //     title: g,
-//     uri: toUri(g),
+//     slug: getSlug(g),
 //   }
 // })
 
@@ -26,7 +26,7 @@
 //   if (g) {
 //     const dtos: CreateCategoryDto[] = categoriesBiplane[idx].map(c => ({
 //       title: c,
-//       uri: toUri(c),
+//       slug: toUri(c),
 //       groupId: g.id,
 //     }))
 //     return Promise.all(dtos.map(async (dto, _idx) => {

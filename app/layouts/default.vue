@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { useGroups } from '~~/src/shared/model/queries'
+import { useGroups, useUser } from '~~/src/shared/model/queries'
 import { Footer } from '~~/src/widgets/footer'
 import { Header } from '~~/src/widgets/header'
 
-useGroups()
+// useGroups()
+// useUser()
 </script>
 
 <template>
