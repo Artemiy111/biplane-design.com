@@ -107,7 +107,7 @@ export class CategoryDbRepo {
         ))
       }
 
-      await tx.update(categories).set({ order: newOrder }).where(eq(categories.uri, model.uri))
+      await tx.update(categories).set({ order: newOrder }).where(eq(categories.slug, model.slug))
       await tx.update(categories).set({ order: sql`${categories.order} / 1000` }).where(gte(categories.order, 1000))
     })
   }

@@ -1,6 +1,6 @@
 import { and, count, eq, gt, gte, lt, lte, sql } from 'drizzle-orm'
 
-import type { CategoryId, ProjectDb, ProjectDbUpdate, ProjectId } from '~~/server/db/schema'
+import type { CategoryId, ProjectDb, ProjectDbDeep, ProjectDbUpdate, ProjectId } from '~~/server/db/schema'
 import type { CreateProjectDto } from '~~/server/use-cases/types'
 
 import { projects } from '~~/server/db/schema'
@@ -12,7 +12,7 @@ import { projectDbMapper } from '../mappers/projectDb.mapper'
 export class ProjectDbRepo {
   constructor(private db: Db) { }
 
-  async getOne(id: ProjectId): Promise<ProjectDb> {
+  async getOne(id: ProjectId) {
     const model = await this.db.query.projects.findFirst({
       where: eq(projects.id, id), with: {
         images: {
@@ -24,15 +24,15 @@ export class ProjectDbRepo {
     return model
   }
 
-  async getOneByUri(uri: string) {
+  async getOneBySlug(slug: string) {
     const model = await this.db.query.projects.findFirst({
-      where: eq(projects.uri, uri), with: {
+      where: eq(projects.slug, slug), with: {
         images: {
           orderBy: images => images.order,
         },
       },
     })
-    if (!model) throw new Error(`Could not get project with uri '${uri}'`)
+    if (!model) throw new Error(`Could not get project with slug '${slug}'`)
     return model
   }
 

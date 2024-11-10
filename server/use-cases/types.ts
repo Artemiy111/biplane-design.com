@@ -11,7 +11,7 @@ export type IUseCase = {
 export type GroupDto = {
   id: GroupId
   title: string
-  uri: string
+  slug: string
   order: number
   categories: CategoryDto[]
 }
@@ -26,7 +26,7 @@ export type CategoryDto = {
   groupId: GroupId
   id: CategoryId
   title: string
-  uri: string
+  slug: string
   order: number
   layout: CategoryLayout
   projects: ProjectDto[]
@@ -41,7 +41,7 @@ export type ProjectDto = {
   categoryId: CategoryId
   id: ProjectId
   title: string
-  uri: string
+  slug: string
   order: number
   images: ImageDto[]
   location: string | null
@@ -68,7 +68,7 @@ export type ImageDto = {
 
 export type ImageFile = {
   filename: string
-  projectUri: string
+  projectSlug: string
   file: File
 }
 export type CreateImageDto = {

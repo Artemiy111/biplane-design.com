@@ -15,12 +15,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
 
 const props = defineProps<{
-  uri: string
+  slug: string
 }>()
 
 const queryCache = useQueryCache()
 const api = useApi()
-const { data: project } = useProject(toRefs(props).uri)
+const { data: project } = useProject(toRefs(props).slug)
 
 const title = computed(() => `Админ-панель | ${project.value?.title}`)
 const description = computed(() => `Админ-панель | ${project.value?.title}`)
@@ -80,8 +80,8 @@ async function uploadImages(images: File[]) {
       <section class="grid md:overflow-x-auto w-full grid-cols-[repeat(2,max-content)] gap-x-16 md:gap-x-8 gap-y-2">
         <span>Id</span>
         <span>{{ project.id }}</span>
-        <span>Uri</span>
-        <span>{{ project.uri }}</span>
+        <span>Slug</span>
+        <span>{{ project.slug }}</span>
         <span>Расположение</span>
         <span>{{ project.location }}</span>
         <span>Год начала</span>
