@@ -13,7 +13,7 @@ export default defineSitemapEventHandler(async () => {
     })),
   })
   const urls = projects.map(p => asSitemapUrl({
-    loc: `https://biplane-design.com/projects/${p.uri}`,
+    loc: `https://biplane-design.com/projects/${p.slug}`,
     images: p.images.map(img => ({
       loc: img.url,
       title: img.alt,

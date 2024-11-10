@@ -146,7 +146,7 @@ function openProjectSheet(project: ProjectDto) {
     mode: 'update',
     initial: {
       id: project.id,
-      uri: project.uri,
+      slug: project.slug,
       title: project.title,
       groupId: getGroupById(getCategoryById(project.categoryId).groupId)!.id,
       location: project.location,
@@ -235,7 +235,7 @@ function openProjectSheet(project: ProjectDto) {
               <TableHead />
               <TableHead>Превью</TableHead>
               <TableHead>Название</TableHead>
-              <TableHead>Uri</TableHead>
+              <TableHead>Slug</TableHead>
               <TableHead>Начало</TableHead>
               <TableHead>Завершение</TableHead>
               <TableHead>Статус</TableHead>
@@ -296,7 +296,7 @@ function openProjectSheet(project: ProjectDto) {
                 </Popover>
               </TableCell>
               <TableCell>
-                <NuxtLink :to="`/admin/projects/${project.uri}`">
+                <NuxtLink :to="`/admin/projects/${project.slug}`">
                   <NuxtImg
                     v-if="project.images.length"
                     :alt="project.images[0]!.alt"
@@ -307,11 +307,11 @@ function openProjectSheet(project: ProjectDto) {
                 </NuxtLink>
               </TableCell>
               <TableCell>
-                <NuxtLink :to="`/admin/projects/${project.uri}`">
+                <NuxtLink :to="`/admin/projects/${project.slug}`">
                   {{ project.title }}
                 </NuxtLink>
               </TableCell>
-              <TableCell>{{ project.uri }}</TableCell>
+              <TableCell>{{ project.slug }}</TableCell>
               <TableCell>{{ project.yearStart }}</TableCell>
               <TableCell>{{ project.yearEnd }}</TableCell>
               <TableCell>{{ project.status }}</TableCell>

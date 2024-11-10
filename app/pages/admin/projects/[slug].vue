@@ -5,9 +5,9 @@ definePageMeta({
   middleware: 'authenticated',
 })
 
-const uri = computed(() => useRoute().params.uri! as string)
+const slug = computed(() => useRoute('admin-projects-slug').params.slug)
 </script>
 
 <template>
-  <AdminProjectPage :uri="uri" />
+  <AdminProjectPage :slug="slug" />
 </template>

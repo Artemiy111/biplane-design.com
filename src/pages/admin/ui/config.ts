@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { projectStatus } from '~~/server/db/schema'
+import { getSlug } from '~~/src/shared/lib/utils/getSlug'
 
 const MIN_YEAR = 2000
 const MAX_YEAR = 2050
@@ -9,20 +10,11 @@ export const schema = z.object({
   categoryId: z.coerce.number(),
   id: z.number(),
   title: z.string().trim().min(3, 'Минимум 3 символа'),
-  uri: z
+  slug: z
     .string()
     .trim()
     .min(3, 'Минимум 3 символа')
-    .refine((s) => {
-      const url = `https://g.com/${s}`
-      try {
-        z.string().url().parse(url)
-        return true
-      }
-      catch (_e) {
-        return false
-      }
-    }, 'Не валидный Uri'),
+    .refine(s => getSlug(s) !== s, 'Не валидный Slug'),
   status: z.enum(projectStatus),
   yearStart: z
     .number()

@@ -1,44 +1,53 @@
 import type { H3Event } from 'h3'
 
 import { TRPCError } from '@trpc/server'
-import { Argon2id } from 'oslo/password'
+import { hash, verify } from 'argon2'
 
 import type { LoginDto } from '~~/src/shared/config/validation/auth'
 
-import { lucia } from '~~/src/shared/lib/utils/auth'
-
+import type { SessionRepo } from './session.repo'
 import type { UserRepo } from './user.repo'
 
 export class AuthRepo {
-  constructor(private userRepo: UserRepo) { }
+  constructor(private userRepo: UserRepo, private sessionRepo: SessionRepo) { }
 
   async login(dto: LoginDto, event: H3Event) {
     const existingUser = await this.userRepo.getByUsername(dto.username)
     if (!existingUser) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Неверные данные' })
 
-    const isValidPassword = await new Argon2id().verify(existingUser.passwordHash, dto.password)
+    const isValidPassword = await verify(existingUser.passwordHash, dto.password)
     if (!isValidPassword) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Неверные данные' })
 
-    const session = await lucia.createSession(existingUser.id, {})
-    const sessionCookie = lucia.createSessionCookie(session.id)
-    setCookie(event, sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+    const token = this.sessionRepo.generateSessionToken()
+    const session = await this.sessionRepo.createSession(token, existingUser.id)
+    setCookie(event, 'token', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      expires: session.expiresAt,
+      secure: import.meta.env.PROD as unknown as boolean,
+    })
   }
 
   async register(dto: LoginDto, event: H3Event) {
-    const passwordHash = await new Argon2id().hash(dto.password)
+    const passwordHash = await hash(dto.password)
     const createdUser = await this.userRepo.create({
       username: dto.username,
       passwordHash,
     })
-
-    const session = await lucia.createSession(createdUser.id, {})
-    const sessionCookie = lucia.createSessionCookie(session.id)
-    setCookie(event, sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+    const token = this.sessionRepo.generateSessionToken()
+    const session = await this.sessionRepo.createSession(token, createdUser.id)
+    setCookie(event, 'token', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      expires: session.expiresAt,
+      secure: import.meta.env.PROD as unknown as boolean,
+    })
   }
 
   async logout(event: H3Event, sessionId: string) {
-    await lucia.invalidateSession(sessionId)
-    const sessionCookie = lucia.createBlankSessionCookie()
-    setCookie(event, sessionCookie.name, sessionCookie.value, sessionCookie.attributes)
+    await this.sessionRepo.deleteSession(sessionId)
+    deleteCookie(event, 'token')
   }
 }

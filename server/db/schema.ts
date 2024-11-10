@@ -16,10 +16,13 @@ export const sessions = sqliteTable('sessions', {
   expiresAt: int({ mode: 'timestamp' }).notNull(),
 })
 
+export type SessionId = SessionDb['id']
+export type SessionDb = typeof sessions.$inferSelect
+
 export const groups = sqliteTable('groups', {
   id: int().primaryKey(),
   title: text().notNull().unique(),
-  uri: text().notNull().unique(),
+  slug: text().notNull().unique(),
   order: int().notNull().unique(),
 })
 
@@ -40,13 +43,12 @@ export const categories = sqliteTable(
     groupId: int().notNull().references(() => groups.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     id: int().primaryKey(),
     title: text().notNull().unique(),
-    uri: text().notNull().unique(),
+    slug: text().notNull().unique(),
     order: int().notNull(),
     layout: text({ enum: categoryLayout }).notNull(),
   },
   (t) => {
     return {
-      uniqueUriForGroup: unique('unique_uri_for_group').on(t.groupId, t.uri),
       uniqueOrderForGroup: unique('unique_order_for_group').on(t.groupId, t.order),
     }
   },
@@ -75,7 +77,7 @@ export const projects = sqliteTable(
     categoryId: int('category_id').notNull().references(() => categories.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
     id: int().primaryKey(),
     title: text().notNull(),
-    uri: text().notNull().unique(),
+    slug: text().notNull().unique(),
     status: text({ enum: projectStatus }).notNull(),
     yearStart: int(),
     yearEnd: int(),
