@@ -7,6 +7,7 @@ import * as z from 'zod'
 
 import type { CategoryDto, GroupDto } from '~~/server/use-cases/types'
 
+import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
 import { useGroups } from '~~/src/shared/model/queries'
 import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
@@ -24,12 +25,12 @@ const querySchema = z.object({
 const route = useRoute()
 const router = useRouter()
 
-const { data: groups } = useGroups()
-const categories = computed(() => groups.value?.flatMap(g => g.categories) || [])
+const groups = ref(await useApi().groups.getAll.query())
+const categories = computed(() => groups.value.flatMap(g => g.categories))
 
 const currentCategory = ref<CategoryDto | null>(getCurrentCategory(route.query))
 const currentGroup = computed(
-  () => groups.value?.find(g => g.id === currentCategory.value?.groupId) || null,
+  () => groups.value.find(g => g.id === currentCategory.value?.groupId) || null,
 )
 
 const currentCategoryProjects = computed(
@@ -53,7 +54,7 @@ function getCategoryFromRouteQuery(query: LocationQuery): CategoryDto | null {
 }
 
 function getCurrentCategory(query: LocationQuery) {
-  return getCategoryFromRouteQuery(query) || categories.value[0] || null
+  return getCategoryFromRouteQuery(query) || categories.value[0]!
 }
 
 router.afterEach(guard => (currentCategory.value = getCurrentCategory(guard.query)))
@@ -80,23 +81,9 @@ function changeGroup(group: GroupDto) {
   }
 }
 
-const breakpoints = useBreakpoints(screenBreakpoints, { strategy: 'max-width' })
-const xs = breakpoints.smallerOrEqual('xs')
-const lg = breakpoints.smallerOrEqual('lg')
-
-const dummyProjects = computed(() => {
-  if (!currentCategory.value) return 0
-  const count = currentCategory.value.projects.length
-  if (currentCategory.value.layout === 'mini') {
-    if (xs.value) return 0
-    if (lg.value) return count % 2
-    return count % 3
-  }
-  else {
-    if (lg.value) return 0
-    else return count % 2
-  }
-})
+// const breakpoints = useBreakpoints(screenBreakpoints, { strategy: 'max-width' })
+// const xs = breakpoints.smallerOrEqual('xs')
+// const lg = breakpoints.smallerOrEqual('lg')
 </script>
 
 <template>
@@ -114,28 +101,26 @@ const dummyProjects = computed(() => {
       />
     </div>
     <template v-else>
-      <section class="grid grid-cols-2 items-center divide-x text-xl lg:text-lg sm:text-base">
-        <h2
+      <section class="flex gap-x-8 text-heading mt-6">
+        <component
+          :is="group.id === currentGroup?.id ? 'h2' : 'span'"
           v-for="group in groups"
           :key="group.id"
-          :class="
-            cn(
-              'w-full cursor-pointer px-8 py-4 transition-colors hover:bg-secondary md:py-3 sm:px-4 sm:py-2',
-              group.id === currentGroup?.id && ' font-semibold',
-            )
-          "
+          :class="cn(
+            'cursor-pointer transition-colors text-foreground text-heading text-gray-400',
+            group.id === currentGroup?.id ? 'text-foreground' : 'hover:text-gray-500',
+          )"
           role="button"
           tabindex="0"
           @click="changeGroup(group)"
           @keypress.enter.space="changeGroup(group)"
         >
           {{ group.title }}
-        </h2>
+        </component>
       </section>
-      <Separator />
       <section
         v-if="currentGroup?.categories.length"
-        class="relative mx-8 my-6 sm:mx-2 sm:my-2 md:my-3"
+        class="relative mt-4"
       >
         <div
           class="pointer-events-none absolute right-0 top-0 z-50 h-full w-24 border-primary-foreground bg-gradient-to-r from-transparent to-white transition"
@@ -148,7 +133,7 @@ const dummyProjects = computed(() => {
             dragFree: true,
           }"
         >
-          <CarouselContent class="w-full gap-8 m-0">
+          <CarouselContent class="w-full gap-6 m-0">
             <CarouselItem
               v-for="c in currentGroup.categories"
               :key="c.id"
@@ -169,18 +154,16 @@ const dummyProjects = computed(() => {
       </section>
       <section
         v-if="currentCategoryProjects?.length"
-        :class="
-          cn(
-            'grid grid-cols-2 gap-x-8 lg:grid-cols-1',
-            currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 xs:grid-cols-1',
-          )
-        "
+        :class="cn(
+          'grid grid-cols-2 gap-x-8 gap-y-8 mt-8 lg:grid-cols-1',
+          currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 xs:grid-cols-1',
+        )"
       >
         <template
           v-for="p in currentCategoryProjects"
           :key="p.id"
         >
-          <Carousel
+          <!-- <Carousel
             v-if="p.isMinimal"
             class="w-full"
             :opts="{ active: false }"
@@ -201,38 +184,31 @@ const dummyProjects = computed(() => {
                 >
               </CarouselItem>
             </CarouselContent>
-          </Carousel>
-          <NuxtLink
-            v-else
-            class="flex flex-col transition-colors bg-white hover:bg-primary-foreground"
-            :to="`/projects/${p.slug}`"
-          >
-            <NuxtImg
-              :alt="p.images[0]!.alt"
-              :class="cn('aspect-video text-white w-full bg-white', p.images[0]!.fit)"
-              format="avif,webp,png,jpg"
-              :height="500"
-              :lazy="true"
-              :src="p.images[0]!.url"
-              :width="500"
-            />
-            <div class="flex items-center justify-between gap-8 px-8 pt-4 pb-16 sm:px-4 sm:py-2">
+          </Carousel> -->
+          <div class="flex flex-col transition-colors">
+            <NuxtLink :to="`/projects/${p.slug}`">
+              <NuxtImg
+                :alt="p.images[0]!.alt"
+                :class="cn('aspect-video text-background w-full bg-background', p.images[0]!.fit)"
+                format="avif,webp,png,jpg"
+                :height="500"
+                :lazy="true"
+                :src="p.images[0]!.url"
+                :width="500"
+              />
+            </NuxtLink>
+            <div class="flex items-center justify-between gap-8 mt-4 mx-container-pad">
               <h4>{{ p.title }}</h4>
-              <span class="text-slate-400">{{ p.yearStart }}</span>
+              <span class="text-gray-400">{{ p.yearStart }}</span>
             </div>
-          </NuxtLink>
+          </div>
         </template>
-        <div
-          v-for="n in dummyProjects"
-          :key="n"
-          class=""
-        />
       </section>
       <section
         v-else
         class="grid h-full flex-grow items-center justify-center"
       >
-        <span class="bg-primary-foreground p-8 text-lg md:text-base">Проектов пока нет</span>
+        <span class="bg-primary-foreground p-8 text-subheading">Проектов пока нет</span>
       </section>
     </template>
   </main>

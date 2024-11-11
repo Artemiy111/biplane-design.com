@@ -32,11 +32,42 @@ export default {
   safelist: ['dark'],
 
   theme: {
+    screens,
     container: {
       center: true,
-      padding: '0rem',
+      padding: 'var(--container-pad)',
+    },
+    fontSize: {
+      // '2xl': '32px',
+      // '3xl': '36px',
+      // 'xl': '28px',
+      // 'lg': '24px',
+      base: ['var(--text-base-font-size)', {
+        lineHeight: 'var(--text-base-line-height)',
+      }],
+      sm: ['var(--text-sm-font-size)', {
+        lineHeight: 'var(--text-sm-line-height)',
+      }],
+      xs: '16px',
+      heading: ['var(--text-heading-font-size)', {
+        lineHeight: 'var(--text-heading-line-height)',
+        fontWeight: 500,
+      }],
+      subheading: ['var(--text-subheading-font-size)', {
+        lineHeight: 'var(--text-subheading-line-height)',
+        fontWeight: 500,
+      }],
     },
     extend: {
+      height: {
+        'full-except-header': 'calc(100dvh - var(--header-height))',
+      },
+      padding: {
+        'container-pad': 'var(--container-pad)',
+      },
+      margin: {
+        'container-pad': 'var(--container-pad)',
+      },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
@@ -107,15 +138,6 @@ export default {
         },
       },
     },
-    fontSize: {
-      '2xl': '32px',
-      '3xl': '36px',
-      'base': '20px',
-      'lg': '24px',
-      'sm': '16px',
-      'xl': '28px',
-      'xs': '14px',
-    },
-    screens,
+
   },
 } satisfies Config

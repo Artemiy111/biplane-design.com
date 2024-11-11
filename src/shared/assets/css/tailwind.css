@@ -4,6 +4,18 @@
  
 @layer base {
   :root {
+    --container-pad: theme('padding.10');
+    --header-height: theme('height.20');
+
+    --text-heading-font-size: 32px;
+    --text-heading-line-height: 1.1;
+    --text-subheading-font-size: 30px;
+    --text-subheading-line-height: 1.2;
+    --text-base-font-size: 20px;
+    --text-base-line-height: 1.5;
+    --text-sm-font-size: 18px;
+    --text-sm-line-height: var(--text-base-line-height);
+
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
  

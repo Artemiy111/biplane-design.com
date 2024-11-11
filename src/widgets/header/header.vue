@@ -8,13 +8,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import {
   NavigationMenu,
   NavigationMenuItem,
+  NavigationMenuLink,
   NavigationMenuList,
 } from '~~/src/shared/ui/kit/navigation-menu'
 import { Separator } from '~~/src/shared/ui/kit/separator'
 
 const route = useRoute()
 const api = useApi()
-const { data: user } = useUser()
+const { data: user, refresh } = useUser()
+refresh()
 
 const routes = [{
   link: '/projects',
@@ -45,9 +47,9 @@ async function singOut() {
 <template>
   <header
     id="header"
-    class="container z-50 flex flex-col"
+    class="container z-50 flex h-20 flex-col"
   >
-    <div class="z-50 flex items-center justify-between px-8 py-4 sm:px-4 sm:py-2">
+    <div class="z-50 flex h-full items-center justify-between">
       <NuxtLink
         class="flex items-center gap-4"
         to="/"
@@ -59,56 +61,55 @@ async function singOut() {
         >
         <span class="sm:hidden">Biplane-Design</span>
       </NuxtLink>
-      <ClientOnly>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            v-if="user"
-            class="flex gap-3 items-center"
-          >
-            <UserRound :stroke-width="1.5" />
-            {{ user.username }}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>
-              <NuxtLink
-                class="w-full"
-                to="/admin"
-              >
-                Админ панель
-              </NuxtLink>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <NuxtLink
-                class="w-full"
-                to="/admin/account"
-              >
-                Аккаунт
-              </NuxtLink>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <NuxtLink
-                class="w-full"
-                to="/admin/auth"
-              >
-                Вход/Регистрация
-              </NuxtLink>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <button
-                class="w-full text-start text-red-500"
-                type="button"
-                variant="link"
-                @click="singOut"
-              >
-                Выйти
-              </button>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </ClientOnly>
-      <NavigationMenu>
-        <NavigationMenuList class="gap-6">
-          <NavigationMenuItem
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          v-if="user"
+          class="flex items-center gap-3"
+        >
+          <UserRound :stroke-width="1.5" />
+          {{ user.username }}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>
+            <NuxtLink
+              class="w-full"
+              to="/admin"
+            >
+              Админ панель
+            </NuxtLink>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <NuxtLink
+              class="w-full"
+              to="/admin/account"
+            >
+              Аккаунт
+            </NuxtLink>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <NuxtLink
+              class="w-full"
+              to="/admin/auth"
+            >
+              Вход/Регистрация
+            </NuxtLink>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <button
+              class="w-full text-start text-red-500"
+              type="button"
+              variant="link"
+              @click="singOut"
+            >
+              Выйти
+            </button>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <nav>
+        <ul class="flex gap-6">
+          <li
             v-for="r in routes"
             :key="r.link"
           >
@@ -120,9 +121,9 @@ async function singOut() {
             >
               {{ r.title }}
             </NuxtLink>
-          </NavigationMenuItem>
-        </NavigationMenuList>
-      </NavigationMenu>
+          </li>
+        </ul>
+      </nav>
     </div>
     <Separator />
   </header>

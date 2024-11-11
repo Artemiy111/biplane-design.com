@@ -8,7 +8,7 @@ import { Header } from '~~/src/widgets/header'
 </script>
 
 <template>
-  <div class="text-base font-normal md:text-sm">
+  <div class="text-base text-foreground font-normal">
     <div class="flex h-full min-h-[100dvh] w-full flex-col">
       <Header />
       <NuxtPage />

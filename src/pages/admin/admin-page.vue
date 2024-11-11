@@ -190,14 +190,15 @@ function openProjectSheet(project: ProjectDto) {
             <li
               v-for="category in group.categories"
               :key="category.id"
-              :class="cn('cursor-pointer ml-2 lg:m-0 px-2 py-1 hover:bg-primary-foreground',
-                         category.id === selectedCategory?.id && 'font-semibold bg-primary-foreground')"
-              role="button"
-              tabindex="0"
-              @click="selectedCategory = category"
-              @keypress.enter.space="selectedCategory = category"
             >
-              <span>{{ category.title }}</span>
+              <button
+                :class="cn('cursor-pointer ml-2 lg:m-0 px-2 py-1 hover:bg-primary-foreground',
+                           category.id === selectedCategory?.id && 'font-semibold bg-primary-foreground')"
+                type="button"
+                @click="selectedCategory = category"
+              >
+                <span>{{ category.title }}</span>
+              </button>
             </li>
           </ul>
         </li>
