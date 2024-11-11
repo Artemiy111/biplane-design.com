@@ -1,26 +1,34 @@
 <script setup lang="ts">
+import { cn } from '~~/src/shared/lib/utils'
 import { Separator } from '~~/src/shared/ui/kit/separator'
+
+const route = useRoute()
+watchEffect(() => {
+  console.log(route.path)
+})
 </script>
 
 <template>
-  <footer class="container mt-16 flex flex-col">
+  <footer
+    :class="cn('container mt-20 flex flex-col', route.path === '/' && 'mt-0')"
+  >
     <Separator />
     <section class="footer-columns grid justify-center gap-x-16 gap-y-8 py-16 lg:gap-x-16 md:gap-y-4">
       <ul class="flex flex-col gap-1">
-        <h6 class="text-lg font-semibold md:text-base sm:text-sm">
+        <h6 class="font-semibold">
           Контакты
         </h6>
         <li>Biplane-design@mail.ru</li>
         <li>3473 25-18-56</li>
       </ul>
       <ul class="flex flex-col gap-1">
-        <h6 class="text-lg font-semibold md:text-base sm:text-sm">
+        <h6 class="font-semibold">
           Время работы
         </h6>
         <li>Пн — Пт&nbsp;&nbsp;&nbsp;&nbsp;8 — 18</li>
       </ul>
       <ul class="flex flex-col gap-1">
-        <h6 class="text-lg font-semibold md:text-base sm:text-sm">
+        <h6 class="font-semibold">
           Адрес
         </h6>
         <li>
@@ -34,7 +42,7 @@ import { Separator } from '~~/src/shared/ui/kit/separator'
         </li>
       </ul>
       <ul class="flex flex-col gap-1">
-        <h6 class="text-lg font-semibold md:text-base sm:text-sm">
+        <h6 class="font-semibold">
           Студентам
         </h6>
         <li>

@@ -73,11 +73,11 @@ async function uploadImages(images: File[]) {
     v-if="project"
     class="container flex flex-col"
   >
-    <h1 class="font-bold px-8 sm:px-4 mt-4 md:mt-4 text-3xl 2xl:text-2xl lg:text-xl md:text-lg sm:text-base">
+    <h1 class="text-heading">
       {{ project.title }}
     </h1>
-    <div class="grid  grid-cols-[1fr_1fr] md:grid-cols-1 px-8 py-8 md:py-4 sm:px-4 gap-x-16 gap-y-8">
-      <section class="grid md:overflow-x-auto w-full grid-cols-[repeat(2,max-content)] gap-x-16 md:gap-x-8 gap-y-2">
+    <div class="grid  grid-cols-[1fr_1fr] gap-x-16 gap-y-8 p-8 md:grid-cols-1 md:py-4 sm:px-4">
+      <section class="grid w-full grid-cols-[repeat(2,max-content)] gap-x-16 gap-y-2 md:gap-x-8 md:overflow-x-auto">
         <span>Id</span>
         <span>{{ project.id }}</span>
         <span>Slug</span>
@@ -104,10 +104,10 @@ async function uploadImages(images: File[]) {
       />
     </div>
 
-    <section class="flex flex-col sm:px-4 gap-4 px-8 md:py-4">
-      <Table class="overflow-x-auto grid grid-cols-[120px_max-content_max-content_1fr_max-content] md:grid-cols-[max-content_260px_200px_max-content_max-content]">
-        <TableHeader class="grid grid-cols-subgrid col-span-5">
-          <TableRow class="grid grid-cols-subgrid col-span-5">
+    <section class="flex flex-col gap-4 px-8 md:py-4 sm:px-4">
+      <Table class="grid grid-cols-[120px_max-content_max-content_1fr_max-content] overflow-x-auto md:grid-cols-[max-content_260px_200px_max-content_max-content]">
+        <TableHeader class="col-span-5 grid grid-cols-subgrid">
+          <TableRow class="col-span-5 grid grid-cols-subgrid">
             <TableHead>№</TableHead>
             <TableHead>Изображение</TableHead>
             <TableHead>Вид</TableHead>
@@ -121,7 +121,7 @@ async function uploadImages(images: File[]) {
               onUpdate: updateImageOrder,
               handle: `[data-draggable-handler='true']`,
             }]"
-          class="transition-all grid grid-cols-subgrid col-span-5 [&>.row-leave-active]:absolute "
+          class="col-span-5 grid grid-cols-subgrid transition-all [&>.row-leave-active]:absolute "
         >
           <TransitionGroup
             name="row"
@@ -129,10 +129,10 @@ async function uploadImages(images: File[]) {
             <TableRow
               v-for="(image) in project.images"
               :key="image.id"
-              class="grid grid-cols-subgrid col-span-5 items-center"
+              class="col-span-5 grid grid-cols-subgrid items-center"
             >
               <TableCell
-                class="cursor-grab flex gap-4"
+                class="flex cursor-grab gap-4"
                 :data-draggable-handler="true"
               >
                 {{ image.order }} <GripVertical />

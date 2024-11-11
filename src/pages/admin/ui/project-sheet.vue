@@ -10,7 +10,7 @@ import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~~/server/use
 import { getSlug } from '~~/src/shared/lib/utils/getSlug'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Checkbox } from '~~/src/shared/ui/kit/checkbox'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form'
 import { Input } from '~~/src/shared/ui/kit/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '~~/src/shared/ui/kit/select'
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '~~/src/shared/ui/kit/sheet'
@@ -225,7 +225,6 @@ defineExpose({
           <FormItem>
             <FormLabel>Статус *</FormLabel>
             <Select v-bind="componentField">
-              ⌦ >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Выберите статус" />
@@ -294,16 +293,13 @@ defineExpose({
         </FormField>
 
         <FormField
-          v-slot="{ value, handleChange }"
+          v-slot="{ componentField }"
           name="isMinimal"
         >
-          <FormItem class="flex gap-4 items-center space-y-0">
+          <FormItem class="flex items-center gap-4 space-y-0">
             <FormLabel>Минималистичный</FormLabel>
             <FormControl class="m-0">
-              <Checkbox
-                :checked="value"
-                @update:checked="handleChange"
-              />
+              <Checkbox v-model:checked="componentField.modelValue" />
             </FormControl>
             <FormMessage />
           </FormItem>

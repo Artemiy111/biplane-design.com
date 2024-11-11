@@ -1,18 +1,15 @@
 <script setup lang="ts">
 import type { LocationQuery } from 'vue-router'
 
-import { useBreakpoints } from '@vueuse/core'
 import { LoaderCircle } from 'lucide-vue-next'
 import * as z from 'zod'
 
-import type { CategoryDto, GroupDto } from '~~/server/use-cases/types'
+import type { CategoryDto } from '~~/server/use-cases/types'
 
 import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
-import { useGroups } from '~~/src/shared/model/queries'
+import { HeadingTabs } from '~~/src/shared/ui/blocks/heading-tabs'
 import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
-import { Separator } from '~~/src/shared/ui/kit/separator'
-import { screenBreakpoints } from '~~/tailwind.config'
 
 const title = 'Проекты'
 const description = 'Представлены различные категории проектов'
@@ -29,13 +26,20 @@ const groups = ref(await useApi().groups.getAll.query())
 const categories = computed(() => groups.value.flatMap(g => g.categories))
 
 const currentCategory = ref<CategoryDto | null>(getCurrentCategory(route.query))
-const currentGroup = computed(
-  () => groups.value.find(g => g.id === currentCategory.value?.groupId) || null,
-)
+const currentGroup = computed(() => groups.value.find(g => g.id === currentCategory.value?.groupId) || null)
 
 const currentCategoryProjects = computed(
   () => currentCategory.value?.projects.filter(p => p.images.length) || null,
 )
+
+const tabs = computed(() => groups.value.map(g => ({ title: g.title, value: g.slug })))
+const tab = ref(currentGroup.value?.slug ?? tabs.value[0]!.value)
+watch(tab, () => {
+  const group = groups.value.find(g => g.slug === tab.value)!
+  if (group.id !== currentCategory.value?.groupId) {
+    currentCategory.value = group.categories[0] || null
+  }
+})
 
 watch(groups, () => {
   if (groups.value && !currentCategory.value)
@@ -59,7 +63,7 @@ function getCurrentCategory(query: LocationQuery) {
 
 router.afterEach(guard => (currentCategory.value = getCurrentCategory(guard.query)))
 
-const categoriesCarouselRef = ref<InstanceType<typeof Carousel> | null>(null)
+const categoriesCarouselRef = useTemplateRef('categoriesCarouselRef')
 const haveHiddenCategories = ref(false)
 
 function setHiddenCategories() {
@@ -74,25 +78,15 @@ onMounted(() => {
   categoriesCarouselRef.value?.carouselApi?.on('resize', setHiddenCategories)
   categoriesCarouselRef.value?.carouselApi?.on('scroll', setHiddenCategories)
 })
-
-function changeGroup(group: GroupDto) {
-  if (group.id !== currentCategory.value?.groupId) {
-    currentCategory.value = group.categories[0] || null
-  }
-}
-
-// const breakpoints = useBreakpoints(screenBreakpoints, { strategy: 'max-width' })
-// const xs = breakpoints.smallerOrEqual('xs')
-// const lg = breakpoints.smallerOrEqual('lg')
 </script>
 
 <template>
   <main
-    class="container flex h-full flex-grow flex-col"
+    class="container flex h-full grow flex-col"
   >
     <div
       v-if="groups === null"
-      class="flex w-full h-full flex-grow flex-col items-center justify-center"
+      class="flex size-full grow flex-col items-center justify-center"
     >
       <LoaderCircle
         class="animate-spin"
@@ -101,7 +95,11 @@ function changeGroup(group: GroupDto) {
       />
     </div>
     <template v-else>
-      <section class="flex gap-x-8 text-heading mt-6">
+      <HeadingTabs
+        v-model:tab="tab"
+        :tabs="tabs"
+      />
+      <!--  <section class="mt-8 flex gap-x-8 text-heading">
         <component
           :is="group.id === currentGroup?.id ? 'h2' : 'span'"
           v-for="group in groups"
@@ -117,7 +115,7 @@ function changeGroup(group: GroupDto) {
         >
           {{ group.title }}
         </component>
-      </section>
+      </section -->
       <section
         v-if="currentGroup?.categories.length"
         class="relative mt-4"
@@ -133,7 +131,7 @@ function changeGroup(group: GroupDto) {
             dragFree: true,
           }"
         >
-          <CarouselContent class="w-full gap-6 m-0">
+          <CarouselContent class="m-0 w-full gap-6">
             <CarouselItem
               v-for="c in currentGroup.categories"
               :key="c.id"
@@ -197,7 +195,7 @@ function changeGroup(group: GroupDto) {
                 :width="500"
               />
             </NuxtLink>
-            <div class="flex items-center justify-between gap-8 mt-4 mx-container-pad">
+            <div class="mx-container-pad mt-4 flex items-center justify-between gap-8">
               <h4>{{ p.title }}</h4>
               <span class="text-gray-400">{{ p.yearStart }}</span>
             </div>
@@ -206,7 +204,7 @@ function changeGroup(group: GroupDto) {
       </section>
       <section
         v-else
-        class="grid h-full flex-grow items-center justify-center"
+        class="grid h-full grow items-center justify-center"
       >
         <span class="bg-primary-foreground p-8 text-subheading">Проектов пока нет</span>
       </section>

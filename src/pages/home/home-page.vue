@@ -10,7 +10,7 @@ const description = 'Студия дизайна'
 useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
-const headingRef = ref<HTMLHeadingElement | null>(null)
+const headingRef = useTemplateRef('headingRef')
 
 onMounted(() => {
   if (!headingRef.value) return
@@ -22,20 +22,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="relative justify-center flex flex-col flex-grow h-full">
+  <main class="relative flex h-full grow flex-col justify-center">
     <NuxtImg
-      class="w-full object-cover h-full-except-header"
+      class="h-full-except-header w-full object-cover"
       src="/main.jpg"
     />
     <section class="absolute mx-container-pad gap-4 pb-[200px] ">
       <h1
         ref="headingRef"
-        class="text-[140px] leading-none xl:text-[120px] lg:text-[100px] md:text-[80px] sm:text-[60px] font-bold  text-yellow-400"
+        class="text-[140px] font-bold leading-none text-yellow-400 lg:text-[100px] md:text-[80px] sm:text-[60px]  xl:text-[120px]"
       >
         Biplane<br>Design
       </h1>
       <p
-        class="gsap-description mt-4 text-subheading pl-2 text-white"
+        class="gsap-description mt-4 pl-2 text-subheading text-white"
       >
         <span>Первоклассные решения</span>&nbsp;<span class="whitespace-nowrap">в архитектуре и дизайне</span>
       </p>

@@ -51,11 +51,11 @@ export default {
       xs: '16px',
       heading: ['var(--text-heading-font-size)', {
         lineHeight: 'var(--text-heading-line-height)',
-        fontWeight: 500,
+        fontWeight: 600,
       }],
       subheading: ['var(--text-subheading-font-size)', {
         lineHeight: 'var(--text-subheading-line-height)',
-        fontWeight: 500,
+        fontWeight: 600,
       }],
     },
     extend: {
