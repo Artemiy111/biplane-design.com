@@ -5,7 +5,7 @@ import type { GroupId } from '~~/server/db/schema'
 import type {
   CreateGroupDto,
   UpdateGroupDto,
-} from '~~/server/use-cases/types'
+} from '~~/server/types'
 
 import { groups } from '~~/server/db/schema'
 

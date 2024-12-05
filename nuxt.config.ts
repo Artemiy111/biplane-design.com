@@ -59,6 +59,9 @@ export default defineNuxtConfig({
 
   experimental: {
     typedPages: true,
+    // sharedPrerenderData: true,
+    // componentIslands: true,
+    // asyncContext: true,
   },
 
   compatibilityDate: '2024-07-20',

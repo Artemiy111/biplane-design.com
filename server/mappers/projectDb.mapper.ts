@@ -1,5 +1,5 @@
 import type { ProjectDbCreate, ProjectDbUpdate } from '../db/schema'
-import type { CreateProjectDto, UpdateProjectDto } from '../use-cases/types'
+import type { CreateProjectDto, UpdateProjectDto } from '../types'
 
 export const projectDbMapper = {
   toDbCreate(dto: CreateProjectDto, order: number): ProjectDbCreate {

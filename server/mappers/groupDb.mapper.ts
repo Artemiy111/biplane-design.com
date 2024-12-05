@@ -1,5 +1,5 @@
 import type { GroupDbCreate, GroupDbUpdate } from '../db/schema'
-import type { CreateGroupDto, UpdateGroupDto } from '../use-cases/types'
+import type { CreateGroupDto, UpdateGroupDto } from '../types'
 
 export const groupDbMapper = {
   toCreate(dto: CreateGroupDto): GroupDbCreate {
