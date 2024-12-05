@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { useElementSize, watchOnce } from '@vueuse/core'
+import { useBreakpoints, useElementSize, watchOnce } from '@vueuse/core'
 
+import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
-import { useProject } from '~~/src/shared/model/queries'
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '~~/src/shared/ui/kit/carousel'
+import { Carousel, CarouselContent, CarouselItem, useCarousel, type CarouselApi } from '~~/src/shared/ui/kit/carousel'
+import { screenBreakpoints } from '~~/tailwind.config'
 
 const props = defineProps<{
   slug: string
 }>()
 
-const { data: project } = useProject(toRefs(props).slug)
+const { data: project } = useApi().projects.getOneBySlug.useQuery({ slug: props.slug }, { watch: [() => props.slug] })
 
 const api = ref<CarouselApi>()
 const apiTumb = ref<CarouselApi>()
-const mainCarouselRef = ref<InstanceType<typeof Carousel> | null>(null)
-const { height: mainCarouselHeight } = useElementSize(toRef(() => mainCarouselRef.value?.carouselRef))
+const carouselRef = useTemplateRef('carouselRef')
+const { height: carouselHeight } = useElementSize(() => carouselRef.value?.carouselRef)
 const totalCount = ref(0)
 const current = ref(0)
 
@@ -39,6 +40,10 @@ function scrollToImage(index: number): void {
   apiTumb.value?.scrollTo(index)
   api.value?.scrollTo(index)
 }
+
+const breakpoints = useBreakpoints(screenBreakpoints, { strategy: 'max-width' })
+const md = breakpoints.smallerOrEqual('md')
+const xl = breakpoints.smallerOrEqual('xl')
 </script>
 
 <template>
@@ -46,39 +51,39 @@ function scrollToImage(index: number): void {
     v-if="project"
     class="container flex flex-col"
   >
-    <section class="flex justify-between px-8 py-4 text-xl lg:text-lg sm:py-2 sm:px-4 sm:text-base">
-      <h1 class="font-semibold">
+    <section class="my-8 flex justify-between">
+      <h1 class="text-heading">
         {{ project.title }}
       </h1>
     </section>
     <section
-      class="grid h-fit grid-cols-[300px,1fr] items-start gap-4 overflow-hidden 2xl:grid-cols-[250px,1fr] xl:grid-cols-[200px,1fr] lg:grid-cols-[150px,1fr] md:grid-cols-1"
+      class="grid h-fit grid-cols-[300px,1fr] items-start gap-4 overflow-hidden 2xl:grid-cols-[250px,1fr] lg:grid-cols-[150px,1fr] md:grid-cols-1 xl:grid-cols-1"
     >
       <Carousel
-        class="md:hidden"
+        class="xl:order-2"
         :opts="{
           loop: false,
           align: 'start',
           dragFree: true,
         }"
-        orientation="vertical"
+        :orientation="xl ? 'horizontal' : 'vertical'"
         @init-api="apiTumb = $event"
       >
+        <!-- eslint-disable vue/prefer-true-attribute-shorthand -->
         <CarouselContent
-          class="m-0 h-fit gap-[4px]"
-          :style="{ maxHeight: `${mainCarouselHeight}px` }"
+          class="m-0 gap-2 xl:flex-row"
+          data-allow-mismatch
+          :style="{ maxHeight: `${carouselHeight}px` }"
         >
           <CarouselItem
             v-for="(img, index) in project.images"
             :key="img.id"
-            class="cursor-grab p-0"
-
-            :class="[index === current ? 'outline outline-8 outline-black -outline-offset-8' : '']"
+            :class="cn('flex w-fit cursor-grab items-center justify-center p-0 xl:basis-auto', index === current && 'outline outline-8 -outline-offset-8 outline-black')"
             @click="current = index"
           >
             <NuxtImg
               :alt="img.alt"
-              :class="cn('aspect-video w-full', img.fit)"
+              :class="cn('aspect-video w-full xl:max-w-60', img.fit)"
               format="avif,webp,png,jpg"
               :src="img.url"
             />
@@ -86,8 +91,9 @@ function scrollToImage(index: number): void {
         </CarouselContent>
       </Carousel>
       <Carousel
-        ref="mainCarouselRef"
-        class="aspect-video w-full md:hidden"
+        v-if="!md"
+        ref="carouselRef"
+        class="aspect-video w-full xl:order-1"
         :opts="{
           loop: false,
         }"
@@ -110,35 +116,31 @@ function scrollToImage(index: number): void {
       </Carousel>
     </section>
 
-    <NuxtImg
-      :key="project.images[0]!.id"
-      :alt="project.images[0]!.alt"
-      :class="cn('w-full hidden md:block', project.images[0]!.fit)"
-      format="avif,webp,png,jpg"
-      :src="project.images[0]!.url"
-    />
-    <section class="grid grid-cols-[repeat(2,max-content)] gap-x-16 gap-y-2 px-8 py-8 sm:px-4">
-      <span>Статус</span>
-      <span>{{ project.status }}</span>
+    <section class="grid grid-cols-[repeat(2,max-content)] gap-4 pt-12">
+      <span class="font-semibold">Статус</span>
+      <span>{{ project.status[0]!.toUpperCase() + project.status.slice(1) }}</span>
       <template v-if="project.location">
-        <span>Расположение</span>
+        <span class="font-semibold">Расположение</span>
         <span>{{ project.location }}</span>
       </template>
       <template v-if="project.yearStart">
-        <span>Год начала</span>
+        <span class="font-semibold">Год начала</span>
         <span>{{ project.yearStart }}</span>
       </template>
       <template v-if="project.yearEnd">
-        <span>Год завершения</span>
+        <span class="font-semibold">Год завершения</span>
         <span>{{ project.yearEnd }}</span>
       </template>
     </section>
-    <div class="md:flex w-full flex-col gap-4 hidden">
+    <div
+      v-if="md"
+      class="flex w-full flex-col gap-4"
+    >
       <NuxtImg
-        v-for="img in project.images.slice(1, -1)"
+        v-for="img in project.images"
         :key="img.id"
         :alt="img.alt"
-        :class="cn('w-full max-h-[70vh]', img.fit)"
+        :class="cn('max-h-[70vh] w-full', img.fit)"
         format="avif,webp,png,jpg"
         :src="img.url"
       />

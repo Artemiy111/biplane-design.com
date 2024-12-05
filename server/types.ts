@@ -1,12 +1,4 @@
-import type { CategoryDbUpdate, CategoryId, CategoryLayout, GroupDbUpdate, GroupId, ImageDbUpdate, ImageFit, ProjectDbCreate, ProjectDbUpdate, ProjectId, ProjectStatus } from '../db/schema'
-
-//
-export type IUseCase = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  execute: (...params: any[]) => void
-}
-
-//
+import type { CategoryDbUpdate, CategoryId, CategoryLayout, GroupDbUpdate, GroupId, ImageDbUpdate, ImageFit, ProjectDbCreate, ProjectDbUpdate, ProjectId, ProjectStatus } from './db/schema'
 
 export type GroupDto = {
   id: GroupId

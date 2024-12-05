@@ -1,7 +1,7 @@
 import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
 
 import type { CategoryDbCreate, CategoryId, GroupId } from '~~/server/db/schema'
-import type { UpdateCategoryDto } from '~~/server/use-cases/types'
+import type { UpdateCategoryDto } from '~~/server/types'
 
 import { categories } from '~~/server/db/schema'
 

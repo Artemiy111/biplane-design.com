@@ -51,8 +51,8 @@ const { mutate: changePassword } = useMutation({
 </script>
 
 <template>
-  <main class="container flex flex-col gap-4 px-8 py-8 sm:px-4 sm:py-4">
-    <h1 class="text-xl lg:text-lg md:text-base font-semibold">
+  <main class="container mt-8 flex flex-col gap-4">
+    <h1 class="text-heading">
       Аккаунт
     </h1>
     <div

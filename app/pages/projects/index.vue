@@ -2,7 +2,7 @@
 import { ProjectsPage } from '~~/src/pages/projects'
 import { useGroups } from '~~/src/shared/model/queries'
 
-useGroups()
+// useGroups()
 </script>
 
 <template>

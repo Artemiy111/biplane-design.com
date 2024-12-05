@@ -5,7 +5,7 @@ import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import { toast } from 'vue-sonner'
 
 import type { GroupId, ProjectId } from '~~/server/db/schema'
-import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~~/server/use-cases/types'
+import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~~/server/types'
 
 import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
@@ -51,9 +51,8 @@ watchImmediate(() => [selectedCategory.value, projects.value], () => {
   }) ?? []
 })
 
-const projectSheetRef = ref<InstanceType<typeof ProjectSheet> | null>(null)
-
-const projectsTableBody = ref<InstanceType<typeof TableBody> | null>(null)
+const projectSheet = useTemplateRef('projectSheet')
+const projectsTableBody = useTemplateRef('projectsTableBody')
 // FIXME TODO чтотоот
 
 const toastMessages = {
@@ -77,7 +76,7 @@ const toastMessages = {
 const { mutate: createProject } = useMutation({
   mutation: (dto: CreateProjectDto) => api.projects.createOne.mutate(dto),
   onSuccess: () => {
-    projectSheetRef.value?.close()
+    projectSheet.value?.close()
     toast.success(toastMessages.create.success)
   },
   onError: () => {
@@ -91,7 +90,7 @@ const { mutate: createProject } = useMutation({
 const { mutate: updateProject } = useMutation({
   mutation: ([id, dto]: [ProjectId, UpdateProjectDto]) => api.projects.updateOne.mutate({ id, ...dto }),
   onSuccess: () => {
-    projectSheetRef.value?.close()
+    projectSheet.value?.close()
     toast.success(toastMessages.update.success)
   },
   onError: (e) => {
@@ -126,7 +125,7 @@ async function onUpdateProjectOrder(e: SortableEvent) {
 const { mutate: deleteProject } = useMutation({
   mutation: (id: ProjectId) => api.projects.deleteOne.mutate({ id }),
   onSuccess: () => {
-    projectSheetRef.value?.close()
+    projectSheet.value?.close()
     toast.success(toastMessages.delete.success)
   },
   onError: () => {
@@ -142,7 +141,7 @@ function getGroupById(id: GroupId) {
 }
 
 function openProjectSheet(project: ProjectDto) {
-  projectSheetRef.value?.open({
+  projectSheet.value?.open({
     mode: 'update',
     initial: {
       id: project.id,
@@ -165,7 +164,7 @@ function openProjectSheet(project: ProjectDto) {
   <ClientOnly>
     <main
       v-if="!groups"
-      class="container flex flex-grow flex-col items-center justify-center"
+      class="container flex grow flex-col items-center justify-center"
     >
       <LoaderCircle
         class="animate-spin"
@@ -175,7 +174,7 @@ function openProjectSheet(project: ProjectDto) {
     </main>
     <main
       v-else
-      class="container grid gap-8 grid-cols-[200px_minmax(500px,1400px)] lg:grid-cols-1 px-8 sm:px-4 mt-8"
+      class="container mt-8 grid grid-cols-[200px_minmax(500px,1400px)] gap-8 px-8 lg:grid-cols-1 sm:px-4"
     >
       <ul class="flex flex-col gap-4">
         <li
@@ -183,32 +182,33 @@ function openProjectSheet(project: ProjectDto) {
           :key="group.id"
           class="w-full list-none"
         >
-          <ul class="flex w-full flex-col lg:flex-row flex-wrap gap-2">
-            <span class="w-full text-slate-800 rounded-sm font-semibold">{{
+          <ul class="flex w-full flex-col flex-wrap gap-2 lg:flex-row">
+            <span class="w-full rounded-sm font-semibold text-slate-800">{{
               group.title
             }}</span>
             <li
               v-for="category in group.categories"
               :key="category.id"
-              :class="cn('cursor-pointer ml-2 lg:m-0 px-2 py-1 hover:bg-primary-foreground',
-                         category.id === selectedCategory?.id && 'font-semibold bg-primary-foreground')"
-              role="button"
-              tabindex="0"
-              @click="selectedCategory = category"
-              @keypress.enter.space="selectedCategory = category"
             >
-              <span>{{ category.title }}</span>
+              <button
+                :class="cn('ml-2 cursor-pointer px-2 py-1 hover:bg-primary-foreground lg:m-0',
+                           category.id === selectedCategory?.id && 'bg-primary-foreground font-semibold')"
+                type="button"
+                @click="selectedCategory = category"
+              >
+                <span>{{ category.title }}</span>
+              </button>
             </li>
           </ul>
         </li>
       </ul>
       <section
         v-if="groups?.length"
-        class="flex flex-col gap-4 w-full"
+        class="flex w-full flex-col gap-4"
       >
         <ProjectSheet
           v-if="groups.length"
-          ref="projectSheetRef"
+          ref="projectSheet"
           :groups="groups"
           @create="createProject"
           @update="(id, dto) => updateProject([id, dto])"
@@ -217,7 +217,7 @@ function openProjectSheet(project: ProjectDto) {
         <Button
           class="w-fit"
           :size="md ? 'sm' : 'default'"
-          @click="projectSheetRef?.open({
+          @click="projectSheet?.open({
             mode: 'create',
             initial: selectedCategory
               ? ({
@@ -228,9 +228,9 @@ function openProjectSheet(project: ProjectDto) {
           Создать проект
         </Button>
 
-        <Table class="grid overflow-x-auto text-xs grid-cols-[80px_100px_200px_200px_180px_120px_140px_170px_170px]">
-          <TableHeader class="grid grid-cols-subgrid col-span-9">
-            <TableRow class="grid grid-cols-subgrid col-span-9">
+        <Table class="grid grid-cols-[80px_100px_200px_200px_180px_120px_140px_170px_170px] overflow-x-auto text-xs">
+          <TableHeader class="col-span-9 grid grid-cols-subgrid">
+            <TableRow class="col-span-9 grid grid-cols-subgrid">
               <TableHead>№</TableHead>
               <TableHead />
               <TableHead>Превью</TableHead>
@@ -250,17 +250,17 @@ function openProjectSheet(project: ProjectDto) {
                 onUpdate: onUpdateProjectOrder,
                 handle: `[data-draggable-handler='true']`,
               }]"
-            class="grid grid-cols-subgrid col-span-9"
+            class="col-span-9 grid grid-cols-subgrid"
           >
             <TableRow
               v-for="project in selectedCategoryProjects"
               :key="project.id"
-              class="items-center w-max grid grid-cols-subgrid col-span-9"
+              class="col-span-9 grid w-max grid-cols-subgrid items-center"
               :data-order="project.order"
               :data-project-id="project.id"
             >
               <TableCell
-                class="flex gap-2 cursor-grab"
+                class="flex cursor-grab gap-2"
                 :data-draggable-handler="true"
               >
                 {{ project.order }}

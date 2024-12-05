@@ -3,7 +3,7 @@ import type { HTMLAttributes } from 'vue'
 
 import { FolderUp } from 'lucide-vue-next'
 
-import type { ImageDto } from '~~/server/use-cases/types'
+import type { ImageDto } from '~~/server/types'
 
 import { cn } from '~~/src/shared/lib/utils'
 import { Input } from '~~/src/shared/ui/kit/input'
@@ -22,7 +22,7 @@ const emit = defineEmits<{
 
 const id = useId()
 
-const inputRef = ref<InstanceType<typeof Input> | null>(null)
+const inputRef = useTemplateRef('inputRef')
 const files = ref<File[]>([])
 const isDragging = ref(false)
 
@@ -94,7 +94,7 @@ defineExpose({
           :id="id"
           ref="inputRef"
           accept=".avif,.webp,.png,.jpg,.jpeg"
-          class="absolute h-[1px] w-[1px] overflow-hidden opacity-0"
+          class="absolute size-px overflow-hidden opacity-0"
           :multiple="props.multiple"
           type="file"
           @change="onChange"
