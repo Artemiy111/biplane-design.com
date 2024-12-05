@@ -22,7 +22,7 @@ const tab = defineModel<string>('tab', { required: true })
       v-for="t in props.tabs"
       :key="t.value"
       :class="cn(
-        'cursor-pointer transition-colors text-foreground text-heading text-gray-400',
+        'cursor-pointer text-heading text-gray-400 transition-colors',
         t.value === tab ? 'text-foreground' : 'hover:text-gray-500',
       )"
       role="button"

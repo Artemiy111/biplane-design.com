@@ -1,5 +1,5 @@
 import type { ImageDbCreate, ImageDbUpdate } from '../db/schema'
-import type { CreateImageDto, UpdateImageDto } from '../use-cases/types'
+import type { CreateImageDto, UpdateImageDto } from '../types'
 
 export const imageDbMapper = {
   toDbCreate(dto: CreateImageDto, filename: string): ImageDbCreate {

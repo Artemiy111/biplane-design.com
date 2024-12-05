@@ -3,7 +3,7 @@ import type { HTMLAttributes } from 'vue'
 
 import { FolderUp } from 'lucide-vue-next'
 
-import type { ImageDto } from '~~/server/use-cases/types'
+import type { ImageDto } from '~~/server/types'
 
 import { cn } from '~~/src/shared/lib/utils'
 import { Input } from '~~/src/shared/ui/kit/input'

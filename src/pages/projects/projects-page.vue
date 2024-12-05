@@ -4,7 +4,7 @@ import type { LocationQuery } from 'vue-router'
 import { LoaderCircle } from 'lucide-vue-next'
 import * as z from 'zod'
 
-import type { CategoryDto } from '~~/server/use-cases/types'
+import type { CategoryDto } from '~~/server/types'
 
 import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
@@ -153,15 +153,11 @@ onMounted(() => {
       <section
         v-if="currentCategoryProjects?.length"
         :class="cn(
-          'grid grid-cols-2 gap-x-8 gap-y-8 mt-8 lg:grid-cols-1',
+          'mt-8 grid grid-cols-2 gap-x-10 gap-y-12 lg:grid-cols-1',
           currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 xs:grid-cols-1',
         )"
       >
-        <template
-          v-for="p in currentCategoryProjects"
-          :key="p.id"
-        >
-          <!-- <Carousel
+        <!-- <Carousel
             v-if="p.isMinimal"
             class="w-full"
             :opts="{ active: false }"
@@ -183,24 +179,27 @@ onMounted(() => {
               </CarouselItem>
             </CarouselContent>
           </Carousel> -->
-          <div class="flex flex-col transition-colors">
-            <NuxtLink :to="`/projects/${p.slug}`">
-              <NuxtImg
-                :alt="p.images[0]!.alt"
-                :class="cn('aspect-video text-background w-full bg-background', p.images[0]!.fit)"
-                format="avif,webp,png,jpg"
-                :height="500"
-                :lazy="true"
-                :src="p.images[0]!.url"
-                :width="500"
-              />
-            </NuxtLink>
-            <div class="mx-container-pad mt-4 flex items-center justify-between gap-8">
-              <h4>{{ p.title }}</h4>
-              <span class="text-gray-400">{{ p.yearStart }}</span>
-            </div>
+        <div
+          v-for="p in currentCategoryProjects"
+          :key="p.id"
+          class="flex flex-col transition-colors"
+        >
+          <NuxtLink :to="`/projects/${p.slug}`">
+            <NuxtImg
+              :alt="p.images[0]!.alt"
+              :class="cn('aspect-video w-full bg-background text-background', p.images[0]!.fit)"
+              format="avif,webp,png,jpg"
+              :height="500"
+              :lazy="true"
+              :src="p.images[0]!.url"
+              :width="500"
+            />
+          </NuxtLink>
+          <div class="mt-4 flex items-center justify-between gap-8">
+            <h4>{{ p.title }}</h4>
+            <span class="text-gray-400">{{ p.yearStart }}</span>
           </div>
-        </template>
+        </div>
       </section>
       <section
         v-else

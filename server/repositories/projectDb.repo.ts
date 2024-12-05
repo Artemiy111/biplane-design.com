@@ -1,7 +1,7 @@
 import { and, count, eq, gt, gte, lt, lte, sql } from 'drizzle-orm'
 
 import type { CategoryId, ProjectDb, ProjectDbDeep, ProjectDbUpdate, ProjectId } from '~~/server/db/schema'
-import type { CreateProjectDto } from '~~/server/use-cases/types'
+import type { CreateProjectDto } from '~~/server/types'
 
 import { projects } from '~~/server/db/schema'
 

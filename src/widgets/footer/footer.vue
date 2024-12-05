@@ -3,9 +3,6 @@ import { cn } from '~~/src/shared/lib/utils'
 import { Separator } from '~~/src/shared/ui/kit/separator'
 
 const route = useRoute()
-watchEffect(() => {
-  console.log(route.path)
-})
 </script>
 
 <template>
@@ -13,7 +10,10 @@ watchEffect(() => {
     :class="cn('container mt-20 flex flex-col', route.path === '/' && 'mt-0')"
   >
     <Separator />
-    <section class="footer-columns grid justify-center gap-x-16 gap-y-8 py-16 lg:gap-x-16 md:gap-y-4">
+    <section
+      class="grid justify-center gap-x-16 gap-y-8 py-16 lg:gap-x-16 md:gap-y-4"
+      data-footer-cols
+    >
       <ul class="flex flex-col gap-1">
         <h6 class="font-semibold">
           Контакты
@@ -97,7 +97,7 @@ watchEffect(() => {
 </template>
 
 <style scoped>
-.footer-columns {
+[data-footer-columns] {
   display: grid;
   grid-template-columns: repeat(4,max-content);
 

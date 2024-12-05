@@ -1,5 +1,5 @@
 import type { CategoryDbCreate, CategoryDbUpdate } from '../db/schema'
-import type { CreateCategoryDto, UpdateCategoryDto } from '../use-cases/types'
+import type { CreateCategoryDto, UpdateCategoryDto } from '../types'
 
 export const categoryDbMapper = {
   toDbCreate(dto: CreateCategoryDto): CategoryDbCreate {

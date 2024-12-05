@@ -2,7 +2,7 @@ import { sha256 } from '@oslojs/crypto/sha2'
 import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from '@oslojs/encoding'
 import { eq } from 'drizzle-orm'
 
-import { db, type Db } from '../db'
+import { db } from '../db'
 import { sessions, users, type SessionDb, type SessionId, type UserDb } from '../db/schema'
 
 export type SessionValidationResult =
@@ -10,8 +10,6 @@ export type SessionValidationResult =
   | { session: null, user: null }
 
 export class SessionRepo {
-  constructor(private db: Db) { }
-
   generateSessionToken(): string {
     const bytes = new Uint8Array(20)
     crypto.getRandomValues(bytes)

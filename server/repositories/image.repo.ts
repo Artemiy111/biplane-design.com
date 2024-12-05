@@ -1,5 +1,5 @@
 import type { ImageId, ProjectId } from '../db/schema'
-import type { CreateImageDto, UpdateImageDto } from '../use-cases/types'
+import type { CreateImageDto, UpdateImageDto } from '../types'
 import type { ImageDbRepo } from './imageDb.repo'
 import type { ImageS3Repo } from './imageS3.repo'
 

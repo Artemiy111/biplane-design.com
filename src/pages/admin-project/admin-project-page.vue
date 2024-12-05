@@ -4,7 +4,7 @@ import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import { toast } from 'vue-sonner'
 
 import type { ImageFit, ImageId } from '~~/server/db/schema'
-import type { UpdateImageDto } from '~~/server/use-cases/types'
+import type { UpdateImageDto } from '~~/server/types'
 
 import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
@@ -140,7 +140,7 @@ async function uploadImages(images: File[]) {
               <TableCell>
                 <NuxtImg
                   :alt="image.alt"
-                  :class="cn('aspect-video w-[300px] object-contain border-primary border bg-white', image.fit)"
+                  :class="cn('aspect-video w-[300px] border border-primary bg-white object-contain', image.fit)"
                   format="avif,webp,png,jpg"
                   :src="image.url"
                 />

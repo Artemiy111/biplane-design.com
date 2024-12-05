@@ -2,7 +2,7 @@ import type { CategoryId, ProjectId } from '../db/schema'
 import type {
   CreateProjectDto,
   UpdateProjectDto,
-} from '../use-cases/types'
+} from '../types'
 import type { ImageRepo } from './image.repo'
 import type { ProjectDbRepo } from './projectDb.repo'
 import type { ProjectS3Repo } from './projectS3.repo'

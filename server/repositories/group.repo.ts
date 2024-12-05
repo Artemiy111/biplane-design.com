@@ -1,5 +1,5 @@
 import type { GroupId } from '../db/schema'
-import type { CreateGroupDto, GroupDto, UpdateGroupDto } from '../use-cases/types'
+import type { CreateGroupDto, GroupDto, UpdateGroupDto } from '../types'
 import type { CategoryRepo } from './category.repo'
 import type { GroupDbRepo } from './groupDb.repo'
 

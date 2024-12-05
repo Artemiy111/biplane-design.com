@@ -1,5 +1,5 @@
 import type { CategoryId, GroupId } from '../db/schema'
-import type { CreateCategoryDto, UpdateCategoryDto } from '../use-cases/types'
+import type { CreateCategoryDto, UpdateCategoryDto } from '../types'
 import type { CategoryDbRepo } from './categoryDb.repo'
 import type { ProjectRepo } from './project.repo'
 

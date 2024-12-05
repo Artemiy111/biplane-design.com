@@ -33,6 +33,6 @@ export const categoryRepo = new CategoryRepo(categoryDbRepo, projectRepo)
 export const groupDbRepo = new GroupDbRepo(db)
 export const groupRepo = new GroupRepo(groupDbRepo, categoryRepo)
 
-export const sessionRepo = new SessionRepo(db)
+export const sessionRepo = new SessionRepo()
 export const authRepo = new AuthRepo(userRepo, sessionRepo)
 logger.log('di done')

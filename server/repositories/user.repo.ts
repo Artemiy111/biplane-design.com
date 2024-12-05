@@ -2,7 +2,7 @@ import { hash } from 'argon2'
 import { eq } from 'drizzle-orm'
 
 import type { CreateUserDb, UserDb } from '../db/schema'
-import type { UserId } from '../use-cases/types'
+import type { UserId } from '../types'
 
 import { db } from '../db'
 import { users } from '../db/schema'

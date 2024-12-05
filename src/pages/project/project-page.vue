@@ -78,7 +78,7 @@ const xl = breakpoints.smallerOrEqual('xl')
           <CarouselItem
             v-for="(img, index) in project.images"
             :key="img.id"
-            :class="cn('cursor-grab p-0 flex justify-center items-center w-fit xl:basis-auto', index === current && 'outline outline-8 -outline-offset-8 outline-black')"
+            :class="cn('flex w-fit cursor-grab items-center justify-center p-0 xl:basis-auto', index === current && 'outline outline-8 -outline-offset-8 outline-black')"
             @click="current = index"
           >
             <NuxtImg
@@ -140,7 +140,7 @@ const xl = breakpoints.smallerOrEqual('xl')
         v-for="img in project.images"
         :key="img.id"
         :alt="img.alt"
-        :class="cn('w-full max-h-[70vh]', img.fit)"
+        :class="cn('max-h-[70vh] w-full', img.fit)"
         format="avif,webp,png,jpg"
         :src="img.url"
       />

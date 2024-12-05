@@ -5,7 +5,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 
 import type { CategoryId, GroupId, ProjectId } from '~~/server/db/schema'
-import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~~/server/use-cases/types'
+import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~~/server/types'
 
 import { getSlug } from '~~/src/shared/lib/utils/getSlug'
 import { Button } from '~~/src/shared/ui/kit/button'

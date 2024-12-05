@@ -5,7 +5,7 @@ import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import { toast } from 'vue-sonner'
 
 import type { GroupId, ProjectId } from '~~/server/db/schema'
-import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~~/server/use-cases/types'
+import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProjectDto } from '~~/server/types'
 
 import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
@@ -191,8 +191,8 @@ function openProjectSheet(project: ProjectDto) {
               :key="category.id"
             >
               <button
-                :class="cn('cursor-pointer ml-2 lg:m-0 px-2 py-1 hover:bg-primary-foreground',
-                           category.id === selectedCategory?.id && 'font-semibold bg-primary-foreground')"
+                :class="cn('ml-2 cursor-pointer px-2 py-1 hover:bg-primary-foreground lg:m-0',
+                           category.id === selectedCategory?.id && 'bg-primary-foreground font-semibold')"
                 type="button"
                 @click="selectedCategory = category"
               >

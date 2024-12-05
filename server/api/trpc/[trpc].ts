@@ -1,7 +1,7 @@
 import { createNuxtApiHandler } from 'trpc-nuxt'
 
 import { authRepo, categoryRepo, groupRepo, imageRepo, projectRepo, userRepo } from '~~/server/di'
-import { authedProcedure, createContext, publicProcedure, router } from '~~/server/trpc'
+import { authedProcedure, createContext, publicProcedure, router } from '~~/server/trpc/trpc'
 import { authSchemas, categorySchemas, groupSchemas, imageSchemas, projectSchemas } from '~~/src/shared/config/validation'
 
 export const appRouter = router({
