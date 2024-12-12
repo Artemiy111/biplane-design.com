@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { z } from 'zod'
+import  { z } from 'zod'
 
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
@@ -7,7 +7,7 @@ import { useForm } from 'vee-validate'
 import type { CategoryId, GroupId, ProjectId } from '~~/server/db/schema'
 import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~~/server/types'
 
-import { getSlug } from '~~/src/shared/lib/utils/getSlug'
+import { getSlug } from '~~/src/shared/lib/utils/get-slug'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Checkbox } from '~~/src/shared/ui/kit/checkbox'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form'
@@ -15,7 +15,7 @@ import { Input } from '~~/src/shared/ui/kit/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '~~/src/shared/ui/kit/select'
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '~~/src/shared/ui/kit/sheet'
 
-import { schema } from './config'
+import { projectSchemas } from '~~/src/shared/config/validation'
 
 const props = defineProps<{
   groups: GroupDto[]
@@ -29,25 +29,26 @@ const emit = defineEmits<{
 export type SheetMode = 'create' | 'update'
 const mode = ref<SheetMode>('create')
 
+const schema = projectSchemas.updateSchema.merge(z.object({
+  groupId: z.coerce.number(),
+  categoryId: z.coerce.number(),
+}))
 type FormSchema = z.infer<typeof schema>
 
 const { values, meta, setFieldValue, setValues, resetForm, handleSubmit } = useForm({
   validationSchema: toTypedSchema(schema),
-  initialValues: {
-    groupId: props.groups[0]?.id,
-    categoryId: props.groups[0]?.categories[0]?.id,
-  },
+  // initialValues: {
+  //   groupId: props.groups[0]?.id,
+  //   categoryId: props.groups[0]?.categories[0]?.id,
+  // },
 })
 
 const selectedGroup = computed<NonNullable<typeof props.groups>[number] | null>(
   () => props.groups.find(g => g.id === values.groupId as number) || null,
 )
 
-const title = computed(() => values.title as string || '')
-const slug = computed(() => getSlug(title.value))
-
-watch(title, () => {
-  setFieldValue('slug', slug.value)
+watch(() => values.title, () => {
+  setFieldValue('slug', getSlug(values.title || ''))
 })
 
 const isOpen = ref(false)
@@ -59,7 +60,7 @@ function handleClose() {
 
 async function open(data:
   { mode: 'create'
-    initial?: {
+    initial: {
       groupId: GroupId
       categoryId: CategoryId }
   }

@@ -1,10 +1,10 @@
 import { z } from 'zod'
 
-import { imageFit } from '~~/server/db/schema'
+import { imageFits } from '~~/server/shared/constants'
 
 const createSchema = z.object({
   projectId: z.coerce.number(),
-  fit: z.enum(['object-fill', 'object-contain', 'object-cover', 'object-none']).default('object-cover'),
+  fit: z.enum(imageFits).default('object-cover'),
   file: z.instanceof(File),
 })
 
@@ -12,7 +12,7 @@ const updateSchema = z.object({
   id: z.string(),
   alt: z.string(),
   order: z.number().min(1),
-  fit: z.enum(imageFit),
+  fit: z.enum(imageFits),
 })
 
 export const imageSchemas = {

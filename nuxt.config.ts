@@ -2,7 +2,7 @@
 // import oxlintPlugin from 'vite-plugin-oxlint'
 // import eslintPlugin from 'vite-plugin-eslint'
 
-import { env } from './server/shared/env'
+import { env } from './server/utils/env'
 
 export default defineNuxtConfig({
   modules: [

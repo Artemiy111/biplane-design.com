@@ -12,6 +12,8 @@ export const validationErrors = {
   maxValue: (max: number) => `Значение должно быть не более ${max}`,
   minDate: (min: Date) => `Дата должна быть не раньше ${formatter.format(min)}`,
   maxDate: (max: Date) => `Дата должна быть не позже ${formatter.format(max)}`,
+  minYear: (min: number) => `Год должен быть не менее ${min}`,
+  maxYear: (max: number) => `Год должен быть не более ${max}`,
   passwordsNotMatch: 'Пароли не совпадают',
   invalidPhoneNumber: 'Неверный номер телефона',
   passwordsDoNotMatch: 'Пароли не совпадают',

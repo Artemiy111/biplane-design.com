@@ -1,6 +1,6 @@
 import { and, count, eq, gt, gte, lt, lte, sql } from 'drizzle-orm'
 
-import type { Db } from '~~/server/db'
+import { db } from '~~/server/db'
 import type { ImageDbCreate, ImageDbUpdate, ImageId, ProjectId } from '~~/server/db/schema'
 
 import { images } from '~~/server/db/schema'
@@ -8,24 +8,22 @@ import { images } from '~~/server/db/schema'
 import { imageDbMapper } from '../mappers/imageDb.mapper'
 
 export class ImageDbRepo {
-  constructor(private db: Db) { }
-
   async getOne(id: ImageId) {
-    const model = await this.db.query.images.findFirst({ where: eq(images.id, id) })
+    const model = await db.query.images.findFirst({ where: eq(images.id, id) })
     if (!model) throw new Error(`Could not get image with id '${id}'`)
     return model
   }
 
   async getAll() {
-    return await this.db.select().from(images).orderBy(images.order)
+    return await db.select().from(images).orderBy(images.order)
   }
 
   async getAllByProjectId(projectId: ProjectId) {
-    return await this.db.select().from(images).orderBy(images.order).where(eq(images.projectId, projectId))
+    return await db.select().from(images).orderBy(images.order).where(eq(images.projectId, projectId))
   }
 
   async create(create: ImageDbCreate) {
-    return this.db.transaction(async (tx) => {
+    return db.transaction(async (tx) => {
       const [created] = await tx.insert(images).values({ ...create, order: 999 }).returning()
       const [curOrder] = await tx.select({ value: count() }).from(images).where(eq(images.projectId, create.projectId))
       await tx.update(images).set({ order: curOrder.value }).where(eq(images.id, created.id)).returning()
@@ -38,11 +36,15 @@ export class ImageDbRepo {
   }
 
   private async updateOrder(id: ImageId, newOrder: number) {
-    return await this.db.transaction(async (tx) => {
+    console.log('start order')
+
+    return await db.transaction(async (tx) => {
+      console.log('tx')
       const model = await tx.query.images.findFirst({ where: eq(images.id, id) })
+      console.log('model', model)
+      // console.log('updated order', model.order, newOrder)
       if (!model) throw tx.rollback()
       if (model.order === newOrder) return
-
       // const [curOrder] = await tx.select({ value: count() }).from(images).where(eq(images.projectId, model.projectId))
       // if (newOrder > curOrder.value + 1)
       //   throw new Error('New order is out of range')
@@ -65,13 +67,14 @@ export class ImageDbRepo {
       await tx.update(images).set({ order: newOrder }).where(eq(images.id, id))
       await tx.update(images).set({ order: sql`${images.order} / 1000` }).where(gte(images.order, 1000))
     }, {
+      'behavior': 'deferred'
       // deferrable: true,
       // isolationLevel: 'read uncommitted',
     })
   }
 
   async update(id: ImageId, update: ImageDbUpdate) {
-    return await this.db.transaction(async (tx) => {
+    return await db.transaction(async (tx) => {
       await this.updateOrder(id, update.order)
       await tx.update(images)
         .set(imageDbMapper.toDbUpdateWithoutOrder(update))
@@ -82,7 +85,7 @@ export class ImageDbRepo {
   }
 
   async delete(id: ImageId) {
-    return await this.db.transaction(async (tx) => {
+    return await db.transaction(async (tx) => {
       const toDelete = await tx.query.images.findFirst({ where: eq(images.id, id) })
       if (!toDelete) throw tx.rollback()
       await tx.delete(images).where(eq(images.id, id))
@@ -94,3 +97,5 @@ export class ImageDbRepo {
     })
   }
 }
+
+export const imageDbRepo = new ImageDbRepo()

@@ -155,6 +155,7 @@ function openProjectSheet(project: ProjectDto) {
       categoryId: project.categoryId,
       order: project.order,
       isMinimal: project.isMinimal,
+      isVisible: project.isVisible,
     },
   })
 }
@@ -223,7 +224,7 @@ function openProjectSheet(project: ProjectDto) {
               ? ({
                 groupId: selectedCategory.groupId,
                 categoryId: selectedCategory.id })
-              : undefined })"
+              : ({groupId: groups![0]!.id, categoryId: groups![0]!.categories[0]!.id}) })" 
         >
           Создать проект
         </Button>

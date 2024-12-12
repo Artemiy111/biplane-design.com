@@ -10,6 +10,13 @@ export default withNuxt(
   // perfectionist.configs['recommended-alphabetical'],
   ...tailwind.configs['flat/recommended'],
   ...pluginVueA11y.configs['flat/recommended'],
+  {
+    settings: {
+      tailwindcss: {
+        callees: ['classnames', 'clsx', 'ctl', 'cn'],
+      },
+    },
+  },
   // {
   //   rules: tseslint.configs.strict.at(-1).rules
   // },

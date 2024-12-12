@@ -1,6 +1,7 @@
 import { createNuxtApiHandler } from 'trpc-nuxt'
 
-import { authRepo, categoryRepo, groupRepo, imageRepo, projectRepo, userRepo } from '~~/server/di'
+import { authRepo, categoryRepo, groupRepo, projectRepo, userRepo } from '~~/server/di'
+import { imageRepo } from '~~/server/repositories/image.repo'
 import { authedProcedure, createContext, publicProcedure, router } from '~~/server/trpc/trpc'
 import { authSchemas, categorySchemas, groupSchemas, imageSchemas, projectSchemas } from '~~/src/shared/config/validation'
 

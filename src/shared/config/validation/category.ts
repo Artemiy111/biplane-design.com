@@ -1,21 +1,18 @@
 import { z } from 'zod'
+import { getMinMaxStringSchema } from './base'
+import { categoryLayouts } from '~~/server/shared/constants'
 
-const createSchema = z.object({
-  groupId: z.number(),
-  title: z.string(),
-  slug: z.string(),
-  order: z.number(),
-  layout: z.enum(['base', 'mini']),
-})
 
 const updateSchema = z.object({
-  groupId: z.number(),
   id: z.number(),
-  title: z.string(),
-  slug: z.string(),
+  groupId: z.number(),
+  title: getMinMaxStringSchema(3, 255),
+  slug: getMinMaxStringSchema(3, 255),
   order: z.number().min(1),
-  layout: z.enum(['base', 'mini']),
+  layout: z.enum(categoryLayouts),
 })
+
+const createSchema = updateSchema.omit({ id: true })
 
 export const categorySchemas = {
   getOneSchema: z.object({
