@@ -4,12 +4,14 @@ import { db } from '~~/server/db'
 import type { ImageDbCreate, ImageDbUpdate, ImageId, ProjectId } from '~~/server/db/schema'
 
 import { images } from '~~/server/db/schema'
-
+import { imageS3Repo } from './imageS3.repo'
 import { imageDbMapper } from '../mappers/imageDb.mapper'
 
 export class ImageDbRepo {
   async getOne(id: ImageId) {
-    const model = await db.query.images.findFirst({ where: eq(images.id, id) })
+    const model = await db.query.images.findFirst({
+      where: eq(images.id, id)
+    })
     if (!model) throw new Error(`Could not get image with id '${id}'`)
     return model
   }

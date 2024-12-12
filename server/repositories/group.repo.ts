@@ -22,20 +22,4 @@ export class GroupRepo {
       return groupMapper.toDto(model, categories)
     }))
   }
-
-  async create(dto: CreateGroupDto): Promise<GroupDto> {
-    const created = await this.dbRepo.create(dto)
-    const categories = await this.categoryRepo.getAllByGroupId(created.id)
-    return groupMapper.toDto(created, categories)
-  }
-
-  async update(id: GroupId, dto: UpdateGroupDto): Promise<GroupDto> {
-    const updated = await this.dbRepo.update(id, dto)
-    const categories = await this.categoryRepo.getAllByGroupId(updated.id)
-    return groupMapper.toDto(updated, categories)
-  }
-
-  async delete(id: GroupId): Promise<void> {
-    return this.dbRepo.delete(id)
-  }
 }

@@ -30,18 +30,4 @@ export class CategoryRepo {
     }))
   }
 
-  async create(dto: CreateCategoryDto) {
-    const created = await this.dbRepo.create(dto)
-    return categoryMapper.toDto(created, [])
-  }
-
-  async update(id: CategoryId, dto: UpdateCategoryDto) {
-    const updated = await this.dbRepo.update(id, categoryDbMapper.toDbUpdate(dto))
-    const projects = await this.projectRepo.getByCategoryId(id)
-    return categoryMapper.toDto(updated, projects)
-  }
-
-  async delete(id: CategoryId) {
-    await this.dbRepo.delete(id)
-  }
 }
