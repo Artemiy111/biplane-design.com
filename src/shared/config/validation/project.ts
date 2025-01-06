@@ -1,15 +1,25 @@
 import { z } from 'zod'
 
-import { projectStatus } from '~~/server/db/schema'
+import { projectStatuses } from '~~/server/shared/constants'
+import { getMinMaxStringSchema, requiredNumberSchema, validationErrors } from './base'
+
+const MIN_YEAR = 2000
+const MAX_YEAR = 2050
 
 const createSchema = z.object({
-  categoryId: z.number(),
-  title: z.string(),
-  slug: z.string(),
-  status: z.enum(projectStatus),
-  yearStart: z.number().nullish(),
-  yearEnd: z.number().nullish(),
-  location: z.string().min(3).nullish(),
+  categoryId: requiredNumberSchema,
+  title: getMinMaxStringSchema(5, 64),
+  slug: getMinMaxStringSchema(5, 64).refine(s => s === encodeURIComponent(s), 'Невалидный slug'),
+  status: z.enum(projectStatuses),
+  yearStart: z.number()
+    .min(MIN_YEAR, validationErrors.minYear(MIN_YEAR))
+    .max(MAX_YEAR, validationErrors.maxYear(MAX_YEAR))
+    .nullable().default(null),
+  yearEnd: z.number()
+    .min(MIN_YEAR, validationErrors.minYear(MIN_YEAR))
+    .max(MAX_YEAR, validationErrors.maxYear(MAX_YEAR))
+    .nullable().default(null),
+  location: getMinMaxStringSchema(3, 64).nullable(),
   isMinimal: z.boolean().optional().default(false),
   isVisible: z.boolean().optional().default(true),
 })

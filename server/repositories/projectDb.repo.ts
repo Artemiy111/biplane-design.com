@@ -1,19 +1,17 @@
 import { and, count, eq, gt, gte, lt, lte, sql } from 'drizzle-orm'
 
-import type { CategoryId, ProjectDb, ProjectDbDeep, ProjectDbUpdate, ProjectId } from '~~/server/db/schema'
+import type { CategoryId, ProjectDbUpdate, ProjectId } from '~~/server/db/schema'
 import type { CreateProjectDto } from '~~/server/types'
 
 import { projects } from '~~/server/db/schema'
 
-import type { Db } from '../db'
+import { db } from '../db'
 
 import { projectDbMapper } from '../mappers/projectDb.mapper'
 
-export class ProjectDbRepo {
-  constructor(private db: Db) { }
-
+class ProjectDbRepo {
   async getOne(id: ProjectId) {
-    const model = await this.db.query.projects.findFirst({
+    const model = await db.query.projects.findFirst({
       where: eq(projects.id, id), with: {
         images: {
           orderBy: images => images.order,
@@ -25,7 +23,7 @@ export class ProjectDbRepo {
   }
 
   async getOneBySlug(slug: string) {
-    const model = await this.db.query.projects.findFirst({
+    const model = await db.query.projects.findFirst({
       where: eq(projects.slug, slug), with: {
         images: {
           orderBy: images => images.order,
@@ -37,7 +35,7 @@ export class ProjectDbRepo {
   }
 
   async getAllByCategoryId(categoryId: CategoryId) {
-    return await this.db.query.projects.findMany({
+    return await db.query.projects.findMany({
       where: eq(projects.categoryId, categoryId),
       with: {
         images: {
@@ -49,7 +47,7 @@ export class ProjectDbRepo {
   }
 
   async getAll() {
-    return await this.db.query.projects.findMany({
+    return await db.query.projects.findMany({
       with: {
         images: {
           orderBy: images => images.order,
@@ -60,7 +58,7 @@ export class ProjectDbRepo {
   }
 
   async create(dto: CreateProjectDto) {
-    return this.db.transaction(async (tx) => {
+    return db.transaction(async (tx) => {
       const toCreate = projectDbMapper.toDbCreate(dto, 1000)
       const created = (await tx.insert(projects).values(toCreate).returning())[0]
       const [curOrder] = await tx.select({ value: count() }).from(projects).where(eq(projects.categoryId, dto.categoryId))
@@ -80,7 +78,7 @@ export class ProjectDbRepo {
   }
 
   async updateOrder(id: ProjectId, newOrder: number) {
-    return await this.db.transaction(async (tx) => {
+    return await db.transaction(async (tx) => {
       const model = await tx.query.projects.findFirst({ where: eq(projects.id, id) })
       if (!model) throw tx.rollback()
 
@@ -111,7 +109,7 @@ export class ProjectDbRepo {
   }
 
   async update(id: ProjectId, update: ProjectDbUpdate) {
-    return await this.db.transaction(async (tx) => {
+    return await db.transaction(async (tx) => {
       const model = await this.getOne(id)
 
       if (update.categoryId !== model.categoryId) {
@@ -144,12 +142,14 @@ export class ProjectDbRepo {
   }
 
   async delete(id: ProjectId) {
-    return await this.db.transaction(async (tx) => {
+    return await db.transaction(async (tx) => {
       const toDelete = await tx.query.projects.findFirst({ where: eq(projects.id, id) })
       if (!toDelete) throw tx.rollback()
-      await this.db.delete(projects).where(eq(projects.id, id))
+      await db.delete(projects).where(eq(projects.id, id))
       await tx.update(projects).set({ order: sql`(${projects.order} - 1) * 1000` }).where(and(eq(projects.categoryId, toDelete.categoryId), gt(projects.order, toDelete.order)))
       await tx.update(projects).set({ order: sql`${projects.order} / 1000` }).where(and(eq(projects.categoryId, toDelete.categoryId), gte(projects.order, 1000)))
     })
   }
 }
+
+export const projectDbRepo = new ProjectDbRepo()

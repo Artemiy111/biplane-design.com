@@ -1,4 +1,6 @@
-import type { CategoryDbUpdate, CategoryId, CategoryLayout, GroupDbUpdate, GroupId, ImageDbUpdate, ImageFit, ProjectDbCreate, ProjectDbUpdate, ProjectId, ProjectStatus } from './db/schema'
+import { authSchemas, categorySchemas, groupSchemas, imageSchemas, projectSchemas } from '~~/src/shared/config/validation'
+import type { CategoryId, CategoryLayout, GroupId, ImageFit, ProjectId, ProjectStatus } from './db/schema'
+import { z } from 'zod'
 
 export type GroupDto = {
   id: GroupId
@@ -8,10 +10,9 @@ export type GroupDto = {
   categories: CategoryDto[]
 }
 
-export type CreateGroupDto = Omit<GroupDto, 'id' | 'order' | 'categories'>
-export type UpdateGroupDto = GroupDbUpdate
+export type CreateGroupDto = z.infer<typeof groupSchemas.createSchema>
+export type UpdateGroupDto = z.infer<typeof groupSchemas.updateSchema>
 
-export type ChangeGroupOrder = (id: GroupId, order: number) => Promise<void>
 //
 
 export type CategoryDto = {
@@ -24,8 +25,8 @@ export type CategoryDto = {
   projects: ProjectDto[]
 }
 
-export type CreateCategoryDto = Omit<CategoryDto, 'id' | 'order' | 'projects'>
-export type UpdateCategoryDto = CategoryDbUpdate
+export type CreateCategoryDto = z.infer<typeof categorySchemas.createSchema>
+export type UpdateCategoryDto = z.infer<typeof categorySchemas.updateSchema>
 
 //
 
@@ -44,8 +45,8 @@ export type ProjectDto = {
   isVisible: boolean
 }
 
-export type CreateProjectDto = Omit<ProjectDbCreate, 'order'>
-export type UpdateProjectDto = ProjectDbUpdate
+export type CreateProjectDto = z.infer<typeof projectSchemas.createSchema>
+export type UpdateProjectDto = z.infer<typeof projectSchemas.updateSchema>
 
 //
 
@@ -68,7 +69,8 @@ export type CreateImageDto = {
   fit: ImageFit
   file: File
 }
-export type UpdateImageDto = ImageDbUpdate
+
+export type UpdateImageDto = z.infer<typeof imageSchemas.updateSchema>
 //
 
 export type UserId = number
@@ -77,16 +79,8 @@ export type UserDto = {
   username: string
 }
 
-export type LoginUserDto = {
-  email: string
-  password: string
-}
+export type LoginUserDto = z.infer<typeof authSchemas.loginSchema>
 
-export type CreateUserDto = {
-  username: string
-  password: string
-}
+export type CreateUserDto = z.infer<typeof authSchemas.registerSchema>
 
-export type UpdateUserDto = {
-  password: string
-}
+export type UpdateUserDto = z.infer<typeof authSchemas.changePasswordSchema>

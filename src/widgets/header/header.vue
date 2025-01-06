@@ -5,12 +5,6 @@ import { toast } from 'vue-sonner'
 import { useApi } from '~~/src/shared/api'
 import { useUser } from '~~/src/shared/model/queries'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '~~/src/shared/ui/kit/dropdown-menu'
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from '~~/src/shared/ui/kit/navigation-menu'
 import { Separator } from '~~/src/shared/ui/kit/separator'
 
 const route = useRoute()

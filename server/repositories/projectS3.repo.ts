@@ -1,56 +1,30 @@
-import type { S3Client } from '@aws-sdk/client-s3'
-
 import { DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
 
 import type { ProjectId } from '../db/schema'
+import { s3 } from '../utils/s3'
+import { env } from '../utils/env'
 
-export class ProjectS3Repo {
-  constructor(private bucketName: string, private s3: S3Client) { }
-
-  // async isDirExists(id: ProjectId) {
-  //   const key = this.getKey(id)
-
-  //   try {
-  //     const _res = await this.s3.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: key }))
-  //     return true
-  //   }
-  //   catch (_e) {
-  //     const error = _e as S3ServiceException
-  //     if (error.name === 'NotFound') {
-  //       return false
-  //     }
-  //     throw _e
-  //   }
-  // }
-
+class ProjectS3Repo {
   getKey(id: ProjectId): string {
     return `${id}/`
   }
 
-  // async createDir(id: ProjectId) {
-  //   const key = this.getKey(id)
-  //   const isDirExists = await this.isDirExists(id)
-
-  //   if (isDirExists)
-  //     throw new Error(`Directory '${id}' already exists`)
-
-  //   await this.s3.send(new PutObjectCommand({ Bucket: this.bucketName, Key: key }))
-  // }
-
   async deleteDir(id: ProjectId): Promise<void> {
     const key = this.getKey(id)
-    const listObjectsResponse = await this.s3.send(new ListObjectsV2Command({ Bucket: this.bucketName, Prefix: key }))
+    const listObjectsResponse = await s3.send(new ListObjectsV2Command({ Bucket: env.BUCKET_NAME, Prefix: key }))
 
     if (listObjectsResponse.Contents) {
       const deletePromises = listObjectsResponse.Contents.map(async (object) => {
         const deleteParams = {
-          Bucket: this.bucketName,
+          Bucket: env.BUCKET_NAME,
           Key: object.Key!,
         }
-        await this.s3.send(new DeleteObjectCommand(deleteParams))
+        await s3.send(new DeleteObjectCommand(deleteParams))
       })
 
       await Promise.all(deletePromises)
     }
   }
 }
+
+export const projectS3Repo = new ProjectS3Repo()

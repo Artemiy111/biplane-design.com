@@ -1,8 +1,8 @@
-import type { Config } from 'drizzle-kit'
+import { defineConfig } from 'drizzle-kit'
 
-import { env } from './server/shared/env'
+import { env } from './server/utils/env'
 
-export default {
+export default defineConfig({
   dbCredentials: {
     url: env.DATABASE_URL,
   },
@@ -10,4 +10,4 @@ export default {
   out: './server/db/migrations',
   schema: './server/db/schema.ts',
   casing: 'snake_case',
-} satisfies Config
+})

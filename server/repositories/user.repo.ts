@@ -7,7 +7,7 @@ import type { UserId } from '../types'
 import { db } from '../db'
 import { users } from '../db/schema'
 
-export class UserRepo {
+class UserRepo {
   async getByUsername(username: string): Promise<UserDb | null> {
     return (await db.query.users.findFirst({ where: eq(users.username, username) })) || null
   }
@@ -24,3 +24,5 @@ export class UserRepo {
     }).where(eq(users.id, userId)).returning())[0]
   }
 }
+
+export const userRepo = new UserRepo()

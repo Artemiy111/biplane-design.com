@@ -41,7 +41,7 @@ const { mutate: deleteImage } = useMutation({
 })
 
 const { mutateAsync: updateImage } = useMutation({
-  mutation: ([id, dto]: [ImageId, UpdateImageDto]) => api.images.updateOne.mutate({ id, ...dto }),
+  mutation: (dto: UpdateImageDto) => api.images.updateOne.mutate(dto),
   onSuccess: () => {
     toast.success('Изображение обновлено')
   },
@@ -58,7 +58,7 @@ async function updateImageOrder(e: SortableEvent) {
   const imageIdx = e.oldDraggableIndex!
   const newIdx = e.newDraggableIndex!
   const image = project.value.images[imageIdx]!
-  await updateImage([image.id, { ...image, order: newIdx + 1 }])
+  await updateImage({ ...image, order: newIdx + 1 }) 
 }
 
 // FIXME: доделвть
@@ -149,7 +149,7 @@ async function uploadImages(images: File[]) {
                 <Select
                   class="w-fit"
                   :model-value="image.fit"
-                  @update:model-value="updateImage([image.id, { ...image, fit: $event as ImageFit }])"
+                  @update:model-value="updateImage({ ...image, fit: $event as ImageFit })"
                 >
                   <SelectTrigger
                     class="w-max"
@@ -175,7 +175,7 @@ async function uploadImages(images: File[]) {
               <TableCell>
                 <Input
                   :model-value="image.alt"
-                  @change="updateImage([image.id, { ...image, alt: ($event.target as HTMLInputElement).value }]) "
+                  @change="updateImage({ ...image, alt: ($event.target as HTMLInputElement).value }) "
                 />
               </TableCell>
               <TableCell class="text-center">
