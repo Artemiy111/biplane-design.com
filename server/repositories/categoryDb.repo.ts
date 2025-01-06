@@ -1,19 +1,16 @@
-import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
-import type { CategoryDbCreate, CategoryId, GroupId } from '~~/server/db/schema'
-import type { UpdateCategoryDto } from '~~/server/types'
+import type { CategoryId, GroupId } from '~~/server/db/schema'
 
 import { categories } from '~~/server/db/schema'
 
-import type { Db } from '../db'
+import { db } from '../db'
 
 import { categoryDbMapper } from '../mappers/categoryDb.mapper'
 
-export class CategoryDbRepo {
-  constructor(private db: Db) { }
-
+class CategoryDbRepo {
   async getOne(id: CategoryId) {
-    const model = await this.db.query.categories.findFirst({
+    const model = await db.query.categories.findFirst({
       where: eq(categories.id, id),
       with: {
         projects: {
@@ -33,7 +30,7 @@ export class CategoryDbRepo {
   }
 
   async getByGroupId(groupId: GroupId) {
-    const model = await this.db.query.categories.findMany({
+    const model = await db.query.categories.findMany({
       where: eq(categories.groupId, groupId),
       with: {
         projects: {
@@ -54,7 +51,7 @@ export class CategoryDbRepo {
   }
 
   async getAll() {
-    const models = await this.db.query.categories.findMany({
+    const models = await db.query.categories.findMany({
       with: {
         projects: {
           with: {
@@ -148,3 +145,5 @@ export class CategoryDbRepo {
   //   })
   // }
 }
+
+export const categoryDbRepo = new CategoryDbRepo()

@@ -10,6 +10,7 @@ import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
 import { HeadingTabs } from '~~/src/shared/ui/blocks/heading-tabs'
 import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
+import { useGroups } from '~~/src/shared/model/queries'
 
 const title = 'Проекты'
 const description = 'Представлены различные категории проектов'
@@ -23,27 +24,21 @@ const route = useRoute()
 const router = useRouter()
 
 const groups = ref(await useApi().groups.getAll.query())
-const categories = computed(() => groups.value.flatMap(g => g.categories))
+const categories = computed(() => groups.value?.flatMap(g => g.categories) || [])
 
 const currentCategory = ref<CategoryDto | null>(getCurrentCategory(route.query))
-const currentGroup = computed(() => groups.value.find(g => g.id === currentCategory.value?.groupId) || null)
+const currentGroup = computed(() => groups.value?.find(g => g.id === currentCategory.value?.groupId) || null)
 
-const currentCategoryProjects = computed(
-  () => currentCategory.value?.projects.filter(p => p.images.length) || null,
-)
+const currentCategoryProjects = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
-const tabs = computed(() => groups.value.map(g => ({ title: g.title, value: g.slug })))
-const tab = ref(currentGroup.value?.slug ?? tabs.value[0]!.value)
-watch(tab, () => {
-  const group = groups.value.find(g => g.slug === tab.value)!
-  if (group.id !== currentCategory.value?.groupId) {
-    currentCategory.value = group.categories[0] || null
+const tabs = computed(() => groups.value?.map(g => ({ title: g.title, value: g.slug })) || [])
+const tab = computed({
+  get: () =>   currentGroup.value!.slug,
+  set: (v) => {
+    const newGroup = groups.value.find(g => g.slug === v)!
+    console.log('newGroup', newGroup.categories[0]!)
+    navigateTo(`/projects?category=${newGroup.categories[0]!.slug}`)
   }
-})
-
-watch(groups, () => {
-  if (groups.value && !currentCategory.value)
-    navigateTo({ path: route.path, query: { category: groups.value?.[0]?.categories[0]?.slug } })
 })
 
 function getCategoryFromRouteQuery(query: LocationQuery): CategoryDto | null {
@@ -99,23 +94,6 @@ onMounted(() => {
         v-model:tab="tab"
         :tabs="tabs"
       />
-      <!--  <section class="mt-8 flex gap-x-8 text-heading">
-        <component
-          :is="group.id === currentGroup?.id ? 'h2' : 'span'"
-          v-for="group in groups"
-          :key="group.id"
-          :class="cn(
-            'cursor-pointer transition-colors text-foreground text-heading text-gray-400',
-            group.id === currentGroup?.id ? 'text-foreground' : 'hover:text-gray-500',
-          )"
-          role="button"
-          tabindex="0"
-          @click="changeGroup(group)"
-          @keypress.enter.space="changeGroup(group)"
-        >
-          {{ group.title }}
-        </component>
-      </section -->
       <section
         v-if="currentGroup?.categories.length"
         class="relative mt-4"
@@ -157,28 +135,6 @@ onMounted(() => {
           currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 xs:grid-cols-1',
         )"
       >
-        <!-- <Carousel
-            v-if="p.isMinimal"
-            class="w-full"
-            :opts="{ active: false }"
-          >
-            <CarouselContent>
-              <CarouselItem
-                v-for="img in p.images.slice(0, 1)"
-                :key="img.id"
-              >
-                <img
-                  :alt="img.alt"
-                  :class="cn('aspect-video w-full bg-white', img.fit)"
-                  format="avif,webp,png,jpg"
-                  :height="500"
-                  loading="lazy"
-                  :src="img.url"
-                  :width="500"
-                >
-              </CarouselItem>
-            </CarouselContent>
-          </Carousel> -->
         <div
           v-for="p in currentCategoryProjects"
           :key="p.id"

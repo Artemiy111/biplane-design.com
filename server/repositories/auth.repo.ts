@@ -5,21 +5,20 @@ import { hash, verify } from 'argon2'
 
 import type { LoginDto } from '~~/src/shared/config/validation/auth'
 
-import type { SessionRepo } from './session.repo'
-import type { UserRepo } from './user.repo'
+import { sessionRepo } from './session.repo'
+import { userRepo } from './user.repo'
 
 export class AuthRepo {
-  constructor(private userRepo: UserRepo, private sessionRepo: SessionRepo) { }
 
   async login(dto: LoginDto, event: H3Event) {
-    const existingUser = await this.userRepo.getByUsername(dto.username)
+    const existingUser = await userRepo.getByUsername(dto.username)
     if (!existingUser) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Неверные данные' })
 
     const isValidPassword = await verify(existingUser.passwordHash, dto.password)
     if (!isValidPassword) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Неверные данные' })
 
-    const token = this.sessionRepo.generateSessionToken()
-    const session = await this.sessionRepo.createSession(token, existingUser.id)
+    const token = sessionRepo.generateSessionToken()
+    const session = await sessionRepo.createSession(token, existingUser.id)
     setCookie(event, 'token', token, {
       httpOnly: true,
       sameSite: 'lax',
@@ -31,12 +30,12 @@ export class AuthRepo {
 
   async register(dto: LoginDto, event: H3Event) {
     const passwordHash = await hash(dto.password)
-    const createdUser = await this.userRepo.create({
+    const createdUser = await userRepo.create({
       username: dto.username,
       passwordHash,
     })
-    const token = this.sessionRepo.generateSessionToken()
-    const session = await this.sessionRepo.createSession(token, createdUser.id)
+    const token = sessionRepo.generateSessionToken()
+    const session = await sessionRepo.createSession(token, createdUser.id)
     setCookie(event, 'token', token, {
       httpOnly: true,
       sameSite: 'lax',
@@ -47,7 +46,9 @@ export class AuthRepo {
   }
 
   async logout(event: H3Event, sessionId: string) {
-    await this.sessionRepo.deleteSession(sessionId)
+    await sessionRepo.deleteSession(sessionId)
     deleteCookie(event, 'token')
   }
 }
+
+export const authRepo = new AuthRepo()

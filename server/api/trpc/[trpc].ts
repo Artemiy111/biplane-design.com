@@ -1,6 +1,6 @@
 import { createNuxtApiHandler } from 'trpc-nuxt'
 
-import { authRepo, categoryRepo, groupRepo, projectRepo, userRepo } from '~~/server/di'
+import { authRepo, categoryRepo, groupRepo, projectRepo, userRepo } from '~~/server/repositories'
 import { imageRepo } from '~~/server/repositories/image.repo'
 import { authedProcedure, createContext, publicProcedure, router } from '~~/server/trpc/trpc'
 import { authSchemas, categorySchemas, groupSchemas, imageSchemas, projectSchemas } from '~~/src/shared/config/validation'
@@ -33,15 +33,6 @@ export const appRouter = router({
     getOne: publicProcedure.input(groupSchemas.getOneSchema).query(({ input }) => {
       return groupRepo.getOne(input.id)
     }),
-    createOne: authedProcedure.input(groupSchemas.createSchema).mutation(({ input }) => {
-      return groupRepo.create(input)
-    }),
-    updateOne: authedProcedure.input(groupSchemas.updateSchema).mutation(({ input }) => {
-      return groupRepo.update(input.id, input)
-    }),
-    deleteOne: authedProcedure.input(groupSchemas.updateSchema).mutation(({ input }) => {
-      return groupRepo.delete(input.id)
-    }),
   },
 
   categories: {
@@ -50,15 +41,6 @@ export const appRouter = router({
     }),
     getOne: publicProcedure.input(categorySchemas.getOneSchema).query(({ input }) => {
       return categoryRepo.getOne(input.id)
-    }),
-    createOne: authedProcedure.input(categorySchemas.createSchema).mutation(({ input }) => {
-      return categoryRepo.create(input)
-    }),
-    updateOne: authedProcedure.input(categorySchemas.updateSchema).mutation(({ input }) => {
-      return categoryRepo.update(input.id, input)
-    }),
-    deleteOne: authedProcedure.input(categorySchemas.deleteSchema).mutation(({ input }) => {
-      return categoryRepo.delete(input.id)
     }),
   },
 

@@ -1,30 +1,30 @@
-import type { S3Client } from '@aws-sdk/client-s3'
-
 import { DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
 
 import type { ProjectId } from '../db/schema'
+import { s3 } from '../utils/s3'
+import { env } from '../utils/env'
 
-export class ProjectS3Repo {
-  constructor(private bucketName: string, private s3: S3Client) { }
-
+class ProjectS3Repo {
   getKey(id: ProjectId): string {
     return `${id}/`
   }
 
   async deleteDir(id: ProjectId): Promise<void> {
     const key = this.getKey(id)
-    const listObjectsResponse = await this.s3.send(new ListObjectsV2Command({ Bucket: this.bucketName, Prefix: key }))
+    const listObjectsResponse = await s3.send(new ListObjectsV2Command({ Bucket: env.BUCKET_NAME, Prefix: key }))
 
     if (listObjectsResponse.Contents) {
       const deletePromises = listObjectsResponse.Contents.map(async (object) => {
         const deleteParams = {
-          Bucket: this.bucketName,
+          Bucket: env.BUCKET_NAME,
           Key: object.Key!,
         }
-        await this.s3.send(new DeleteObjectCommand(deleteParams))
+        await s3.send(new DeleteObjectCommand(deleteParams))
       })
 
       await Promise.all(deletePromises)
     }
   }
 }
+
+export const projectS3Repo = new ProjectS3Repo()

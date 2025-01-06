@@ -6,8 +6,7 @@ import { env } from '~~/server/utils/env'
 
 import type { ProjectId } from '../db/schema'
 
-export class ImageS3Repo {
-
+class ImageS3Repo {
   getKey(projectId: ProjectId, filename: string): string {
     return `${projectId}/${filename}`
   }

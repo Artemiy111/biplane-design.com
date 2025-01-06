@@ -2,7 +2,7 @@ import type { H3Event } from 'h3'
 
 import { initTRPC, TRPCError } from '@trpc/server'
 
-import { sessionRepo } from '../di'
+import { sessionRepo } from '../repositories'
 
 const t = initTRPC.context<typeof createContext>().create()
 

@@ -3,14 +3,14 @@ import { useBreakpoints, useElementSize, watchOnce } from '@vueuse/core'
 
 import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
-import { Carousel, CarouselContent, CarouselItem, useCarousel, type CarouselApi } from '~~/src/shared/ui/kit/carousel'
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '~~/src/shared/ui/kit/carousel'
 import { screenBreakpoints } from '~~/tailwind.config'
 
 const props = defineProps<{
   slug: string
 }>()
 
-const { data: project } = useApi().projects.getOneBySlug.useQuery({ slug: props.slug }, { watch: [() => props.slug] })
+const { data: project } = await useApi().projects.getOneBySlug.useQuery({ slug: props.slug }, { watch: [() => props.slug] })
 
 const api = ref<CarouselApi>()
 const apiTumb = ref<CarouselApi>()
@@ -42,7 +42,6 @@ function scrollToImage(index: number): void {
 }
 
 const breakpoints = useBreakpoints(screenBreakpoints, { strategy: 'max-width' })
-const md = breakpoints.smallerOrEqual('md')
 const xl = breakpoints.smallerOrEqual('xl')
 </script>
 
@@ -91,9 +90,8 @@ const xl = breakpoints.smallerOrEqual('xl')
         </CarouselContent>
       </Carousel>
       <Carousel
-        v-if="!md"
         ref="carouselRef"
-        class="aspect-video w-full xl:order-1"
+        class="md:hidden aspect-video w-full xl:order-1"
         :opts="{
           loop: false,
         }"
@@ -116,7 +114,7 @@ const xl = breakpoints.smallerOrEqual('xl')
       </Carousel>
     </section>
 
-    <section class="grid grid-cols-[repeat(2,max-content)] gap-4 pt-12">
+    <section class="grid grid-cols-[repeat(2,max-content)] gap-4 pt-12 md:pt-0 md:pb-8">
       <span class="font-semibold">Статус</span>
       <span>{{ project.status[0]!.toUpperCase() + project.status.slice(1) }}</span>
       <template v-if="project.location">
@@ -133,8 +131,7 @@ const xl = breakpoints.smallerOrEqual('xl')
       </template>
     </section>
     <div
-      v-if="md"
-      class="flex w-full flex-col gap-4"
+      class="hidden md:flex w-full flex-col gap-4"
     >
       <NuxtImg
         v-for="img in project.images"

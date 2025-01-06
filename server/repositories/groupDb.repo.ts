@@ -1,16 +1,14 @@
-import { and, count, eq, getTableColumns, gt, gte, lt, lte, sql } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
-import type { Db } from '~~/server/db'
+import { db } from '~~/server/db'
 import type { GroupId } from '~~/server/db/schema'
 
 import { groups } from '~~/server/db/schema'
 
-export class GroupDbRepo {
-  constructor(private db: Db) { }
-
+class GroupDbRepo {
   async getOne(id: GroupId) {
     const model
-      = await this.db.query.groups.findFirst({
+      = await db.query.groups.findFirst({
         where: eq(groups.id, id),
         with: {
           categories: {
@@ -33,7 +31,7 @@ export class GroupDbRepo {
   }
 
   async getAll() {
-    return await this.db.query.groups.findMany({
+    return await db.query.groups.findMany({
       with: {
         categories: {
           with: {
@@ -51,3 +49,5 @@ export class GroupDbRepo {
     })
   }
 }
+
+export const groupDbRepo = new GroupDbRepo()

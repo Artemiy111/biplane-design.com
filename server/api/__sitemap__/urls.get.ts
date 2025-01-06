@@ -1,6 +1,6 @@
 import { asSitemapUrl, defineSitemapEventHandler } from '#imports'
 
-import { projectRepo } from '~~/server/di'
+import { projectRepo } from '~~/server/repositories'
 
 export default defineSitemapEventHandler(async () => {
   const projects = await projectRepo.getAll()
