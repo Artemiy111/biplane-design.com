@@ -11,8 +11,7 @@ const route = useRoute()
   >
     <Separator />
     <section
-      class="grid justify-center gap-x-16 gap-y-8 py-16 lg:gap-x-16 md:gap-y-4"
-      data-footer-cols
+      class="grid grid-cols-[max-content_max-content_400px_max-content] justify-center gap-x-16 py-16 gap-y-8 lg:grid-cols-1 2xl:grid-cols-[380px_max-content]"  
     >
       <ul class="flex flex-col gap-1">
         <h6 class="font-semibold">
@@ -67,47 +66,6 @@ const route = useRoute()
           </NuxtLink>
         </li>
       </ul>
-      <!-- <ul class="flex flex-col gap-1">
-        <li class="font-bold">
-          <NuxtLink
-            href="/"
-            class="underline hover:no-underline"
-          >
-            Пример документации проекта
-          </NuxtLink>
-        </li>
-      </ul> -->
     </section>
-    <!-- <section>
-      <Separator />
-      <iframe
-        class="max-h-[65vh]"
-        frameborder="0"
-        height="600"
-        src="https://yandex.ru/map-widget/v1/?um=constructor%3A3da4595a6346865d8223d34a3ff56c219a4f3852edd8bb18b888329ab0ba28fa&amp;source=constructor"
-        title="Карта"
-        width="100%"
-      />
-      <Separator />
-    </section> -->
-    <!-- <section class="flex px-8 py-4 sm:px-4">
-      <span>© Biplane-Design 2000 - 2024</span>
-    </section> -->
   </footer>
 </template>
-
-<style scoped>
-[data-footer-columns] {
-  display: grid;
-  grid-template-columns: repeat(4,max-content);
-
-  @media (width <= 1500px) {
-    grid-template-columns: 400px 300px;
-  }
-
-  @media (width <= 920px) {
-    grid-template-columns: 1fr;
-  }
-
-}
-</style>

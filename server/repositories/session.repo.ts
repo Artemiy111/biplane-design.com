@@ -9,7 +9,7 @@ export type SessionValidationResult =
   | { session: SessionDb, user: UserDb }
   | { session: null, user: null }
 
-export class SessionRepo {
+class SessionRepo {
   generateSessionToken(): string {
     const bytes = new Uint8Array(20)
     crypto.getRandomValues(bytes)
@@ -60,3 +60,5 @@ export class SessionRepo {
     await db.delete(sessions).where(eq(sessions.id, sessionId))
   }
 }
+
+export const sessionRepo = new SessionRepo()

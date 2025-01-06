@@ -1,7 +1,6 @@
 import { useApi } from '../api'
 
 export const useUser = defineQuery({ key: ['user'], query: () => useApi().user.whoami.query() })
-
 export const useGroups = defineQuery({ key: ['groups'], query: () => useApi().groups.getAll.query() })
 
 export const useProjects = defineQuery({ key: ['projects'], query: () => useApi().projects.getAll.query() })
