@@ -5,6 +5,7 @@ import { env } from './server/utils/env'
 export default defineConfig({
   dbCredentials: {
     url: env.DATABASE_URL,
+    authToken: env.DATABASE_AUTH_TOKEN,
   },
   dialect: 'turso',
   out: './server/db/migrations',

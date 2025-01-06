@@ -56,7 +56,11 @@ function getCurrentCategory(query: LocationQuery) {
   return getCategoryFromRouteQuery(query) || categories.value[0]!
 }
 
-router.afterEach(guard => (currentCategory.value = getCurrentCategory(guard.query)))
+router.afterEach(guard =>  {
+  console.log(route.name, guard.name)
+  if (guard.name !== route.name) return
+  (currentCategory.value = getCurrentCategory(guard.query))
+})
 
 const categoriesCarouselRef = useTemplateRef('categoriesCarouselRef')
 const haveHiddenCategories = ref(false)

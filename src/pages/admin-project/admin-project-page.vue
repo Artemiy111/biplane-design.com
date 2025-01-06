@@ -10,6 +10,7 @@ import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
 import { useProject } from '~~/src/shared/model/queries'
 import { Dropzone } from '~~/src/shared/ui/blocks/dropzone'
+import PageHeading from '~~/src/shared/ui/blocks/page-heading/page-heading.vue'
 import { Input } from '~~/src/shared/ui/kit/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~~/src/shared/ui/kit/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
@@ -73,26 +74,24 @@ async function uploadImages(images: File[]) {
     v-if="project"
     class="container flex flex-col"
   >
-    <h1 class="text-heading">
-      {{ project.title }}
-    </h1>
-    <div class="grid  grid-cols-[1fr_1fr] gap-x-16 gap-y-8 p-8 md:grid-cols-1 md:py-4 sm:px-4">
-      <section class="grid w-full grid-cols-[repeat(2,max-content)] gap-x-16 gap-y-2 md:gap-x-8 md:overflow-x-auto">
-        <span>Id</span>
+    <PageHeading>{{ project.title }}</PageHeading>
+    <div class="grid grid-cols-[max-content_1fr] gap-x-16 gap-y-8 mb-12 md:grid-cols-1">
+      <section class="grid w-full grid-cols-[repeat(2,max-content)] gap-x-4 gap-y-4 md:gap-x-8 md:overflow-x-auto">
+        <span class="font-semibold">Id</span>
         <span>{{ project.id }}</span>
-        <span>Slug</span>
+        <span class="font-semibold">Slug</span>
         <span>{{ project.slug }}</span>
-        <span>Расположение</span>
+        <span class="font-semibold">Расположение</span>
         <span>{{ project.location }}</span>
-        <span>Год начала</span>
+        <span class="font-semibold">Год начала</span>
         <span>{{ project.yearStart }}</span>
-        <span>Год завершения</span>
+        <span class="font-semibold">Год завершения</span>
         <span>{{ project.yearEnd }}</span>
-        <span>Мини</span>
+        <span class="font-semibold">Мини</span>
         <span>{{ project.isMinimal ? "да" : 'нет' }}</span>
-        <span>№ в категории</span>
+        <span class="font-semibold">№ в категории</span>
         <span>{{ project.order }}</span>
-        <span>Изображений</span>
+        <span class="font-semibold">Изображений</span>
         <span>{{ project.images.length }}</span>
       </section>
       <Dropzone
@@ -104,15 +103,15 @@ async function uploadImages(images: File[]) {
       />
     </div>
 
-    <section class="flex flex-col gap-4 px-8 md:py-4 sm:px-4">
-      <Table class="grid grid-cols-[120px_max-content_max-content_1fr_max-content] overflow-x-auto md:grid-cols-[max-content_260px_200px_max-content_max-content]">
+    <section class="flex flex-col gap-4">
+      <Table class="grid overflow-x grid-cols-[120px_max-content_max-content_1fr_max-content] overflow-x-auto md:grid-cols-[max-content_260px_200px_max-content_max-content]">
         <TableHeader class="col-span-5 grid grid-cols-subgrid">
           <TableRow class="col-span-5 grid grid-cols-subgrid">
             <TableHead>№</TableHead>
             <TableHead>Изображение</TableHead>
             <TableHead>Вид</TableHead>
             <TableHead>Описание</TableHead>
-            <TableHead>Опции</TableHead>
+            <TableHead/>
           </TableRow>
         </TableHeader>
         <TableBody
