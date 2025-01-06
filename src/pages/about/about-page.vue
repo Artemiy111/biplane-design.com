@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import PageHeading from '~~/src/shared/ui/blocks/page-heading/page-heading.vue'
+
 const title = 'О нас'
 const description = 'История развития студии'
 useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
@@ -7,9 +9,7 @@ useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 <template>
   <main class="container ">
-    <h1 class="mb-4 mt-8 text-heading">
-      О студии
-    </h1>
+    <PageHeading class="mb-4" >О студии</PageHeading>
     <p>
       Дизайн-студия Биплан-Дизайн была основана в 2000 году и за более чем 20 лет успешной работы зарекомендовала себя как одна из ведущих студий дизайна в Башкирии.
       <!-- Команда студии состоит из опытных профессионалов, включая дизайнеров интерьера, архитекторов и инженеров, которые работают вместе, чтобы создавать инновационные и функциональные пространства. -->

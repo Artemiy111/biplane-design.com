@@ -3,6 +3,7 @@ import { useBreakpoints, useElementSize, watchOnce } from '@vueuse/core'
 
 import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
+import PageHeading from '~~/src/shared/ui/blocks/page-heading/page-heading.vue'
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '~~/src/shared/ui/kit/carousel'
 import { screenBreakpoints } from '~~/tailwind.config'
 
@@ -50,11 +51,7 @@ const xl = breakpoints.smallerOrEqual('xl')
     v-if="project"
     class="container flex flex-col"
   >
-    <section class="my-8 flex justify-between">
-      <h1 class="text-heading">
-        {{ project.title }}
-      </h1>
-    </section>
+    <PageHeading>{{ project.title }}</PageHeading>
     <section
       class="grid h-fit grid-cols-[300px,1fr] items-start gap-4 overflow-hidden 2xl:grid-cols-[250px,1fr] lg:grid-cols-[150px,1fr] md:grid-cols-1 xl:grid-cols-1"
     >
