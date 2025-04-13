@@ -42,19 +42,19 @@ export default {
       // '3xl': '36px',
       // 'xl': '28px',
       // 'lg': '24px',
-      base: ['var(--text-base-font-size)', {
-        lineHeight: 'var(--text-base-line-height)',
+      base: ['var(--text-base)', {
+        lineHeight: 'var(--text-base--line-height)',
       }],
-      sm: ['var(--text-sm-font-size)', {
+      sm: ['var(--text-sm)', {
         lineHeight: 'var(--text-sm-line-height)',
       }],
       xs: '16px',
-      heading: ['var(--text-heading-font-size)', {
+      heading: ['var(--text-heading)', {
         lineHeight: 'var(--text-heading-line-height)',
         fontWeight: 600,
       }],
-      subheading: ['var(--text-subheading-font-size)', {
-        lineHeight: 'var(--text-subheading-line-height)',
+      subheading: ['var(--text-subheading--font-size)', {
+        lineHeight: 'var(--text-subheading--line-height)',
         fontWeight: 600,
       }],
     },

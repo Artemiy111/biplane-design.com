@@ -25,7 +25,6 @@ const { data: project } = useProject(toRefs(props).slug)
 
 const title = computed(() => `Админ-панель | ${project.value?.title}`)
 const description = computed(() => `Админ-панель | ${project.value?.title}`)
-useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 const { mutate: deleteImage } = useMutation({

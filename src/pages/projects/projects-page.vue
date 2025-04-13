@@ -14,7 +14,6 @@ import { useGroups } from '~~/src/shared/model/queries'
 
 const title = 'Проекты'
 const description = 'Представлены различные категории проектов'
-useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 const querySchema = z.object({
