@@ -11,7 +11,7 @@ const props = defineProps<{
   slug: string
 }>()
 
-const { data: project } = await useApi().projects.getOneBySlug.useQuery({ slug: props.slug }, { watch: [() => props.slug] })
+const { data: project, status } = useApi().projects.getOneBySlug.useQuery({ slug: props.slug }, { watch: [() => props.slug] })
 
 const api = ref<CarouselApi>()
 const apiTumb = ref<CarouselApi>()
@@ -22,7 +22,6 @@ const current = ref(0)
 
 const title = computed(() => `Проекты | ${project.value?.title}`)
 const description = computed(() => `${project.value?.title}. Расположение: ${project.value?.location}`)
-useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 watchOnce(api, (api) => {

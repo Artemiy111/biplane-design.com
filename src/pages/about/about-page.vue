@@ -3,7 +3,6 @@ import PageHeading from '~~/src/shared/ui/blocks/page-heading/page-heading.vue'
 
 const title = 'О нас'
 const description = 'История развития студии'
-useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 </script>
 

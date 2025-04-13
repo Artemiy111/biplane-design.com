@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite"
 // https://nuxt.com/docs/api/configuration/nuxt-config
 // import oxlintPlugin from 'vite-plugin-oxlint'
 // import eslintPlugin from 'vite-plugin-eslint'
@@ -6,8 +7,6 @@ import { env } from './server/utils/env'
 
 export default defineNuxtConfig({
   modules: [
-    '@nuxtjs/tailwindcss',
-    // '@nuxtjs/partytown',
     '@nuxt/image',
     '@nuxt/eslint',
     '@nuxt/fonts',
@@ -18,6 +17,12 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@pinia/colada-nuxt',
   ],
+
+  vite: {
+    plugins: [
+      tailwindcss(),
+    ],
+  },
 
   imports: {
     dirs: [],
@@ -59,9 +64,6 @@ export default defineNuxtConfig({
 
   experimental: {
     typedPages: true,
-    // sharedPrerenderData: true,
-    // componentIslands: true,
-    // asyncContext: true,
   },
 
   compatibilityDate: '2024-07-20',
@@ -96,9 +98,4 @@ export default defineNuxtConfig({
   sitemap: {
     sources: ['/api/__sitemap__/urls'],
   },
-
-  tailwindcss: {
-    cssPath: '~~/src/shared/assets/css/tailwind.css',
-  },
-
 })

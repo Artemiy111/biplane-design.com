@@ -1,4 +1,4 @@
-import { createNuxtApiHandler } from 'trpc-nuxt'
+import { createTRPCNuxtHandler } from 'trpc-nuxt/server'
 
 import { authRepo, categoryRepo, groupRepo, projectRepo, userRepo } from '~~/server/repositories'
 import { imageRepo } from '~~/server/repositories/image.repo'
@@ -86,7 +86,7 @@ export const appRouter = router({
 
 export type AppRouter = typeof appRouter
 
-export default createNuxtApiHandler({
+export default createTRPCNuxtHandler({
   router: appRouter,
   createContext,
 })
