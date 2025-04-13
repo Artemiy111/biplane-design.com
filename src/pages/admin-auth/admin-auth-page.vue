@@ -14,7 +14,6 @@ import { Input } from '~~/src/shared/ui/kit/input'
 
 const title = 'Вход/Регистрация'
 const description = 'Вход для администратора'
-useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 const api = useApi()

@@ -3,7 +3,6 @@ import { buttonVariants } from '~~/src/shared/ui/kit/button'
 
 const title = 'Страница не найдена'
 const description = 'Ошибка 404'
-useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 </script>
 

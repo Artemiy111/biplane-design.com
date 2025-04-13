@@ -7,7 +7,6 @@ import { buttonVariants } from '~~/src/shared/ui/kit/button'
 
 const title = 'Biplane-Design | Главная'
 const description = 'Студия дизайна'
-useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 onMounted(() => {

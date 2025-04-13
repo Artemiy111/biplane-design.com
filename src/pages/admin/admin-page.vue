@@ -19,7 +19,6 @@ import ProjectSheet from './ui/project-sheet.vue'
 
 const title = 'Админ-панель'
 const description = 'Менеджмент базы-данных'
-useServerSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 const api = useApi()
@@ -88,7 +87,7 @@ const { mutate: createProject } = useMutation({
 })
 
 const { mutate: updateProject } = useMutation({
-  mutation: ([id, dto]: [ProjectId, UpdateProjectDto]) => api.projects.updateOne.mutate({ id, ...dto }),
+  mutation: ([id, dto]: [ProjectId, UpdateProjectDto]) => api.projects.updateOne.mutate({ ...dto, id }),
   onSuccess: () => {
     projectSheet.value?.close()
     toast.success(toastMessages.update.success)
