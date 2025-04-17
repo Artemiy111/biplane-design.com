@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ProjectsPage } from '~~/src/pages/projects'
-import { useGroups } from '~~/src/shared/model/queries'
+import { useGroupsQuery } from '~~/src/shared/model/queries'
 
 // useGroups()
 </script>
