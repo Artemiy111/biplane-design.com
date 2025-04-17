@@ -1,7 +1,7 @@
-import { useUser } from '~~/src/shared/model/queries'
+import { useUserQuery } from '~~/src/shared/model/queries'
 
 export default defineNuxtRouteMiddleware(async () => {
-  const { data: user, refetch } = useUser()
+  const { data: user, refetch } = useUserQuery()
   if (!user.value) {
     await refetch()
     if (!user.value)

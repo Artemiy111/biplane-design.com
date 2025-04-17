@@ -1,7 +1,7 @@
-import { useUser } from './queries'
+import { useUserQuery } from './queries'
 
 export const useAuthenticatedUser = () => {
-  const { data: user } = useUser()
+  const { data: user } = useUserQuery()
   return computed(() => {
     if (!user.value) {
       throw createError('useAuthenticatedUser() can only be used in protected pages')

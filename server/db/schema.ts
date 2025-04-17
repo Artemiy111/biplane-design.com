@@ -125,5 +125,5 @@ export const imageRelations = relations(images, ({ one }) => ({
 }))
 
 export type GroupDbDeep = GroupDb & { categories: CategoryDbDeep[] }
-export type CategoryDbDeep = CategoryDb & { projects: ProjectDbDeep[] }
+export type CategoryDbDeep = CategoryDb & { group: GroupDb, projects: ProjectDbDeep[] }
 export type ProjectDbDeep = ProjectDb & { images: ImageDb[] }

@@ -12,25 +12,25 @@ const props = withDefaults(defineProps<{
   tag: 'h1',
 })
 
-const tab = defineModel<string>('tab', { required: true })
+const tabModel = defineModel<string>('tab', { required: true })
 </script>
 
 <template>
   <section class="mt-8 flex gap-x-8 text-heading">
     <component
-      :is="t.value === tab? props.tag : 'span'"
-      v-for="t in props.tabs"
-      :key="t.value"
+    v-for="tab in props.tabs"
+    :is="tab.value === tabModel ? props.tag : 'span'"
+      :key="tab.value"
       :class="cn(
         'cursor-pointer text-heading text-gray-400 transition-colors',
-        t.value === tab ? 'text-foreground' : 'hover:text-gray-500',
+        tab.value === tabModel ? 'text-foreground' : 'hover:text-gray-500',
       )"
       role="button"
       tabindex="0"
-      @click="tab = t.value"
-      @keypress.enter.space="tab = t.value"
+      @click="tabModel = tab.value"
+      @keypress.enter.space="tabModel = tab.value"
     >
-      {{ t.title }}
+      {{ tab.title }}
     </component>
   </section>
 </template>

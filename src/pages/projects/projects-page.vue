@@ -4,13 +4,13 @@ import type { LocationQuery } from 'vue-router'
 import { LoaderCircle } from 'lucide-vue-next'
 import * as z from 'zod'
 
-import type { CategoryDto } from '~~/server/types'
+import type { CategoryDto, GroupDto } from '~~/server/types'
 
-import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
-import { useGroups } from '~~/src/shared/model/queries'
+import { useGroupsQuery } from '~~/src/shared/model/queries'
 import { HeadingTabs } from '~~/src/shared/ui/blocks/heading-tabs'
 import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
+import { watchDeep, watchImmediate } from '@vueuse/core'
 
 const title = 'Проекты'
 const description = 'Представлены различные категории проектов'
@@ -22,20 +22,29 @@ const querySchema = z.object({
 const route = useRoute()
 const router = useRouter()
 
-const groups = ref(await useApi().groups.getAll.query())
-const categories = computed(() => groups.value?.flatMap(g => g.categories) || [])
-
-const currentCategory = ref<CategoryDto | null>(getCurrentCategory(route.query))
-const currentGroup = computed(() => groups.value?.find(g => g.id === currentCategory.value?.groupId) || null)
+const {groups, categories, status, asyncStatus} = useGroupsQuery()
+const currentGroup = ref<GroupDto | null>(null)
+const currentCategory = ref<CategoryDto | null>(null)
 
 const currentCategoryProjects = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
-const tabs = computed(() => groups.value?.map(g => ({ title: g.title, value: g.slug })) || [])
+watchImmediate(status, () => {
+  currentCategory.value = getCurrentCategoryOrDefault(route.query)
+  if (currentCategory.value) {
+    currentGroup.value = groups.value.find(g => g.id === currentCategory.value!.groupId)!
+  } else {
+    currentGroup.value = groups.value[0] || null
+    currentCategory.value = groups.value[0]?.categories[0] || null
+  }
+  console.log(currentCategory.value, groups.value)
+})
+
+const tabs = computed(() => groups.value.map(g => ({ title: g.title, value: g.slug })))
+
 const tab = computed({
-  get: () => currentGroup.value!.slug,
+  get: () => currentGroup.value?.slug || '',
   set: (v) => {
-    const newGroup = groups.value.find(g => g.slug === v)!
-    console.log('newGroup', newGroup.categories[0]!)
+    const newGroup = groups.value.find(g => g.slug === v)! 
     navigateTo(`/projects?category=${newGroup.categories[0]!.slug}`)
   },
 })
@@ -51,14 +60,19 @@ function getCategoryFromRouteQuery(query: LocationQuery): CategoryDto | null {
   return queryCategory
 }
 
-function getCurrentCategory(query: LocationQuery) {
-  return getCategoryFromRouteQuery(query) || categories.value[0]!
+function getCurrentCategoryOrDefault(query: LocationQuery) {
+  return getCategoryFromRouteQuery(query) || groups.value[0]?.categories[0] || null
 }
 
 router.afterEach((guard) => {
-  console.log(route.name, guard.name)
   if (guard.name !== route.name) return
-  (currentCategory.value = getCurrentCategory(guard.query))
+  currentCategory.value = getCurrentCategoryOrDefault(guard.query)
+  if (!currentCategory.value) {
+    currentGroup.value = groups.value[0] || null
+    currentCategory.value = groups.value[0]?.categories[0] || null
+    return
+  }
+  currentGroup.value = groups.value.find(g => g.id === currentCategory.value!.groupId)!
 })
 
 const categoriesCarouselRef = useTemplateRef('categoriesCarouselRef')
@@ -83,7 +97,7 @@ onMounted(() => {
     class="container flex h-full grow flex-col"
   >
     <div
-      v-if="groups === null"
+      v-if="groups.length === 0 && status === 'pending'"
       class="flex size-full grow flex-col items-center justify-center"
     >
       <LoaderCircle
@@ -131,8 +145,9 @@ onMounted(() => {
           </CarouselContent>
         </Carousel>
       </section>
-      <section
-        v-if="currentCategoryProjects?.length"
+
+      <template v-if="currentCategoryProjects">
+        <section
         :class="cn(
           'mt-8 grid grid-cols-2 gap-x-10 gap-y-12 lg:grid-cols-1',
           currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 xs:grid-cols-1',
@@ -161,11 +176,24 @@ onMounted(() => {
         </div>
       </section>
       <section
-        v-else
+        v-if="currentCategoryProjects.length === 0" 
         class="grid h-full grow items-center justify-center"
       >
         <span class="bg-primary-foreground p-8 text-subheading">Проектов пока нет</span>
       </section>
+      </template>
+     <template v-else>
+      <section v-if="status === 'pending' || asyncStatus === 'loading'" class="grid h-full grow items-center justify-center"> 
+        <LoaderCircle
+        class="animate-spin"
+        :size="60"
+        :stroke-width="1.5"
+      />
+      </section>
+      <section v-else-if="status === 'error'" class="grid h-full grow items-center justify-center"> 
+        <span class="bg-primary-foreground p-8 text-subheading">Ошибка загрузки</span>
+      </section>
+     </template>
     </template>
   </main>
 </template>

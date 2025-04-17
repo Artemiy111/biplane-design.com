@@ -21,8 +21,8 @@ export const screenBreakpoints = {
 export type ScreenSize = keyof (typeof screens)
 
 export default {
-  content: ['./src/**/*.{vue,ts,tsx}'],
-  theme: {
-    screens,
-  },
+  // content: ['./src/**/*.{vue,ts,tsx}'],
+  // theme: {
+  //   screens,
+  // },
 } satisfies Config

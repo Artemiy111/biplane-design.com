@@ -8,7 +8,7 @@ import type { UpdateImageDto } from '~~/server/types'
 
 import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
-import { useProject } from '~~/src/shared/model/queries'
+import { useProjectQuery } from '~~/src/shared/model/queries'
 import { Dropzone } from '~~/src/shared/ui/blocks/dropzone'
 import PageHeading from '~~/src/shared/ui/blocks/page-heading/page-heading.vue'
 import { Input } from '~~/src/shared/ui/kit/input'
@@ -21,7 +21,7 @@ const props = defineProps<{
 
 const queryCache = useQueryCache()
 const api = useApi()
-const { data: project } = useProject(toRefs(props).slug)
+const { data: project } = useProjectQuery(toRefs(props).slug)
 
 const title = computed(() => `Админ-панель | ${project.value?.title}`)
 const description = computed(() => `Админ-панель | ${project.value?.title}`)
