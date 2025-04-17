@@ -1,6 +1,8 @@
-import { authSchemas, categorySchemas, groupSchemas, imageSchemas, projectSchemas } from '~~/src/shared/config/validation'
+import type { z } from 'zod'
+
+import type { authSchemas, categorySchemas, groupSchemas, imageSchemas, projectSchemas } from '~~/src/shared/config/validation'
+
 import type { CategoryId, CategoryLayout, GroupId, ImageFit, ProjectId, ProjectStatus } from './db/schema'
-import { z } from 'zod'
 
 export type GroupDto = {
   id: GroupId

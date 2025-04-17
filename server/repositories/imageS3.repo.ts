@@ -1,8 +1,9 @@
 import type { S3ServiceException } from '@aws-sdk/client-s3'
-import { s3 } from '~~/server/utils/s3'
+
 import { DeleteObjectCommand, HeadObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 
 import { env } from '~~/server/utils/env'
+import { s3 } from '~~/server/utils/s3'
 
 import type { ProjectId } from '../db/schema'
 

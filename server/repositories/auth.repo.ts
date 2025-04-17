@@ -9,7 +9,6 @@ import { sessionRepo } from './session.repo'
 import { userRepo } from './user.repo'
 
 export class AuthRepo {
-
   async login(dto: LoginDto, event: H3Event) {
     const existingUser = await userRepo.getByUsername(dto.username)
     if (!existingUser) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Неверные данные' })

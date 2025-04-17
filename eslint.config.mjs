@@ -1,22 +1,22 @@
 // import antfu from '@antfu/eslint-config'
 import oxlint from 'eslint-plugin-oxlint'
 import perfectionist from 'eslint-plugin-perfectionist'
-import tailwind from 'eslint-plugin-tailwindcss'
+// import tailwind from 'eslint-plugin-tailwindcss'
 import pluginVueA11y from 'eslint-plugin-vuejs-accessibility'
 
 import { withNuxt } from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
   // perfectionist.configs['recommended-alphabetical'],
-  ...tailwind.configs['flat/recommended'],
+  // ...tailwind.configs['flat/recommended'],
   ...pluginVueA11y.configs['flat/recommended'],
-  {
-    settings: {
-      tailwindcss: {
-        callees: ['classnames', 'clsx', 'ctl', 'cn'],
-      },
-    },
-  },
+  // {
+  //   settings: {
+  //     tailwindcss: {
+  //       callees: ['classnames', 'clsx', 'ctl', 'cn'],
+  //     },
+  //   },
+  // },
   // {
   //   rules: tseslint.configs.strict.at(-1).rules
   // },
@@ -30,7 +30,7 @@ export default withNuxt(
       'perfectionist/sort-vue-attributes': 'off',
       'perfectionist/sort-imports': ['error', {
         type: 'alphabetical',
-        internalPattern: ['~/**', '~~/**'],
+        internalPattern: ['~/*', '~~/*'],
       }],
       'perfectionist/sort-named-imports': [
         'error',

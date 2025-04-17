@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm'
 import { int, sqliteTable, text, unique, uniqueIndex } from 'drizzle-orm/sqlite-core'
+
 import { categoryLayouts, imageFits, projectStatuses } from '../shared/constants'
 
 export const users = sqliteTable('users', {
@@ -36,7 +37,6 @@ export const groupsRelations = relations(groups, ({ many }) => ({
   categories: many(categories),
 }))
 
-
 export const categories = sqliteTable(
   'categories',
   {
@@ -47,7 +47,7 @@ export const categories = sqliteTable(
     order: int().notNull(),
     layout: text({ enum: categoryLayouts }).notNull(),
   },
-  (t) => [unique('unique_order_for_group').on(t.groupId, t.order),]
+  t => [unique('unique_order_for_group').on(t.groupId, t.order)],
 )
 
 export type CategoryId = CategoryDb['id']
@@ -65,7 +65,6 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
   projects: many(projects),
 }))
 
-
 export const projects = sqliteTable(
   'projects',
   {
@@ -81,7 +80,7 @@ export const projects = sqliteTable(
     isMinimal: int({ mode: 'boolean' }).notNull().default(false),
     isVisible: int({ mode: 'boolean' }).notNull().default(true),
   },
-  (t) => [unique('unique_order_for_category').on(t.categoryId, t.order),]
+  t => [unique('unique_order_for_category').on(t.categoryId, t.order)],
 )
 
 export type ProjectId = ProjectDb['id']
@@ -108,7 +107,7 @@ export const images = sqliteTable(
     fit: text({ enum: imageFits }).notNull(),
     order: int().notNull(),
   },
-  (t) => [uniqueIndex('unique_order_for_project').on(t.projectId, t.order)]
+  t => [uniqueIndex('unique_order_for_project').on(t.projectId, t.order)],
 )
 
 export type ImageId = ImageDb['id']

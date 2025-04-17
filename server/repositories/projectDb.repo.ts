@@ -6,7 +6,6 @@ import type { CreateProjectDto } from '~~/server/types'
 import { projects } from '~~/server/db/schema'
 
 import { db } from '../db'
-
 import { projectDbMapper } from '../mappers/projectDb.mapper'
 
 class ProjectDbRepo {

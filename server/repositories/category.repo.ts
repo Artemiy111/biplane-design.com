@@ -1,7 +1,8 @@
 import type { CategoryId, GroupId } from '../db/schema'
+
+import { categoryMapper } from '../mappers/category.mapper'
 import { categoryDbRepo as dbRepo } from './categoryDb.repo'
 import { projectRepo } from './project.repo'
-import { categoryMapper } from '../mappers/category.mapper'
 
 class CategoryRepo {
   async getOne(id: CategoryId) {

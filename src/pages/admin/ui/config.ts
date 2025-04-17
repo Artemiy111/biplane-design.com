@@ -2,7 +2,6 @@ import { z } from 'zod'
 
 import { projectSchemas } from '~~/src/shared/config/validation'
 
-
 // export const schema = z.object({
 //   categoryId: z.coerce.number(),
 //   id: z.number(),

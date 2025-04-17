@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DialogTitle, type DialogTitleProps } from 'radix-vue'
+import { DialogTitle, type DialogTitleProps } from 'reka-ui'
 import { computed, type HTMLAttributes } from 'vue'
 
 import { cn } from '~~/src/shared/lib/utils'
@@ -15,7 +15,8 @@ const delegatedProps = computed(() => {
 
 <template>
   <DialogTitle
-    :class="cn('text-lg font-semibold text-foreground', props.class)"
+    :class="cn('text-foreground font-semibold', props.class)"
+    data-slot="sheet-title"
     v-bind="delegatedProps"
   >
     <slot />

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Slot } from 'radix-vue'
+import { Slot } from 'reka-ui'
 
 import { useFormField } from './useFormField'
 
@@ -11,6 +11,7 @@ const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
     :id="formItemId"
     :aria-describedby="!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`"
     :aria-invalid="!!error"
+    data-slot="form-control"
   >
     <slot />
   </Slot>

@@ -3,11 +3,11 @@ import type {
   CreateProjectDto,
   UpdateProjectDto,
 } from '../types'
+
+import { projectMapper } from '../mappers/project.mapper'
+import { imageRepo } from './image.repo'
 import { projectDbRepo as dbRepo } from './projectDb.repo'
 import { projectS3Repo as s3Repo } from './projectS3.repo'
-
-import { imageRepo } from './image.repo'
-import { projectMapper } from '../mappers/project.mapper'
 
 class ProjectRepo {
   async getOne(id: ProjectId) {

@@ -1,8 +1,9 @@
 import { DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
 
 import type { ProjectId } from '../db/schema'
-import { s3 } from '../utils/s3'
+
 import { env } from '../utils/env'
+import { s3 } from '../utils/s3'
 
 class ProjectS3Repo {
   getKey(id: ProjectId): string {
