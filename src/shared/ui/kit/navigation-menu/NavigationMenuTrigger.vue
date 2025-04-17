@@ -4,7 +4,7 @@ import {
   NavigationMenuTrigger,
   useForwardProps,
   type NavigationMenuTriggerProps,
-} from 'radix-vue'
+} from 'reka-ui'
 import { computed, type HTMLAttributes } from 'vue'
 
 import { cn } from '~~/src/shared/lib/utils'
@@ -26,11 +26,12 @@ const forwardedProps = useForwardProps(delegatedProps)
   <NavigationMenuTrigger
     v-bind="forwardedProps"
     :class="cn(navigationMenuTriggerStyle(), 'group', props.class)"
+    data-slot="navigation-menu-trigger"
   >
     <slot />
     <ChevronDown
       aria-hidden="true"
-      class="relative top-px ml-1 size-3 transition duration-200 group-data-[state=open]:rotate-180"
+      class="relative top-[1px] ml-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
     />
   </NavigationMenuTrigger>
 </template>

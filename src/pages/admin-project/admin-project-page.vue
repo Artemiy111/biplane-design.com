@@ -58,7 +58,7 @@ async function updateImageOrder(e: SortableEvent) {
   const imageIdx = e.oldDraggableIndex!
   const newIdx = e.newDraggableIndex!
   const image = project.value.images[imageIdx]!
-  await updateImage({ ...image, order: newIdx + 1 }) 
+  await updateImage({ ...image, order: newIdx + 1 })
 }
 
 // FIXME: доделвть
@@ -110,7 +110,7 @@ async function uploadImages(images: File[]) {
             <TableHead>Изображение</TableHead>
             <TableHead>Вид</TableHead>
             <TableHead>Описание</TableHead>
-            <TableHead/>
+            <TableHead />
           </TableRow>
         </TableHeader>
         <TableBody

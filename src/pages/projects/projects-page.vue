@@ -8,9 +8,9 @@ import type { CategoryDto } from '~~/server/types'
 
 import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
+import { useGroups } from '~~/src/shared/model/queries'
 import { HeadingTabs } from '~~/src/shared/ui/blocks/heading-tabs'
 import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
-import { useGroups } from '~~/src/shared/model/queries'
 
 const title = 'Проекты'
 const description = 'Представлены различные категории проектов'
@@ -32,12 +32,12 @@ const currentCategoryProjects = computed(() => currentCategory.value?.projects.f
 
 const tabs = computed(() => groups.value?.map(g => ({ title: g.title, value: g.slug })) || [])
 const tab = computed({
-  get: () =>   currentGroup.value!.slug,
+  get: () => currentGroup.value!.slug,
   set: (v) => {
     const newGroup = groups.value.find(g => g.slug === v)!
     console.log('newGroup', newGroup.categories[0]!)
     navigateTo(`/projects?category=${newGroup.categories[0]!.slug}`)
-  }
+  },
 })
 
 function getCategoryFromRouteQuery(query: LocationQuery): CategoryDto | null {
@@ -55,7 +55,7 @@ function getCurrentCategory(query: LocationQuery) {
   return getCategoryFromRouteQuery(query) || categories.value[0]!
 }
 
-router.afterEach(guard =>  {
+router.afterEach((guard) => {
   console.log(route.name, guard.name)
   if (guard.name !== route.name) return
   (currentCategory.value = getCurrentCategory(guard.query))

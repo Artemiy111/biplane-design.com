@@ -1,4 +1,4 @@
-import tailwindcss from "@tailwindcss/vite"
+import tailwindcss from '@tailwindcss/vite'
 // https://nuxt.com/docs/api/configuration/nuxt-config
 // import oxlintPlugin from 'vite-plugin-oxlint'
 // import eslintPlugin from 'vite-plugin-eslint'
@@ -18,12 +18,6 @@ export default defineNuxtConfig({
     '@pinia/colada-nuxt',
   ],
 
-  vite: {
-    plugins: [
-      tailwindcss(),
-    ],
-  },
-
   imports: {
     dirs: [],
   },
@@ -36,6 +30,7 @@ export default defineNuxtConfig({
   },
 
   app: { head: { htmlAttrs: { lang: 'ru' } } },
+  css: ['./src/shared/assets/css/tailwind.css'],
 
   // yandexMetrika: {
   //   debug: false,
@@ -67,6 +62,11 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2024-07-20',
+  vite: {
+    plugins: [
+      tailwindcss(),
+    ],
+  },
   telemetry: { enabled: false },
 
   eslint: {

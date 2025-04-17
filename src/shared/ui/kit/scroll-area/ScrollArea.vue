@@ -4,7 +4,7 @@ import {
   ScrollAreaRoot,
   ScrollAreaViewport,
   type ScrollAreaRootProps,
-} from 'radix-vue'
+} from 'reka-ui'
 import { computed, type HTMLAttributes } from 'vue'
 
 import { cn } from '~~/src/shared/lib/utils'
@@ -23,9 +23,13 @@ const delegatedProps = computed(() => {
 <template>
   <ScrollAreaRoot
     v-bind="delegatedProps"
-    :class="cn('relative overflow-hidden', props.class)"
+    :class="cn('relative', props.class)"
+    data-slot="scroll-area"
   >
-    <ScrollAreaViewport class="size-full rounded-[inherit]">
+    <ScrollAreaViewport
+      class="focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1"
+      data-slot="scroll-area-viewport"
+    >
       <slot />
     </ScrollAreaViewport>
     <ScrollBar />

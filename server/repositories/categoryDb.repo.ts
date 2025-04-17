@@ -5,7 +5,6 @@ import type { CategoryId, GroupId } from '~~/server/db/schema'
 import { categories } from '~~/server/db/schema'
 
 import { db } from '../db'
-
 import { categoryDbMapper } from '../mappers/categoryDb.mapper'
 
 class CategoryDbRepo {

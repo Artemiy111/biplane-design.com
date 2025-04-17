@@ -1,7 +1,8 @@
 import { z } from 'zod'
-import { getMinMaxStringSchema } from './base'
+
 import { categoryLayouts } from '~~/server/shared/constants'
 
+import { getMinMaxStringSchema } from './base'
 
 const updateSchema = z.object({
   id: z.number(),

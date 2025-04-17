@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronDown } from 'lucide-vue-next'
-import { SelectScrollDownButton, useForwardProps, type SelectScrollDownButtonProps } from 'radix-vue'
+import { SelectScrollDownButton, useForwardProps, type SelectScrollDownButtonProps } from 'reka-ui'
 import { computed, type HTMLAttributes } from 'vue'
 
 import { cn } from '~~/src/shared/lib/utils'
@@ -20,6 +20,7 @@ const forwardedProps = useForwardProps(delegatedProps)
   <SelectScrollDownButton
     v-bind="forwardedProps"
     :class="cn('flex cursor-default items-center justify-center py-1', props.class)"
+    data-slot="select-scroll-down-button"
   >
     <slot>
       <ChevronDown class="size-4" />

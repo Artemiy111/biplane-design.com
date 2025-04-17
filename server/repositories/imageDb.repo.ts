@@ -1,15 +1,16 @@
 import { and, count, eq, gt, gte, lt, lte, sql } from 'drizzle-orm'
 
-import { db } from '~~/server/db'
 import type { ImageDbCreate, ImageDbUpdate, ImageId, ProjectId } from '~~/server/db/schema'
 
+import { db } from '~~/server/db'
 import { images } from '~~/server/db/schema'
+
 import { imageDbMapper } from '../mappers/imageDb.mapper'
 
 class ImageDbRepo {
   async getOne(id: ImageId) {
     const model = await db.query.images.findFirst({
-      where: eq(images.id, id)
+      where: eq(images.id, id),
     })
     if (!model) throw new Error(`Could not get image with id '${id}'`)
     return model
@@ -68,7 +69,7 @@ class ImageDbRepo {
       await tx.update(images).set({ order: newOrder }).where(eq(images.id, id))
       await tx.update(images).set({ order: sql`${images.order} / 1000` }).where(gte(images.order, 1000))
     }, {
-      'behavior': 'deferred'
+      behavior: 'deferred',
       // deferrable: true,
       // isolationLevel: 'read uncommitted',
     })
