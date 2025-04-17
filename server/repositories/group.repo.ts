@@ -1,9 +1,9 @@
 import type { GroupId } from '../db/schema'
 import type { GroupDto } from '../types'
-import { groupDbRepo as dbRepo } from './groupDb.repo'
-import { categoryRepo } from './category.repo'
 
 import { groupMapper } from '../mappers/group.mapper'
+import { categoryRepo } from './category.repo'
+import { groupDbRepo as dbRepo } from './groupDb.repo'
 
 class GroupRepo {
   async getOne(id: GroupId): Promise<GroupDto> {

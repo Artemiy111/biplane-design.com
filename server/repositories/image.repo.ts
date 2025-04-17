@@ -1,13 +1,13 @@
 import type { ImageId, ProjectId } from '../db/schema'
 import type { CreateImageDto, UpdateImageDto } from '../types'
-import { imageDbRepo as dbRepo } from './imageDb.repo'
-import { imageS3Repo as s3Repo } from './imageS3.repo'
+
 import { imageMapper } from '../mappers/image.mapper'
 import { imageDbMapper } from '../mappers/imageDb.mapper'
+import { imageDbRepo as dbRepo } from './imageDb.repo'
+import { imageS3Repo as s3Repo } from './imageS3.repo'
 
 class ImageRepo {
   async getOne(id: ImageId) {
-
     const model = await dbRepo.getOne(id)
     const url = s3Repo.getUrl(model.projectId, model.id)
     return imageMapper.toDto(model, url)

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import  { z } from 'zod'
-
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
+import { z } from 'zod'
 
 import type { CategoryId, GroupId, ProjectId } from '~~/server/db/schema'
 import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~~/server/types'
 
+import { projectSchemas } from '~~/src/shared/config/validation'
 import { getSlug } from '~~/src/shared/lib/utils/get-slug'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Checkbox } from '~~/src/shared/ui/kit/checkbox'
@@ -14,8 +14,6 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src
 import { Input } from '~~/src/shared/ui/kit/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '~~/src/shared/ui/kit/select'
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '~~/src/shared/ui/kit/sheet'
-
-import { projectSchemas } from '~~/src/shared/config/validation'
 
 const props = defineProps<{
   groups: GroupDto[]

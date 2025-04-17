@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NavigationMenuList, useForwardProps, type NavigationMenuListProps } from 'radix-vue'
+import { NavigationMenuList, useForwardProps, type NavigationMenuListProps } from 'reka-ui'
 import { computed, type HTMLAttributes } from 'vue'
 
 import { cn } from '~~/src/shared/lib/utils'
@@ -20,10 +20,11 @@ const forwardedProps = useForwardProps(delegatedProps)
     v-bind="forwardedProps"
     :class="
       cn(
-        'group flex flex-1 list-none items-center justify-center gap-x-1',
+        'group flex flex-1 list-none items-center justify-center gap-1',
         props.class,
       )
     "
+    data-slot="navigation-menu-list"
   >
     <slot />
   </NavigationMenuList>

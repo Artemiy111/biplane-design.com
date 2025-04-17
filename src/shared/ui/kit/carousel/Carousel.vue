@@ -8,9 +8,10 @@ import { useProvideCarousel } from './useCarousel'
 const props = withDefaults(defineProps<CarouselProps & WithClassAsProps>(), {
   orientation: 'horizontal',
 })
+
 const emits = defineEmits<CarouselEmits>()
 
-const { canScrollNext, canScrollPrev, carouselApi, carouselRef, orientation, scrollNext, scrollPrev } = useProvideCarousel(toRefs(props), emits)
+const { canScrollNext, canScrollPrev, carouselApi, carouselRef, orientation, scrollNext, scrollPrev } = useProvideCarousel(props, emits)
 
 defineExpose({
   canScrollNext,
@@ -41,10 +42,10 @@ function onKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <!-- eslint-disable vuejs-accessibility/no-static-element-interactions -->
   <div
     aria-roledescription="carousel"
     :class="cn('relative', props.class)"
+    data-slot="carousel"
     role="region"
     tabindex="0"
     @keydown="onKeyDown"

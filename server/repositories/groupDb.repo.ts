@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm'
 
-import { db } from '~~/server/db'
 import type { GroupId } from '~~/server/db/schema'
 
+import { db } from '~~/server/db'
 import { groups } from '~~/server/db/schema'
 
 class GroupDbRepo {
