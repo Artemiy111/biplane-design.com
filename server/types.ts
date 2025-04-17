@@ -2,7 +2,7 @@ import type { z } from 'zod'
 
 import type { authSchemas, categorySchemas, groupSchemas, imageSchemas, projectSchemas } from '~~/src/shared/config/validation'
 
-import type { CategoryId, CategoryLayout, GroupId, ImageFit, ProjectId, ProjectStatus } from './db/schema'
+import type { CategoryId, CategoryLayout, GroupDb, GroupId, ImageFit, ProjectId, ProjectStatus } from './db/schema'
 
 export type GroupDto = {
   id: GroupId
@@ -19,6 +19,7 @@ export type UpdateGroupDto = z.infer<typeof groupSchemas.updateSchema>
 
 export type CategoryDto = {
   groupId: GroupId
+  group: GroupDb
   id: CategoryId
   title: string
   slug: string

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGroups, useUser } from '~~/src/shared/model/queries'
+import { useGroupsQuery, useUserQuery } from '~~/src/shared/model/queries'
 import { Footer } from '~~/src/widgets/footer'
 import { Header } from '~~/src/widgets/header'
 
