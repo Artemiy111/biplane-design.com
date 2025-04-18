@@ -26,7 +26,7 @@ onMounted(() => {
     />
     <section class="absolute mx-container-pad gap-4 pb-[200px] ">
       <h1
-        class="relative text-[140px] font-bold leading-none text-yellow-400 lg:text-[100px] md:text-[80px] sm:text-[60px]  xl:text-[120px]"
+        class="relative text-[140px] font-bold leading-none text-yellow-400  max-sm:text-[60px] max-md:text-[80px] max-lg:text-[100px] max-xl:text-[120px]"
         data-hero-title
       >
         Biplane<br>Design
