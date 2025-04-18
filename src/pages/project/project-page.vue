@@ -1,20 +1,25 @@
 <script setup lang="ts">
 import { useBreakpoints, useElementSize, watchOnce } from '@vueuse/core'
-
-import { useApi } from '~~/src/shared/api'
+import { LoaderCircle } from 'lucide-vue-next'
 import { cn } from '~~/src/shared/lib/utils'
 import PageHeading from '~~/src/shared/ui/blocks/page-heading/page-heading.vue'
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '~~/src/shared/ui/kit/carousel'
-import { screenBreakpoints } from '~~/tailwind.config'
+import { breakpoints  } from '~~/src/shared/config/breakpoints'
+import { useProjectQuery } from '~~/src/shared/model/queries'
 
 const props = defineProps<{
   slug: string
 }>()
 
-const { data: project, status } = useApi().projects.getOneBySlug.useQuery({ slug: props.slug }, { watch: [() => props.slug] })
+const slug = computed(() => props.slug)
 
+const bps = useBreakpoints(breakpoints, { strategy: 'max-width' })
+const xl = bps.smallerOrEqual('xl')
+
+const {project, status} = useProjectQuery(slug)
 const api = ref<CarouselApi>()
 const apiTumb = ref<CarouselApi>()
+const tumbOrientation = computed(() => xl.value ? 'horizontal' : 'vertical')
 const carouselRef = useTemplateRef('carouselRef')
 const { height: carouselHeight } = useElementSize(() => carouselRef.value?.carouselRef)
 const totalCount = ref(0)
@@ -41,8 +46,6 @@ function scrollToImage(index: number): void {
   api.value?.scrollTo(index)
 }
 
-const breakpoints = useBreakpoints(screenBreakpoints, { strategy: 'max-width' })
-const xl = breakpoints.smallerOrEqual('xl')
 </script>
 
 <template>
@@ -52,33 +55,33 @@ const xl = breakpoints.smallerOrEqual('xl')
   >
     <PageHeading>{{ project.title }}</PageHeading>
     <section
-      class="grid h-fit grid-cols-[300px,1fr] items-start gap-4 overflow-hidden 2xl:grid-cols-[250px,1fr] lg:grid-cols-[150px,1fr] md:grid-cols-1 xl:grid-cols-1"
+      class="grid h-fit grid-cols-[300px_1fr] items-start gap-4 overflow-hidden max-2xl:grid-cols-[250px_1fr] max-xl:grid-cols-1"
     >
       <Carousel
-        class="xl:order-2"
+        class="max-xl:order-2"
         :opts="{
           loop: false,
           align: 'start',
           dragFree: true,
         }"
-        :orientation="xl ? 'horizontal' : 'vertical'"
+        :orientation="tumbOrientation"
         @init-api="apiTumb = $event"
       >
         <!-- eslint-disable vue/prefer-true-attribute-shorthand -->
         <CarouselContent
-          class="m-0 gap-2 xl:flex-row"
+          class="m-0 gap-2 max-xl:flex-row"
           data-allow-mismatch
           :style="{ maxHeight: `${carouselHeight}px` }"
         >
           <CarouselItem
             v-for="(img, index) in project.images"
             :key="img.id"
-            :class="cn('flex w-fit cursor-grab items-center justify-center p-0 xl:basis-auto', index === current && 'outline outline-8 -outline-offset-8 outline-black')"
+            :class="cn('flex w-fit cursor-grab items-center justify-center p-0 max-xl:basis-auto', index === current && 'outline-8 -outline-offset-8 outline-black')"
             @click="current = index"
           >
             <NuxtImg
               :alt="img.alt"
-              :class="cn('aspect-video w-full xl:max-w-60', img.fit)"
+              :class="cn('aspect-video w-full max-xl:max-w-60 max-lg:max-w-50', img.fit)"
               format="avif,webp,png,jpg"
               :src="img.url"
             />
@@ -87,7 +90,7 @@ const xl = breakpoints.smallerOrEqual('xl')
       </Carousel>
       <Carousel
         ref="carouselRef"
-        class="md:hidden aspect-video w-full xl:order-1"
+        class="max-md:hidden aspect-video w-full max-xl:order-1"
         :opts="{
           loop: false,
         }"
@@ -110,7 +113,7 @@ const xl = breakpoints.smallerOrEqual('xl')
       </Carousel>
     </section>
 
-    <section class="grid grid-cols-[repeat(2,max-content)] gap-4 pt-12 md:pt-0 md:pb-8">
+    <section class="grid grid-cols-[repeat(2,max-content)] gap-4 pt-12 max-md:pt-0 max-md:pb-8">
       <span class="font-semibold">Статус</span>
       <span>{{ project.status[0]!.toUpperCase() + project.status.slice(1) }}</span>
       <template v-if="project.location">
@@ -127,7 +130,7 @@ const xl = breakpoints.smallerOrEqual('xl')
       </template>
     </section>
     <div
-      class="hidden md:flex w-full flex-col gap-4"
+      class="hidden max-md:flex w-full flex-col gap-4"
     >
       <NuxtImg
         v-for="img in project.images"
@@ -138,5 +141,15 @@ const xl = breakpoints.smallerOrEqual('xl')
         :src="img.url"
       />
     </div>
+  </main>
+  <main v-else-if="status === 'pending'" class="grid h-full items-center justify-center">
+    <LoaderCircle
+      class="animate-spin"
+      :size="60"
+      :stroke-width="1.5"
+    />
+  </main>
+  <main v-else-if="status === 'error'" class="grid h-full items-center justify-center">
+    <span class="bg-red-100 p-8 text-subheading text-destructive">Проект не найден</span> 
   </main>
 </template>

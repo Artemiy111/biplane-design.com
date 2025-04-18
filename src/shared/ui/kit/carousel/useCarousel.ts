@@ -1,6 +1,6 @@
 import { createInjectionState } from '@vueuse/core'
 import emblaCarouselVue from 'embla-carousel-vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, type ToRefs } from 'vue'
 
 import type { UnwrapRefCarouselApi as CarouselApi, CarouselEmits, CarouselProps } from './interface'
 
@@ -9,11 +9,14 @@ const [useProvideCarousel, useInjectCarousel] = createInjectionState(
     opts,
     orientation,
     plugins,
-  }: CarouselProps, emits: CarouselEmits) => {
-    const [emblaNode, emblaApi] = emblaCarouselVue({
+  }: ToRefs<CarouselProps>, emits: CarouselEmits) => {
+    const axis = computed(() => {
+      return !orientation || orientation.value === 'horizontal' ? 'x' : 'y'
+    })
+    const [emblaNode, emblaApi] = emblaCarouselVue(computed(() => ({
       ...opts,
-      axis: orientation === 'horizontal' ? 'x' : 'y',
-    }, plugins)
+      axis: axis.value,
+    })), plugins?.value)
 
     function scrollPrev() {
       emblaApi.value?.scrollPrev()

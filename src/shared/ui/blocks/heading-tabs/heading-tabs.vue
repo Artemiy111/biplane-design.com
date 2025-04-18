@@ -22,7 +22,7 @@ const tabModel = defineModel<string>('tab', { required: true })
     :is="tab.value === tabModel ? props.tag : 'span'"
       :key="tab.value"
       :class="cn(
-        'cursor-pointer text-heading text-gray-400 transition-colors',
+        'cursor-pointer text-gray-400 transition-colors',
         tab.value === tabModel ? 'text-foreground' : 'hover:text-gray-500',
       )"
       role="button"

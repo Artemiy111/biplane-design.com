@@ -30,7 +30,6 @@ export default defineNuxtConfig({
   },
 
   app: { head: { htmlAttrs: { lang: 'ru' } } },
-  css: ['./src/shared/assets/css/tailwind.css'],
 
   // yandexMetrika: {
   //   debug: false,
@@ -62,9 +61,11 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2024-07-20',
+
+  css: ['./src/shared/assets/css/main.css'],
   vite: {
     plugins: [
-      tailwindcss(),
+      tailwindcss()
     ],
   },
   telemetry: { enabled: false },

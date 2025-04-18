@@ -56,7 +56,7 @@ const { mutate: changePassword } = useMutation({
     </h1>
     <div
       v-if="user"
-      class="grid grid-cols-[max-content,1fr] gap-4"
+      class="grid grid-cols-[max-content_1fr] gap-4"
     >
       <span>Имя администратора</span>
       <span>{{ user.username }}</span>

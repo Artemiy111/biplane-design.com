@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import '~~/src/shared/assets/css/main.css'
 import { SpeedInsights } from '@vercel/speed-insights/nuxt'
 
 import { Toaster } from '~~/src/shared/ui/kit/sonner'
-
 const yandexMetrika = import.meta.dev
   ? {}
   : {
