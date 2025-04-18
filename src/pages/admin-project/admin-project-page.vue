@@ -21,7 +21,7 @@ const props = defineProps<{
 
 const queryCache = useQueryCache()
 const api = useApi()
-const { data: project } = useProjectQuery(toRefs(props).slug)
+const { project } = useProjectQuery(toRef(() => props.slug))
 
 const title = computed(() => `Админ-панель | ${project.value?.title}`)
 const description = computed(() => `Админ-панель | ${project.value?.title}`)

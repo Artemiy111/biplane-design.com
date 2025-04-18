@@ -9,7 +9,7 @@ import type { CategoryDto, CreateProjectDto, GroupDto, ProjectDto, UpdateProject
 
 import { useApi } from '~~/src/shared/api'
 import { cn } from '~~/src/shared/lib/utils'
-import { useGroupsQuery, useProjectsQuery } from '~~/src/shared/model/queries'
+import { useGroupsQuery } from '~~/src/shared/model/queries'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~~/src/shared/ui/kit/popover'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
@@ -30,9 +30,7 @@ const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
 
 const selectedCategory = ref<CategoryDto | null>(cachedGroups.value?.[0]?.categories[0] ?? null)
 
-const { groups, categories } = useGroupsQuery()
-// const categories = computed(() => groups.value?.flatMap(g => g.categories) ?? [])
-const { data: projects } = useProjectsQuery()
+const { groups, categories, projects } = useGroupsQuery()
 
 watchOnce(groups, () => {
   if (!groups.value?.length) return
