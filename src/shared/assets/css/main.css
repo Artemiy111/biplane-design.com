@@ -2,16 +2,27 @@
 
 @config "../../../../tailwind.config.ts";
 
-@plugin "tailwindcss-animate";
+/* @plugin "tailwindcss-animate"; */
 
 @utility container {
+  min-width: 100%;
   margin-inline: auto;
   padding-inline: var(--container-pad);
+  
+  @media (width >= theme(--breakpoint-2xl)) {
+    max-width: var(--breakpoint-2xl);
+  }
+
+  @media (width >= theme(--breakpoint-xs)) {
+    min-width: 100%;
+  }
+
+ 
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@keyframes accordion-down {
+/* @keyframes accordion-down {
   from {
   height: 0;
   }
@@ -45,30 +56,25 @@
   to {
   height: 0;
   }
- }
+ } */
 
 @theme {
   --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --radius: 0.5rem;
-
-  /* --rounded-sm: calc(var(var(--radius)) - 4px);
-  --rounded-md: calc(var(var(--radius)) - 2px);
-  --rounded-lg: var(--radius);
-  --rounded-xl: calc(var(var(--radius)) + 4px); */
+  /* --radius: 0.5rem; */
 
   --breakpoint-*: initial;
-  --breakpoint-xs: 479px;
-  --breakpoint-sm: 639px;
-  --breakpoint-md: 767px;
-  --breakpoint-lg: 1023px;
-  --breakpoint-xl: 1279px;
-  --breakpoint-2xl: 1399px;
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1400px;
 
   --text-heading: 32px;
   --text-heading--line-height: 1.1;
   --text-heading--font-weight: 600;
 
-  --text-subheading--font-size: 24px;
+  --text-subheading: 24px;
   --text-subheading--line-height: 1.2;
   --text-subheading--font-weight: 600;
 
@@ -78,15 +84,16 @@
   --text-sm: 18px;
   --text-sm--line-height: var(--text-base--line-height);
 
-  --container-pad: calc(10 * var(--spacing));
-  --header-height: calc(20 * var(--spacing));
+  --container-pad: --spacing(10);
+  --header-height: --spacing(20);
 
   --height-full-except-header: calc(100dvh - var(--header-height));
 
   --margin-container-pad: var(--container-pad);
   --padding-container-pad: var(--container-pad);
-}
 
+
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -161,6 +168,22 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  @media (width < theme(--breakpoint-md)) {
+    --container-pad: calc(8 * var(--spacing));
+    --text-heading: 28px;
+    --text-subheading: 22px;
+    --text-base: 18px;
+    --text-sm: 16px;
+  }
+
+  @media (width < theme(--breakpoint-sm)) {
+    --container-pad: calc(4* var(--spacing));
+    --text-heading: 24px;
+    --text-subheading: 20px;
+    --text-base: 16px;
+    --text-sm: 14px;
+  }
 }
 
 @variant dark {
@@ -202,7 +225,10 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
+  html {
     @apply bg-background text-foreground;
+
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
   }
 }

@@ -8,10 +8,13 @@ import { useProvideCarousel } from './useCarousel'
 const props = withDefaults(defineProps<CarouselProps & WithClassAsProps>(), {
   orientation: 'horizontal',
 })
+const refs = toRefs(props)
 
 const emits = defineEmits<CarouselEmits>()
-
-const { canScrollNext, canScrollPrev, carouselApi, carouselRef, orientation, scrollNext, scrollPrev } = useProvideCarousel(props, emits)
+watch(() => props.orientation, () => {
+  console.log('orientation changed', props.orientation)
+})
+const { canScrollNext, canScrollPrev, carouselApi, carouselRef, orientation, scrollNext, scrollPrev } = useProvideCarousel(refs, emits)
 
 defineExpose({
   canScrollNext,

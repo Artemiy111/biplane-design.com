@@ -11,7 +11,7 @@ const route = useRoute()
   >
     <Separator />
     <section
-      class="grid grid-cols-[max-content_max-content_400px_max-content] justify-center gap-x-16 py-16 gap-y-8 lg:grid-cols-1 2xl:grid-cols-[380px_max-content]"
+      class="grid grid-cols-[max-content_max-content_400px_max-content] justify-center gap-x-16 py-16 gap-y-8 max-lg:grid-cols-1 max-2xl:grid-cols-[380px_max-content]"
     >
       <ul class="flex flex-col gap-1">
         <h6 class="font-semibold">

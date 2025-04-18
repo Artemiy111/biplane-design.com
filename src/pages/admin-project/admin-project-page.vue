@@ -74,8 +74,8 @@ async function uploadImages(images: File[]) {
     class="container flex flex-col"
   >
     <PageHeading>{{ project.title }}</PageHeading>
-    <div class="grid grid-cols-[max-content_1fr] gap-x-16 gap-y-8 mb-12 md:grid-cols-1">
-      <section class="grid w-full grid-cols-[repeat(2,max-content)] gap-x-4 gap-y-4 md:gap-x-8 md:overflow-x-auto">
+    <div class="grid grid-cols-[max-content_1fr] gap-x-16 gap-y-8 mb-12 max-md:grid-cols-1">
+      <section class="grid w-full grid-cols-[repeat(2,max-content)] gap-x-4 gap-y-4 max-md:gap-x-8 max-md:overflow-x-auto">
         <span class="font-semibold">Id</span>
         <span>{{ project.id }}</span>
         <span class="font-semibold">Slug</span>
@@ -103,7 +103,7 @@ async function uploadImages(images: File[]) {
     </div>
 
     <section class="flex flex-col gap-4">
-      <Table class="grid overflow-x grid-cols-[120px_max-content_max-content_1fr_max-content] overflow-x-auto md:grid-cols-[max-content_260px_200px_max-content_max-content]">
+      <Table class="grid overflow-x grid-cols-[120px_max-content_max-content_1fr_max-content] overflow-x-auto max-md:grid-cols-[max-content_260px_200px_max-content_max-content]">
         <TableHeader class="col-span-5 grid grid-cols-subgrid">
           <TableRow class="col-span-5 grid grid-cols-subgrid">
             <TableHead>№</TableHead>

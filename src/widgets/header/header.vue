@@ -41,7 +41,7 @@ async function singOut() {
 <template>
   <header
     id="header"
-    class="container z-50 flex h-20 flex-col"
+    class="container z-50 flex h-(--header-height) flex-col"
   >
     <div class="z-50 flex h-full items-center justify-between">
       <NuxtLink
@@ -58,7 +58,7 @@ async function singOut() {
       <DropdownMenu>
         <DropdownMenuTrigger
           v-if="user"
-          class="flex items-center gap-3"
+          class="flex items-center gap-3 cursor-pointer"
         >
           <UserRound :stroke-width="1.5" />
           {{ user.username }}

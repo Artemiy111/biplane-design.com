@@ -28,7 +28,7 @@ const currentCategory = ref<CategoryDto | null>(null)
 
 const currentCategoryProjects = computed(() => currentCategory.value?.projects.filter(p => p.images.length) || null)
 
-watchImmediate(status, () => {
+watchImmediate(() => groups.value.length, () => {
   currentCategory.value = getCurrentCategoryOrDefault(route.query)
   if (currentCategory.value) {
     currentGroup.value = groups.value.find(g => g.id === currentCategory.value!.groupId)!
@@ -36,7 +36,6 @@ watchImmediate(status, () => {
     currentGroup.value = groups.value[0] || null
     currentCategory.value = groups.value[0]?.categories[0] || null
   }
-  console.log(currentCategory.value, groups.value)
 })
 
 const tabs = computed(() => groups.value.map(g => ({ title: g.title, value: g.slug })))
@@ -94,7 +93,7 @@ onMounted(() => {
 
 <template>
   <main
-    class="container flex h-full grow flex-col"
+    class="container flex h-full  grow flex-col"
   >
     <div
       v-if="groups.length === 0 && status === 'pending'"
@@ -149,8 +148,8 @@ onMounted(() => {
       <template v-if="currentCategoryProjects">
         <section
         :class="cn(
-          'mt-8 grid grid-cols-2 gap-x-10 gap-y-12 lg:grid-cols-1',
-          currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 xs:grid-cols-1',
+          'mt-8 grid grid-cols-2 gap-x-10 gap-y-12 max-lg:grid-cols-1',
+          currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 max-xs:grid-cols-1',
         )"
       >
         <div

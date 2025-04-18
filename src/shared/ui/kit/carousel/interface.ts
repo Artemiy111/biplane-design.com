@@ -14,7 +14,7 @@ export type UnwrapRefCarouselApi = UnwrapRef<CarouselApi>
 export type CarouselProps = {
   opts?: CarouselOptions
   plugins?: CarouselPlugin
-  orientation?: 'horizontal' | 'vertical'
+  orientation?: MaybeRef<'horizontal' | 'vertical'>
 }
 
 export type CarouselEmits = {

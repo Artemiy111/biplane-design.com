@@ -13,7 +13,7 @@ import { useGroupsQuery, useProjectsQuery } from '~~/src/shared/model/queries'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~~/src/shared/ui/kit/popover'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
-import { screenBreakpoints } from '~~/tailwind.config'
+import { breakpoints } from '~~/src/shared/config/breakpoints'
 
 import ProjectSheet from './ui/project-sheet.vue'
 
@@ -23,15 +23,15 @@ useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 
 const api = useApi()
 const queryCache = useQueryCache()
-const breakpoints = useBreakpoints(screenBreakpoints, { strategy: 'max-width' })
-const md = breakpoints.isSmallerOrEqual('md')
+const bps = useBreakpoints(breakpoints, { strategy: 'max-width' })
+const md = bps.isSmallerOrEqual('md')
 
 const { data: cachedGroups } = useNuxtData<GroupDto[]>('groups')
 
 const selectedCategory = ref<CategoryDto | null>(cachedGroups.value?.[0]?.categories[0] ?? null)
 
-const { data: groups } = useGroupsQuery()
-const categories = computed(() => groups.value?.flatMap(g => g.categories) ?? [])
+const { groups, categories } = useGroupsQuery()
+// const categories = computed(() => groups.value?.flatMap(g => g.categories) ?? [])
 const { data: projects } = useProjectsQuery()
 
 watchOnce(groups, () => {
@@ -174,7 +174,7 @@ function openProjectSheet(project: ProjectDto) {
     </main>
     <main
       v-else
-      class="container mt-8 grid grid-cols-[200px_minmax(500px,1400px)] gap-8 px-8 lg:grid-cols-1 sm:px-4"
+      class="container mt-8 grid grid-cols-[200px_minmax(500px,1400px)] gap-8 px-8 max-lg:grid-cols-1 max-sm:px-4"
     >
       <ul class="flex flex-col gap-4">
         <li
@@ -182,7 +182,7 @@ function openProjectSheet(project: ProjectDto) {
           :key="group.id"
           class="w-full list-none"
         >
-          <ul class="flex w-full flex-col flex-wrap gap-2 lg:flex-row">
+          <ul class="flex w-full flex-col flex-wrap gap-2 max-lg:flex-row">
             <span class="w-full rounded-sm font-semibold text-slate-800">{{
               group.title
             }}</span>
@@ -191,7 +191,7 @@ function openProjectSheet(project: ProjectDto) {
               :key="category.id"
             >
               <button
-                :class="cn('ml-2 cursor-pointer px-2 py-1 hover:bg-primary-foreground lg:m-0',
+                :class="cn('ml-2 cursor-pointer px-2 py-1 hover:bg-primary-foreground max-lg:m-0',
                            category.id === selectedCategory?.id && 'bg-primary-foreground font-semibold')"
                 type="button"
                 @click="selectedCategory = category"
