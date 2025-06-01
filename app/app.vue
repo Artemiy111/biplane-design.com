@@ -2,16 +2,16 @@
 import { SpeedInsights } from '@vercel/speed-insights/nuxt'
 
 import '~~/src/shared/assets/css/main.css'
-import { Toaster } from '~~/src/shared/ui/kit/sonner'
 import { CookieToastProvider } from '~~/src/shared/ui/blocks/cookie-toast'
+import { Toaster } from '~~/src/shared/ui/kit/sonner'
 
 const yandexMetrika = import.meta.dev
   ? {}
   : {
-    script: [
-      {
-        key: 'ym',
-        innerHTML: `
+      script: [
+        {
+          key: 'ym',
+          innerHTML: `
     (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
     m[i].l=1*new Date();
     for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
@@ -24,20 +24,20 @@ const yandexMetrika = import.meta.dev
           accurateTrackBounce:true
     });
   `,
-      },
-    ],
-    noscript: [{
-      key: 'ym-no',
-      innerHTML: `<div><img src="https://mc.yandex.ru/watch/61819282" style="position:absolute; left:-9999px;" alt="" /></div>`,
-    }],
-  }
+        },
+      ],
+      noscript: [{
+        key: 'ym-no',
+        innerHTML: `<div><img src="https://mc.yandex.ru/watch/61819282" style="position:absolute; left:-9999px;" alt="" /></div>`,
+      }],
+    }
 
 useHead(yandexMetrika)
 </script>
 
 <template>
   <SpeedInsights />
-  <Toaster :rich-colors="true" />
+  <Toaster rich-colors />
   <CookieToastProvider />
 
   <NuxtLayout>

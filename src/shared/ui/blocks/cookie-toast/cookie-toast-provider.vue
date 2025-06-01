@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useCookieAllowed } from '~~/src/shared/model/user'
 import { toast } from 'vue-sonner'
+
+import { useCookieAllowed } from '~~/src/shared/model/user'
+
 import CookieToast from './cookie-toast.vue'
-import { watchImmediate } from '@vueuse/core'
 
 const { cookieAllowed } = useCookieAllowed()
 

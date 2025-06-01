@@ -2,6 +2,7 @@ import { createTRPCNuxtClient, httpBatchLink } from 'trpc-nuxt/client'
 
 import type { AppRouter } from '~~/server/api/trpc/[trpc]'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const trpc = ref<any | null>(null)
 
 export const useApi = () => {

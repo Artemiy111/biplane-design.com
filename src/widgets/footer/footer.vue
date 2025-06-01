@@ -6,9 +6,7 @@ const route = useRoute()
 </script>
 
 <template>
-  <footer
-    :class="cn('container mt-20 flex flex-col', route.path === '/' && 'mt-0')"
-  >
+  <footer :class="cn('container mt-20 flex flex-col', route.path === '/' && 'mt-0')">
     <Separator />
     <section
       class="grid grid-cols-[max-content_max-content_400px_max-content] justify-center gap-x-16 py-16 gap-y-8 max-lg:grid-cols-1 max-2xl:grid-cols-[380px_max-content]"
@@ -32,7 +30,7 @@ const route = useRoute()
         </h6>
         <li>
           <NuxtLink
-            :external="true"
+            external
             target="_blank"
             to="https://yandex.ru/map-widget/v1/?um=constructor%3A3da4595a6346865d8223d34a3ff56c219a4f3852edd8bb18b888329ab0ba28fa&amp;source=constructor"
           >
@@ -47,7 +45,7 @@ const route = useRoute()
         <li>
           <NuxtLink
             class="flex gap-2 "
-            :external="true"
+            external
             href="https://coolors.co"
             rel=""
             target="_blank noopener noreferrer"
@@ -58,7 +56,7 @@ const route = useRoute()
         <li>
           <NuxtLink
             class="flex gap-2"
-            :external="true"
+            external
             href="https://habr.com/ru/companies/ruvds/articles/553582"
             target="_blank noopener noreferrer"
           >
