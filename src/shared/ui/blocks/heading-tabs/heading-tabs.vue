@@ -18,8 +18,8 @@ const tabModel = defineModel<string>('tab', { required: true })
 <template>
   <section class="mt-8 flex gap-x-8 text-heading">
     <component
-    v-for="tab in props.tabs"
-    :is="tab.value === tabModel ? props.tag : 'span'"
+      :is="tab.value === tabModel ? props.tag : 'span'"
+      v-for="tab in props.tabs"
       :key="tab.value"
       :class="cn(
         'cursor-pointer text-gray-400 transition-colors',
