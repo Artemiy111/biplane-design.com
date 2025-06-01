@@ -18,7 +18,6 @@ export const useProjectQuery = (slug: Ref<string>) => {
       placeholderData: () => {
         const qc = useQueryCache()
         const projects = qc.getQueryData(['groups']) as UnwrapRef<ReturnType<typeof useGroupsQuery>["projects"]> | undefined
-        console.log('pr', projects)
         if (!projects) return undefined
         const project = projects.find(p => p.slug === slug.value)
         return project
@@ -26,7 +25,3 @@ export const useProjectQuery = (slug: Ref<string>) => {
     })
   return { project: project || null, ...rest }
 }
-
-// export const useProjectQuery = (slug: Ref<string>) => {
-// return useQuery({ key: () => ['project', slug.value], query: () => useApi().projects.getOneBySlug.query({ slug: slug.value }) })
-// }

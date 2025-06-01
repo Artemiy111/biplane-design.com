@@ -1,6 +1,6 @@
 // import antfu from '@antfu/eslint-config'
 import oxlint from 'eslint-plugin-oxlint'
-import perfectionist from 'eslint-plugin-perfectionist'
+// import perfectionist from 'eslint-plugin-perfectionist'
 // import tailwind from 'eslint-plugin-tailwindcss'
 import pluginVueA11y from 'eslint-plugin-vuejs-accessibility'
 
@@ -20,12 +20,11 @@ export default withNuxt(
   // {
   //   rules: tseslint.configs.strict.at(-1).rules
   // },
-
   {
     plugins: { perfectionist },
-
+  },
+  {
     rules: {
-
       'import/order': 'off',
       'perfectionist/sort-vue-attributes': 'off',
       'perfectionist/sort-imports': ['error', {

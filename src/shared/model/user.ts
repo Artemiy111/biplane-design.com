@@ -1,3 +1,4 @@
+import { useApi } from '../api'
 import { useUserQuery } from './queries'
 
 export const useAuthenticatedUser = () => {
@@ -8,4 +9,18 @@ export const useAuthenticatedUser = () => {
     }
     return user.value
   })
+}
+
+export const useCookieAllowed = () => {
+  const allowedString = useCookie<boolean | string | null>('cookie-allowed')
+  const allowCookie = async () => {
+    try {
+      await useApi().user.allowCookie.mutate()
+    } catch (_) {
+      allowedString.value = 'true'
+    }
+  }
+
+  const cookieAllowed = computed(() => allowedString.value === 'true' || allowedString.value === true)
+  return { cookieAllowed, allowCookie }
 }

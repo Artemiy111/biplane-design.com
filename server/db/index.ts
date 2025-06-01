@@ -7,7 +7,7 @@ export const db = drizzle({
   connection: {
     url: env.DATABASE_URL,
     authToken: env.DATABASE_AUTH_TOKEN,
-  }, schema, logger: true, casing: 'snake_case',
+  }, schema, logger: false, casing: 'snake_case',
 })
 
 export type Db = typeof db

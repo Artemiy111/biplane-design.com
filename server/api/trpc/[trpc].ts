@@ -13,6 +13,9 @@ export const appRouter = router({
     changePassword: authedProcedure.input(authSchemas.changePasswordSchema).mutation(({ input, ctx }) => {
       return userRepo.changePassword(ctx.user.id, input.newPassword)
     }),
+    allowCookie: publicProcedure.mutation(({ ctx }) => {
+      setCookie(ctx.event, 'cookie-allowed', 'true', { expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365) })
+    }),
   },
   auth: {
     login: publicProcedure.input(authSchemas.loginSchema).mutation(async ({ input, ctx }) => {
