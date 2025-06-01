@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Footer } from '~~/src/widgets/footer'
 import { Header } from '~~/src/widgets/header'
-
 </script>
 
 <template>

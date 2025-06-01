@@ -7,6 +7,7 @@ import { env } from './server/utils/env'
 
 export default defineNuxtConfig({
   modules: [
+    // '@nuxt/ui',
     '@nuxt/image',
     '@nuxt/eslint',
     '@nuxt/fonts',
@@ -19,7 +20,7 @@ export default defineNuxtConfig({
   ],
 
   imports: {
-    dirs: [],
+    dirs: ['@vueuse/core'],
   },
 
   devtools: {
@@ -31,10 +32,7 @@ export default defineNuxtConfig({
 
   app: { head: { htmlAttrs: { lang: 'ru' } } },
 
-  // yandexMetrika: {
-  //   debug: false,
-  //   id: '61819282',
-  // },
+  css: ['./src/shared/assets/css/main.css'],
 
   // components: {
   //   dirs: [],
@@ -43,6 +41,10 @@ export default defineNuxtConfig({
   site: {
     url: 'https://biplane-design.com',
   },
+
+  // ui: {
+  //   colorMode: false,
+  // },
 
   runtimeConfig: {
     BASE_URL: env.BASE_URL,
@@ -61,11 +63,9 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2024-07-20',
-
-  css: ['./src/shared/assets/css/main.css'],
   vite: {
     plugins: [
-      tailwindcss()
+      tailwindcss(),
     ],
   },
   telemetry: { enabled: false },

@@ -8,12 +8,10 @@ import { useProvideCarousel } from './useCarousel'
 const props = withDefaults(defineProps<CarouselProps & WithClassAsProps>(), {
   orientation: 'horizontal',
 })
-const refs = toRefs(props)
+
+const refs = toRefs(() => props)
 
 const emits = defineEmits<CarouselEmits>()
-watch(() => props.orientation, () => {
-  console.log('orientation changed', props.orientation)
-})
 const { canScrollNext, canScrollPrev, carouselApi, carouselRef, orientation, scrollNext, scrollPrev } = useProvideCarousel(refs, emits)
 
 defineExpose({
@@ -45,22 +43,8 @@ function onKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div
-    aria-roledescription="carousel"
-    :class="cn('relative', props.class)"
-    data-slot="carousel"
-    role="region"
-    tabindex="0"
-    @keydown="onKeyDown"
-  >
-    <slot
-      :can-scroll-next
-      :can-scroll-prev
-      :carousel-api
-      :carousel-ref
-      :orientation
-      :scroll-next
-      :scroll-prev
-    />
+  <div aria-roledescription="carousel" :class="cn('relative', props.class)" data-slot="carousel" role="region"
+    tabindex="0" @keydown="onKeyDown">
+    <slot :can-scroll-next :can-scroll-prev :carousel-api :carousel-ref :orientation :scroll-next :scroll-prev />
   </div>
 </template>
