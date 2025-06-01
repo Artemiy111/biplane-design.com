@@ -1,8 +1,6 @@
 @import "tailwindcss";
-
+/* @import "@nuxt/ui"; */
 @config "../../../../tailwind.config.ts";
-
-/* @plugin "tailwindcss-animate"; */
 
 @utility container {
   min-width: 100%;
@@ -16,47 +14,9 @@
   @media (width >= theme(--breakpoint-xs)) {
     min-width: 100%;
   }
-
- 
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
-
-/* @keyframes accordion-down {
-  from {
-  height: 0;
-  }
-  to {
-  height: var(--radix-accordion-content-height);
-  }
- }
-
- @keyframes accordion-up {
-  from {
-  height: var(--radix-accordion-content-height);
-  }
-  to {
-  height: 0;
-  }
- }
-
- @keyframes collapsible-down {
-  from {
-  height: 0;
-  }
-  to {
-  height: var(--radix-collapsible-content-height);
-  }
- }
-
- @keyframes collapsible-up {
-  from {
-  height: var(--radix-collapsible-content-height);
-  }
-  to {
-  height: 0;
-  }
- } */
 
 @theme {
   --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -81,8 +41,11 @@
   --text-base: 20px;
   --text-base--line-height: 1.5;
 
-  --text-sm: 18px;
-  --text-sm--line-height: var(--text-base--line-height);
+  --text-sm: 17px;
+  --text-sm--line-height: 1.5;
+
+  --text-xs: 14px;
+  --text-xs--line-height: 1.5;
 
   --container-pad: --spacing(10);
   --header-height: --spacing(20);
@@ -168,6 +131,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  transition-behavior: allow-discrete;
 
   @media (width < theme(--breakpoint-md)) {
     --container-pad: calc(8 * var(--spacing));

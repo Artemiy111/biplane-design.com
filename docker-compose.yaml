@@ -26,7 +26,7 @@ services:
     #     - action: rebuild
     #       path: package.json
   # db:
-  #   image: postgres:16
+  #   image: postgres:17
   #   restart: always
   #   ports:
   #     - $DB_PORT:5432
