@@ -6,18 +6,18 @@ import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 import type { GroupId } from '~~/server/db/schema'
 import type { CategoryDto, GroupDto, ProjectDto } from '~~/server/types'
 
+import { breakpoints } from '~~/src/shared/config/breakpoints'
 import { cn } from '~~/src/shared/lib/utils'
+import {
+  useCreateProjectMutation,
+  useDeleteProjectMutation,
+  useUpdateProjectMutation,
+  useUpdateProjectOrderMutation,
+} from '~~/src/shared/model/mutations'
 import { useGroupsQuery } from '~~/src/shared/model/queries'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~~/src/shared/ui/kit/popover'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~~/src/shared/ui/kit/table'
-import { breakpoints } from '~~/src/shared/config/breakpoints'
-import {
-  useCreateProjectMutation,
-  useUpdateProjectMutation,
-  useUpdateProjectOrderMutation,
-  useDeleteProjectMutation
-} from '~~/src/shared/model/mutations'
 
 import ProjectSheet from './ui/project-sheet.vue'
 
@@ -96,40 +96,70 @@ function openProjectSheet(project: ProjectDto) {
 
 <template>
   <ClientOnly>
-    <main v-if="!groups" class="container flex grow flex-col items-center justify-center">
-      <LoaderCircle class="animate-spin" :size="60" :stroke-width="1.5" />
+    <main
+      v-if="!groups"
+      class="container flex grow flex-col items-center justify-center"
+    >
+      <LoaderCircle
+        class="animate-spin"
+        :size="60"
+        :stroke-width="1.5"
+      />
     </main>
-    <main v-else
-      class="container mt-8 grid grid-cols-[200px_minmax(500px,1400px)] gap-8 px-8 max-lg:grid-cols-1 max-sm:px-4">
+    <main
+      v-else
+      class="container mt-8 grid grid-cols-[200px_minmax(500px,1400px)] gap-8 px-8 max-lg:grid-cols-1 max-sm:px-4"
+    >
       <ul class="flex flex-col gap-4">
-        <li v-for="group in groups" :key="group.id" class="w-full list-none">
+        <li
+          v-for="group in groups"
+          :key="group.id"
+          class="w-full list-none"
+        >
           <ul class="flex w-full flex-col flex-wrap gap-2 max-lg:flex-row">
             <span class="w-full rounded-sm font-semibold text-slate-800">{{
               group.title
-              }}</span>
-            <li v-for="category in group.categories" :key="category.id">
-              <button :class="cn('ml-2 cursor-pointer px-2 py-1 hover:bg-primary-foreground max-lg:m-0',
-                category.id === selectedCategory?.id && 'bg-primary-foreground font-semibold')" type="button"
-                @click="selectedCategory = category">
+            }}</span>
+            <li
+              v-for="category in group.categories"
+              :key="category.id"
+            >
+              <button
+                :class="cn('ml-2 cursor-pointer px-2 py-1 hover:bg-primary-foreground max-lg:m-0',
+                           category.id === selectedCategory?.id && 'bg-primary-foreground font-semibold')"
+                type="button"
+                @click="selectedCategory = category"
+              >
                 <span>{{ category.title }}</span>
               </button>
             </li>
           </ul>
         </li>
       </ul>
-      <section v-if="groups?.length" class="flex w-full flex-col gap-4">
-        <ProjectSheet v-if="groups.length" ref="projectSheet" :groups="groups"
+      <section
+        v-if="groups?.length"
+        class="flex w-full flex-col gap-4"
+      >
+        <ProjectSheet
+          v-if="groups.length"
+          ref="projectSheet"
+          :groups="groups"
           @create="dto => createProject(dto).then(() => projectSheet?.close())"
-          @update="(id, dto) => updateProject([id, dto]).then(() => projectSheet?.close())" />
-        <Button class="w-fit" :size="md ? 'sm' : 'default'" @click="projectSheet?.open({
-          mode: 'create',
-          initial: selectedCategory
-            ? ({
-              groupId: selectedCategory.groupId,
-              categoryId: selectedCategory.id
-            })
-            : ({ groupId: groups![0]!.id, categoryId: groups![0]!.categories[0]!.id })
-        })">
+          @update="(id, dto) => updateProject([id, dto]).then(() => projectSheet?.close())"
+        />
+        <Button
+          class="w-fit"
+          :size="md ? 'sm' : 'default'"
+          @click="projectSheet?.open({
+            mode: 'create',
+            initial: selectedCategory
+              ? ({
+                groupId: selectedCategory.groupId,
+                categoryId: selectedCategory.id,
+              })
+              : ({ groupId: groups![0]!.id, categoryId: groups![0]!.categories[0]!.id }),
+          })"
+        >
           Создать проект
         </Button>
 
@@ -147,26 +177,45 @@ function openProjectSheet(project: ProjectDto) {
               <TableHead>Расположение</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody ref="projectsTableBody" v-draggable="[
-            selectedCategoryProjects as any,
-            {
-              onUpdate: onUpdateProjectOrder,
-              handle: `[data-draggable-handler='true']`,
-            }]" class="col-span-9 grid grid-cols-subgrid">
-            <TableRow v-for="project in selectedCategoryProjects" :key="project.id"
-              class="col-span-9 grid w-max grid-cols-subgrid items-center" :data-order="project.order"
-              :data-project-id="project.id">
-              <TableCell class="flex cursor-grab gap-2" :data-draggable-handler="true">
+          <TableBody
+            v-draggable="[
+              selectedCategoryProjects as any,
+              {
+                onUpdate: onUpdateProjectOrder,
+                handle: `[data-draggable-handler='true']`,
+              }]"
+            class="col-span-9 grid grid-cols-subgrid"
+          >
+            <TableRow
+              v-for="project in selectedCategoryProjects"
+              :key="project.id"
+              class="col-span-9 grid w-max grid-cols-subgrid items-center"
+              :data-order="project.order"
+              :data-project-id="project.id"
+            >
+              <TableCell
+                class="flex cursor-grab gap-2"
+                data-draggable-handler="true"
+              >
                 {{ project.order }}
                 <GripVertical />
               </TableCell>
-              <TableCell class="flex gap-4" @click.stop>
-                <button type="button" @click="openProjectSheet(project)">
+              <TableCell
+                class="flex gap-4"
+                @click.stop
+              >
+                <button
+                  type="button"
+                  @click="openProjectSheet(project)"
+                >
                   <Pen />
                 </button>
                 <Popover>
                   <PopoverTrigger>
-                    <button class="text-red-500" type="button">
+                    <button
+                      class="text-red-500"
+                      type="button"
+                    >
                       <Trash2 />
                     </button>
                   </PopoverTrigger>
@@ -180,9 +229,13 @@ function openProjectSheet(project: ProjectDto) {
               </TableCell>
               <TableCell>
                 <NuxtLink :to="`/admin/projects/${project.slug}`">
-                  <NuxtImg v-if="project.images.length" :alt="project.images[0]!.alt"
-                    :class="cn('aspect-video w-full', project.images[0]!.fit)" format="avif,webp,png,jpg"
-                    :src="project.images[0]!.url" />
+                  <NuxtImg
+                    v-if="project.images.length"
+                    :alt="project.images[0]!.alt"
+                    :class="cn('aspect-video w-full', project.images[0]!.fit)"
+                    format="avif,webp,png,jpg"
+                    :src="project.images[0]!.url"
+                  />
                 </NuxtLink>
               </TableCell>
               <TableCell>

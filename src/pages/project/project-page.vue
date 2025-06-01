@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useBreakpoints, useElementSize, watchOnce } from '@vueuse/core'
 import { LoaderCircle } from 'lucide-vue-next'
+
+import { breakpoints } from '~~/src/shared/config/breakpoints'
 import { cn } from '~~/src/shared/lib/utils'
+import { useProjectQuery } from '~~/src/shared/model/queries'
 import PageHeading from '~~/src/shared/ui/blocks/page-heading/page-heading.vue'
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '~~/src/shared/ui/kit/carousel'
-import { breakpoints  } from '~~/src/shared/config/breakpoints'
-import { useProjectQuery } from '~~/src/shared/model/queries'
 
 const props = defineProps<{
   slug: string
@@ -16,7 +17,7 @@ const slug = computed(() => props.slug)
 const bps = useBreakpoints(breakpoints, { strategy: 'max-width' })
 const xl = bps.smallerOrEqual('xl')
 
-const {project, status} = useProjectQuery(slug)
+const { project, status } = useProjectQuery(slug)
 const api = ref<CarouselApi>()
 const apiTumb = ref<CarouselApi>()
 const tumbOrientation = computed(() => xl.value ? 'horizontal' : 'vertical')
@@ -45,7 +46,6 @@ function scrollToImage(index: number): void {
   apiTumb.value?.scrollTo(index)
   api.value?.scrollTo(index)
 }
-
 </script>
 
 <template>
@@ -142,14 +142,20 @@ function scrollToImage(index: number): void {
       />
     </div>
   </main>
-  <main v-else-if="status === 'pending'" class="grid h-full items-center justify-center">
+  <main
+    v-else-if="status === 'pending'"
+    class="grid h-full items-center justify-center"
+  >
     <LoaderCircle
       class="animate-spin"
       :size="60"
       :stroke-width="1.5"
     />
   </main>
-  <main v-else-if="status === 'error'" class="grid h-full items-center justify-center">
-    <span class="bg-red-100 p-8 text-subheading text-destructive">Проект не найден</span> 
+  <main
+    v-else-if="status === 'error'"
+    class="grid h-full items-center justify-center"
+  >
+    <span class="bg-red-100 p-8 text-subheading text-destructive">Проект не найден</span>
   </main>
 </template>

@@ -16,7 +16,8 @@ export const useCookieAllowed = () => {
   const allowCookie = async () => {
     try {
       await useApi().user.allowCookie.mutate()
-    } catch (_) {
+    }
+    catch (_) {
       allowedString.value = 'true'
     }
   }

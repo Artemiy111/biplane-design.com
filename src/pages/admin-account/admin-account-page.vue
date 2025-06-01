@@ -2,14 +2,13 @@
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 
-import { useApi } from '~~/src/shared/api'
 import { authSchemas } from '~~/src/shared/config/validation/'
+import { useChangePasswordMutation } from '~~/src/shared/model/mutations'
 import { useAuthenticatedUser } from '~~/src/shared/model/user'
 import { Button } from '~~/src/shared/ui/kit/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '~~/src/shared/ui/kit/dialog'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~~/src/shared/ui/kit/form'
 import { Input } from '~~/src/shared/ui/kit/input'
-import { useChangePasswordMutation } from '~~/src/shared/model/mutations'
 
 const title = 'Аккаунт администратора'
 const description = 'Настройки аккаунта администратора'
@@ -29,8 +28,6 @@ const onSubmit = handleSubmit(async (values) => {
   resetForm()
   isDialogOpen.value = false
 })
-
-
 </script>
 
 <template>
@@ -38,11 +35,14 @@ const onSubmit = handleSubmit(async (values) => {
     <h1 class="text-heading">
       Аккаунт
     </h1>
-    <div v-if="user" class="grid grid-cols-[max-content_1fr] gap-4">
+    <div
+      v-if="user"
+      class="grid grid-cols-[max-content_1fr] gap-4"
+    >
       <span>Имя администратора</span>
       <span>{{ user.username }}</span>
       <Dialog v-model:open="isDialogOpen">
-        <DialogTrigger :as-child="true">
+        <DialogTrigger as-child>
           <Button variant="outline">
             Сменить пароль
           </Button>
@@ -53,8 +53,14 @@ const onSubmit = handleSubmit(async (values) => {
             <DialogTitle>Сменить пароль</DialogTitle>
             <DialogDescription>Заполните поля</DialogDescription>
           </DialogHeader>
-          <form class="flex flex-col gap-4" @submit.prevent="onSubmit">
-            <FormField v-slot="{ componentField }" name="currentPassword">
+          <form
+            class="flex flex-col gap-4"
+            @submit.prevent="onSubmit"
+          >
+            <FormField
+              v-slot="{ componentField }"
+              name="currentPassword"
+            >
               <FormItem>
                 <FormLabel>Текущий пароль</FormLabel>
                 <FormControl>
@@ -63,7 +69,10 @@ const onSubmit = handleSubmit(async (values) => {
                 <FormMessage />
               </FormItem>
             </FormField>
-            <FormField v-slot="{ componentField }" name="newPassword">
+            <FormField
+              v-slot="{ componentField }"
+              name="newPassword"
+            >
               <FormItem>
                 <FormLabel>Новый пароль</FormLabel>
                 <FormControl>
@@ -72,7 +81,10 @@ const onSubmit = handleSubmit(async (values) => {
                 <FormMessage />
               </FormItem>
             </FormField>
-            <FormField v-slot="{ componentField }" name="repeatNewPassword">
+            <FormField
+              v-slot="{ componentField }"
+              name="repeatNewPassword"
+            >
               <FormItem>
                 <FormLabel>Повторите пароль</FormLabel>
                 <FormControl>

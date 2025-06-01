@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { LocationQuery } from 'vue-router'
 
+import { watchImmediate } from '@vueuse/core'
 import { LoaderCircle } from 'lucide-vue-next'
 import * as z from 'zod'
 
@@ -10,7 +11,6 @@ import { cn } from '~~/src/shared/lib/utils'
 import { useGroupsQuery } from '~~/src/shared/model/queries'
 import { HeadingTabs } from '~~/src/shared/ui/blocks/heading-tabs'
 import { Carousel, CarouselContent, CarouselItem } from '~~/src/shared/ui/kit/carousel'
-import { watchDeep, watchImmediate } from '@vueuse/core'
 
 const title = 'Проекты'
 const description = 'Представлены различные категории проектов'
@@ -22,7 +22,7 @@ const querySchema = z.object({
 const route = useRoute()
 const router = useRouter()
 
-const {groups, categories, status, asyncStatus} = useGroupsQuery()
+const { groups, categories, status, asyncStatus } = useGroupsQuery()
 const currentGroup = ref<GroupDto | null>(null)
 const currentCategory = ref<CategoryDto | null>(null)
 
@@ -32,7 +32,8 @@ watchImmediate(() => groups.value.length, () => {
   currentCategory.value = getCurrentCategoryOrDefault(route.query)
   if (currentCategory.value) {
     currentGroup.value = groups.value.find(g => g.id === currentCategory.value!.groupId)!
-  } else {
+  }
+  else {
     currentGroup.value = groups.value[0] || null
     currentCategory.value = groups.value[0]?.categories[0] || null
   }
@@ -43,7 +44,7 @@ const tabs = computed(() => groups.value.map(g => ({ title: g.title, value: g.sl
 const tab = computed({
   get: () => currentGroup.value?.slug || '',
   set: (v) => {
-    const newGroup = groups.value.find(g => g.slug === v)! 
+    const newGroup = groups.value.find(g => g.slug === v)!
     navigateTo(`/projects?category=${newGroup.categories[0]!.slug}`)
   },
 })
@@ -92,9 +93,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main
-    class="container flex h-full  grow flex-col"
-  >
+  <main class="container flex h-full  grow flex-col">
     <div
       v-if="groups.length === 0 && status === 'pending'"
       class="flex size-full grow flex-col items-center justify-center"
@@ -147,52 +146,58 @@ onMounted(() => {
 
       <template v-if="currentCategoryProjects">
         <section
-        :class="cn(
-          'mt-8 grid grid-cols-2 gap-x-10 gap-y-12 max-lg:grid-cols-1',
-          currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 max-xs:grid-cols-1',
-        )"
-      >
-        <div
-          v-for="p in currentCategoryProjects"
-          :key="p.id"
-          class="flex flex-col transition-colors"
+          :class="cn(
+            'mt-8 grid grid-cols-2 gap-x-10 gap-y-12 max-lg:grid-cols-1',
+            currentCategory?.layout === 'mini' && 'grid-cols-3 lg:grid-cols-2 max-xs:grid-cols-1',
+          )"
         >
-          <NuxtLink :to="`/projects/${p.slug}`">
-            <NuxtImg
-              :alt="p.images[0]!.alt"
-              :class="cn('aspect-video w-full bg-background text-background', p.images[0]!.fit)"
-              format="avif,webp,png,jpg"
-              :height="500"
-              :lazy="true"
-              :src="p.images[0]!.url"
-              :width="500"
-            />
-          </NuxtLink>
-          <div class="mt-4 flex items-center justify-between gap-8">
-            <h4>{{ p.title }}</h4>
-            <span class="text-gray-400">{{ p.yearStart }}</span>
+          <div
+            v-for="p in currentCategoryProjects"
+            :key="p.id"
+            class="flex flex-col transition-colors"
+          >
+            <NuxtLink :to="`/projects/${p.slug}`">
+              <NuxtImg
+                :alt="p.images[0]!.alt"
+                :class="cn('aspect-video w-full bg-background text-background', p.images[0]!.fit)"
+                format="avif,webp,png,jpg"
+                :height="500"
+                lazy
+                :src="p.images[0]!.url"
+                :width="500"
+              />
+            </NuxtLink>
+            <div class="mt-4 flex items-center justify-between gap-8">
+              <h4>{{ p.title }}</h4>
+              <span class="text-gray-400">{{ p.yearStart }}</span>
+            </div>
           </div>
-        </div>
-      </section>
-      <section
-        v-if="currentCategoryProjects.length === 0" 
-        class="grid h-full grow items-center justify-center"
-      >
-        <span class="bg-primary-foreground p-8 text-subheading">Проектов пока нет</span>
-      </section>
+        </section>
+        <section
+          v-if="currentCategoryProjects.length === 0"
+          class="grid h-full grow items-center justify-center"
+        >
+          <span class="bg-primary-foreground p-8 text-subheading">Проектов пока нет</span>
+        </section>
       </template>
-     <template v-else>
-      <section v-if="status === 'pending' || asyncStatus === 'loading'" class="grid h-full grow items-center justify-center"> 
-        <LoaderCircle
-        class="animate-spin"
-        :size="60"
-        :stroke-width="1.5"
-      />
-      </section>
-      <section v-else-if="status === 'error'" class="grid h-full grow items-center justify-center"> 
-        <span class="bg-primary-foreground p-8 text-subheading">Ошибка загрузки</span>
-      </section>
-     </template>
+      <template v-else>
+        <section
+          v-if="status === 'pending' || asyncStatus === 'loading'"
+          class="grid h-full grow items-center justify-center"
+        >
+          <LoaderCircle
+            class="animate-spin"
+            :size="60"
+            :stroke-width="1.5"
+          />
+        </section>
+        <section
+          v-else-if="status === 'error'"
+          class="grid h-full grow items-center justify-center"
+        >
+          <span class="bg-primary-foreground p-8 text-subheading">Ошибка загрузки</span>
+        </section>
+      </template>
     </template>
   </main>
 </template>

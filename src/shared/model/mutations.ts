@@ -2,8 +2,9 @@ import { toast } from 'vue-sonner'
 
 import type { ImageId, ProjectId } from '~~/server/db/schema'
 import type { CreateProjectDto, UpdateImageDto, UpdateProjectDto } from '~~/server/types'
-import { useApi } from '~~/src/shared/api'
 import type { ChangePasswordDto, LoginDto, RegisterDto } from '~~/src/shared/config/validation/auth'
+
+import { useApi } from '~~/src/shared/api'
 
 export const messages = {
   user: {
@@ -46,7 +47,7 @@ export const messages = {
       success: 'Изображение обновлено',
       error: 'Не удалось обновить изображение',
     },
-  }
+  },
 }
 
 export const useCreateProjectMutation = defineMutation(() => {
@@ -213,4 +214,3 @@ export const useUpdateImageMutation = defineMutation(() => {
 
   return { updateImage, ...rest }
 })
-
