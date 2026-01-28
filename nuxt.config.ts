@@ -12,7 +12,6 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/fonts',
     'shadcn-nuxt',
-    '@tresjs/nuxt',
     '@nuxtjs/seo',
     '@pinia/nuxt',
     '@pinia/colada-nuxt',
@@ -51,15 +50,10 @@ export default defineNuxtConfig({
     transpile: ['trpc-nuxt'],
   },
 
-  future: {
-    compatibilityVersion: 4,
-  },
-
   experimental: {
     typedPages: true,
   },
 
-  compatibilityDate: '2024-07-20',
   vite: {
     plugins: [
       tailwindcss(),

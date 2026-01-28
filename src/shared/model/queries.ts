@@ -15,7 +15,7 @@ export const useGroupsQuery = defineQuery(() => {
         console.log('groups all')
         return useApi().groups.getAll.query()
       },
-      initialData: () => [],
+      placeholderData: () => []
     })
   const groups = computed(() => _groups.value || [])
   const categories = computed(() => groups.value.flatMap(g => g.categories))
