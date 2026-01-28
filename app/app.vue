@@ -2,10 +2,10 @@
 import { SpeedInsights } from '@vercel/speed-insights/nuxt'
 
 import '~~/src/shared/assets/css/main.css'
-import { CookieToastProvider } from '~~/src/shared/ui/blocks/cookie-toast'
+// import { CookieToastProvider } from '~~/src/shared/ui/blocks/cookie-toast'
 import { Toaster } from '~~/src/shared/ui/kit/sonner'
 
-const yandexMetrika = import.meta.dev
+const _yandexMetrika = import.meta.dev
   ? {}
   : {
       script: [
@@ -32,13 +32,14 @@ const yandexMetrika = import.meta.dev
       }],
     }
 
-useHead(yandexMetrika)
+// disable
+// useHead(yandexMetrika)
 </script>
 
 <template>
   <SpeedInsights />
   <Toaster rich-colors />
-  <CookieToastProvider />
+  <!-- <CookieToastProvider /> -->
 
   <NuxtLayout>
     <NuxtPage />

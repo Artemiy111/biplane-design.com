@@ -12,12 +12,13 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/fonts',
     'shadcn-nuxt',
-    // 'nuxt-yandex-metrika',
     '@tresjs/nuxt',
     '@nuxtjs/seo',
     '@pinia/nuxt',
     '@pinia/colada-nuxt',
   ],
+
+  ssr: true,
 
   imports: {
     dirs: ['@vueuse/core'],
