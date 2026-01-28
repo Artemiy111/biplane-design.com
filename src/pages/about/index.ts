@@ -1,1 +1,1 @@
-export { default as AboutPage } from './about-page.vue'
+export { default as AboutPage } from './+about.vue'

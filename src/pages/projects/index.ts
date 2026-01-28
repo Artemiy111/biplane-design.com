@@ -1,1 +1,1 @@
-export { default as ProjectsPage } from './projects-page.vue'
+export { default as ProjectsPage } from './+projects.vue'

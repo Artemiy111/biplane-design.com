@@ -1,1 +1,1 @@
-export { default as AdminAccountPage } from './admin-account-page.vue'
+export { default as AdminAccountPage } from './+admin-account.vue'
