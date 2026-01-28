@@ -1,20 +1,15 @@
 <script setup lang="ts">
+import type { DropdownMenuItemProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 
 import { reactiveOmit } from '@vueuse/core'
-import { DropdownMenuItem, useForwardProps, type DropdownMenuItemProps } from 'reka-ui'
+import { DropdownMenuItem, useForwardProps } from 'reka-ui'
 
 import { cn } from '~~/src/shared/lib/utils'
 
-const props = withDefaults(defineProps<DropdownMenuItemProps & {
-  class?: HTMLAttributes['class']
-  inset?: boolean
-  variant?: 'default' | 'destructive'
-}>(), {
-  variant: 'default',
-})
+const props = defineProps<DropdownMenuItemProps & { class?: HTMLAttributes['class'], inset?: boolean }>()
 
-const delegatedProps = reactiveOmit(props, 'inset', 'variant')
+const delegatedProps = reactiveOmit(props, 'class')
 
 const forwardedProps = useForwardProps(delegatedProps)
 </script>
@@ -22,10 +17,11 @@ const forwardedProps = useForwardProps(delegatedProps)
 <template>
   <DropdownMenuItem
     v-bind="forwardedProps"
-    :class="cn(`focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive-foreground data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/40 data-[variant=destructive]:focus:text-destructive-foreground data-[variant=destructive]:*:[svg]:!text-destructive-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`, props.class)"
-    :data-inset="inset ? '' : undefined"
-    data-slot="dropdown-menu-item"
-    :data-variant="variant"
+    :class="cn(
+      'relative flex cursor-default select-none items-center rounded-sm gap-2 px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0',
+      inset && 'pl-8',
+      props.class,
+    )"
   >
     <slot />
   </DropdownMenuItem>

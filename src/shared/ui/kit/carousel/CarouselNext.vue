@@ -2,20 +2,13 @@
 import { ArrowRight } from 'lucide-vue-next'
 
 import { cn } from '~~/src/shared/lib/utils'
-import { Button, type ButtonVariants } from '~~/src/shared/ui/kit/button'
+import { Button } from '~~/src/shared/ui/kit/button'
 
 import type { WithClassAsProps } from './interface'
 
 import { useCarousel } from './useCarousel'
 
-const props = withDefaults(defineProps<{
-  variant?: ButtonVariants['variant']
-  size?: ButtonVariants['size']
-}
-& WithClassAsProps>(), {
-  variant: 'outline',
-  size: 'icon',
-})
+const props = defineProps<WithClassAsProps>()
 
 const { orientation, canScrollNext, scrollNext } = useCarousel()
 </script>
@@ -23,20 +16,18 @@ const { orientation, canScrollNext, scrollNext } = useCarousel()
 <template>
   <Button
     :class="cn(
-      'absolute size-8 rounded-full',
+      'touch-manipulation absolute h-8 w-8 rounded-full p-0',
       orientation === 'horizontal'
-        ? 'top-1/2 -right-12 -translate-y-1/2'
+        ? '-right-12 top-1/2 -translate-y-1/2'
         : '-bottom-12 left-1/2 -translate-x-1/2 rotate-90',
       props.class,
     )"
-    data-slot="carousel-next"
     :disabled="!canScrollNext"
-    :size="size"
-    :variant="variant"
+    variant="outline"
     @click="scrollNext"
   >
     <slot>
-      <ArrowRight />
+      <ArrowRight class="h-4 w-4 text-current" />
       <span class="sr-only">Next Slide</span>
     </slot>
   </Button>

@@ -9,10 +9,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <thead
-    :class="cn('[&_tr]:border-b', props.class)"
-    data-slot="table-header"
-  >
+  <thead :class="cn('[&_tr]:border-b', props.class)">
     <slot />
   </thead>
 </template>
