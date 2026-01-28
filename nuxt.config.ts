@@ -17,7 +17,7 @@ export default defineNuxtConfig({
     '@pinia/colada-nuxt',
   ],
 
-  ssr: false,
+  ssr: true,
 
   devtools: {
     enabled: true,
@@ -26,16 +26,21 @@ export default defineNuxtConfig({
     },
   },
 
-  app: { head: { htmlAttrs: { lang: 'ru' } } },
+  app: {
+    head: {
+      htmlAttrs: { lang: 'ru' },
+      titleTemplate: '%s | Biplane-Design',
+    },
+  },
 
   css: ['./src/shared/assets/css/main.css'],
-
   // components: {
   //   dirs: [],
   // },
 
   site: {
     url: 'https://biplane-design.com',
+    name: 'Biplane-Design',
   },
 
   // ui: {
@@ -53,6 +58,8 @@ export default defineNuxtConfig({
   experimental: {
     typedPages: true,
   },
+
+  compatibilityDate: '2026-01-28',
 
   vite: {
     plugins: [
