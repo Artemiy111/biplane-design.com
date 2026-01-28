@@ -13,14 +13,11 @@ const { error, formItemId } = useFormField()
 </script>
 
 <template>
-  <!-- eslint-disable vuejs-accessibility/label-has-for -->
   <Label
     :class="cn(
-      'data-[error=true]:text-destructive-foreground',
+      error && 'text-destructive',
       props.class,
     )"
-    :data-error="!!error"
-    data-slot="form-label"
     :for="formItemId"
   >
     <slot />
