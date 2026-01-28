@@ -18,11 +18,7 @@ export default defineNuxtConfig({
     '@pinia/colada-nuxt',
   ],
 
-  ssr: true,
-
-  imports: {
-    dirs: ['@vueuse/core'],
-  },
+  ssr: false,
 
   devtools: {
     enabled: true,

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import '~~/src/shared/assets/css/main.css'
 // import { CookieToastProvider } from '~~/src/shared/ui/blocks/cookie-toast'
 import { Toaster } from '~~/src/shared/ui/kit/sonner'

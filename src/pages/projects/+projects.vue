@@ -93,7 +93,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="container flex h-full  grow flex-col">
+  <main class="container flex h-full grow flex-col">
     <div
       v-if="groups.length === 0 && status === 'pending'"
       class="flex size-full grow flex-col items-center justify-center"
@@ -114,7 +114,7 @@ onMounted(() => {
         class="relative mt-4"
       >
         <div
-          class="pointer-events-none absolute right-0 top-0 z-50 h-full w-24 border-primary-foreground bg-gradient-to-r from-transparent to-white transition"
+          class="pointer-events-none absolute right-0 top-0 z-50 h-full w-24 border-primary-foreground bg-linear-to-r from-transparent to-white transition"
           :class="[haveHiddenCategories ? 'opacity-100' : 'opacity-0']"
         />
         <Carousel

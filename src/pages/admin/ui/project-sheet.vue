@@ -56,14 +56,16 @@ function handleClose() {
   isOpen.value = false
 }
 
-async function open(data:
-  { mode: 'create'
-    initial: {
-      groupId: GroupId
-      categoryId: CategoryId }
-  }
-  |
-  { mode: 'update', initial: FormSchema }) {
+type Data = { mode: 'create'
+  initial: {
+    groupId: GroupId
+    categoryId: CategoryId }
+} | {
+  mode: 'update'
+  initial: FormSchema
+}
+
+async function open(data: Data) {
   isOpen.value = true
 
   if (data.mode === 'update') {

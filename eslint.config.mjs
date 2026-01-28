@@ -28,24 +28,24 @@ export default withNuxt(
     rules: {
       'import/order': 'off',
 
-      'perfectionist/sort-exports': [
-        'error',
-        {
-          groupKind: 'values-first',
-          type: 'alphabetical',
-        },
-      ],
+      // 'perfectionist/sort-exports': [
+      //   'error',
+      //   {
+      //     groupKind: 'values-first',
+      //     type: 'alphabetical',
+      //   },
+      // ],
       'perfectionist/sort-imports': ['error', {
         internalPattern: ['~/*', '~~/*'],
         type: 'alphabetical',
       }],
-      'perfectionist/sort-named-imports': [
-        'error',
-        {
-          groupKind: 'values-first',
-          type: 'alphabetical',
-        },
-      ],
+      // 'perfectionist/sort-named-imports': [
+      //   'error',
+      //   {
+      //     groupKind: 'values-first',
+      //     type: 'alphabetical',
+      //   },
+      // ],
       'perfectionist/sort-vue-attributes': 'off',
     },
   },

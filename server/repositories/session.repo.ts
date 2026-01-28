@@ -5,9 +5,9 @@ import { eq } from 'drizzle-orm'
 import { db } from '../db'
 import { sessions, users, type SessionDb, type SessionId, type UserDb } from '../db/schema'
 
-export type SessionValidationResult =
-  | { session: SessionDb, user: UserDb }
-  | { session: null, user: null }
+export type SessionValidationResult
+  = | { session: SessionDb, user: UserDb }
+    | { session: null, user: null }
 
 class SessionRepo {
   generateSessionToken(): string {
