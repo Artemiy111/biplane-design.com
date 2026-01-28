@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { SpeedInsights } from '@vercel/speed-insights/nuxt'
 
 import '~~/src/shared/assets/css/main.css'
 // import { CookieToastProvider } from '~~/src/shared/ui/blocks/cookie-toast'
@@ -37,7 +36,6 @@ const _yandexMetrika = import.meta.dev
 </script>
 
 <template>
-  <SpeedInsights />
   <Toaster rich-colors />
   <!-- <CookieToastProvider /> -->
 
