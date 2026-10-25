@@ -52,3 +52,10 @@ docker compose down
 rm -rf server/db/data/sqld
 docker compose up -d sqld
 ```
+
+## License
+
+Source code is licensed under the [MIT License](./LICENSE).
+
+Brand assets — the name, logo and images in this repository — are not covered
+by the license. See [NOTICE](./NOTICE) for details.
