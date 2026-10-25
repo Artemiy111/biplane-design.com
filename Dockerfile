@@ -1,16 +1,16 @@
-FROM oven/bun:alpine AS builder
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
 COPY package.json bun.lock ./
-RUN bun i --freze-lockfile 
+RUN bun i --frozen-lockfile
 
 COPY . .
 
 RUN bun run build
 
 
-FROM oven/bun:alpine
+FROM oven/bun:1-alpine
 
 WORKDIR /app
 
