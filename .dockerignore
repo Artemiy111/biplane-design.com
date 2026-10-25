@@ -1,4 +1,5 @@
 .git
+.github
 Dockerfile
 
 # Nuxt dev/build outputs
@@ -14,6 +15,11 @@ node_modules
 
 # Local database data
 server/db/data
+
+# Local env files: the image is built from CI, not from a dev machine
+.env
+.env.*
+!.env.example
 
 # Logs
 logs

@@ -53,6 +53,24 @@ rm -rf server/db/data/sqld
 docker compose up -d sqld
 ```
 
+## Прод-образ
+
+CI публикует образ на каждый push в `main`:
+`ghcr.io/artemiy111/biplane-design:latest`.
+
+```bash
+docker run -d --name biplane-design -p 3000:3000 \
+  -e BASE_URL=http://localhost:3000 \
+  -e DATABASE_URL=http://sqld:8080 \
+  -e DATABASE_AUTH_TOKEN=... \
+  -e AWS_ACCESS_KEY_ID=... \
+  -e AWS_SECRET_ACCESS_KEY=... \
+  -e ENDPOINT_URL=... \
+  -e REGION=... \
+  -e BUCKET_NAME=... \
+  ghcr.io/artemiy111/biplane-design:latest
+```
+
 ## License
 
 Source code is licensed under the [MIT License](./LICENSE).
