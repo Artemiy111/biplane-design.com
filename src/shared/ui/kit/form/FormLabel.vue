@@ -13,6 +13,7 @@ const { error, formItemId } = useFormField()
 </script>
 
 <template>
+  <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
   <Label
     :class="cn(
       error && 'text-destructive',

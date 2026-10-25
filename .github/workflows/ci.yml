@@ -1,0 +1,158 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  BASE_URL: http://localhost:3000
+  DATABASE_URL: http://127.0.0.1:8080
+  DATABASE_AUTH_TOKEN: ci-token
+  AWS_ACCESS_KEY_ID: ci-key
+  AWS_SECRET_ACCESS_KEY: ci-secret
+  ENDPOINT_URL: http://127.0.0.1:9000
+  REGION: local
+  BUCKET_NAME: local
+  NUXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  quality:
+    name: Lint & tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: ESLint
+        run: bun run lint
+
+      - name: Stylelint
+        run: bun run lint:style
+
+      - name: Unit tests
+        run: bun test
+
+      - name: Validate docker compose
+        run: docker compose config -q
+
+  commits:
+    name: Commit messages
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Commitlint
+        run: bunx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bun run build
+
+      - name: Check build output
+        run: test -f .output/server/index.mjs
+
+  smoke:
+    name: SSR smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Start dev server
+        run: |
+          bun run dev --host 127.0.0.1 > /tmp/nuxt-dev.log 2>&1 &
+          echo $! > /tmp/nuxt-dev.pid
+
+      - name: Wait for the server
+        run: |
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:3000/about > /dev/null 2>&1; then
+              echo "Server is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Nuxt dev server did not become ready"
+          cat /tmp/nuxt-dev.log
+          exit 1
+
+      - name: Check admin auth page renders
+        run: |
+          status=$(curl -sS -o /tmp/admin-auth.html -w '%{http_code}' http://127.0.0.1:3000/admin/auth)
+          echo "GET /admin/auth -> $status"
+          test "$status" = "200"
+          grep -q "Вход" /tmp/admin-auth.html
+
+      - name: Show server logs on failure
+        if: failure()
+        run: cat /tmp/nuxt-dev.log
