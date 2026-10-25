@@ -42,6 +42,7 @@ function onKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
+  <!-- eslint-disable vuejs-accessibility/no-static-element-interactions -->
   <div
     aria-roledescription="carousel"
     :class="cn('relative', props.class)"
@@ -59,4 +60,5 @@ function onKeyDown(event: KeyboardEvent) {
       :scroll-prev
     />
   </div>
+  <!-- eslint-enable vuejs-accessibility/no-static-element-interactions -->
 </template>
