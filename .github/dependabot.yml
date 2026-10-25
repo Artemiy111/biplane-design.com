@@ -1,0 +1,70 @@
+version: 2
+
+updates:
+  - package-ecosystem: bun
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Moscow
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      nuxt:
+        patterns:
+          - nuxt
+          - nuxt-*
+          - "@nuxt/*"
+          - "@nuxtjs/*"
+          - shadcn-nuxt
+          - trpc-nuxt
+        update-types:
+          - minor
+          - patch
+      vue:
+        patterns:
+          - vue
+          - vue-*
+          - "@vue/*"
+          - "@vueuse/*"
+          - "@pinia/*"
+          - reka-ui
+        update-types:
+          - minor
+          - patch
+      production-dependencies:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      development-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Moscow
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: docker-compose
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Moscow
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      docker-images:
+        patterns:
+          - "*"
