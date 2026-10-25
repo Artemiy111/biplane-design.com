@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import * as z from 'zod'
 
 const formatter = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short' })
 

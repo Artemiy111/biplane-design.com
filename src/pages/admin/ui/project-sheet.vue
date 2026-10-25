@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
-import { z } from 'zod'
+import * as z from 'zod'
 
 import type { CategoryId, GroupId, ProjectId } from '~~/server/db/schema'
 import type { CreateProjectDto, GroupDto, UpdateProjectDto } from '~~/server/types'
