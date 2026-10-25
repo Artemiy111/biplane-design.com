@@ -13,6 +13,7 @@ const delegatedProps = reactiveOmit(props, 'class')
 </script>
 
 <template>
+  <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
   <Label
     v-bind="delegatedProps"
     :class="
