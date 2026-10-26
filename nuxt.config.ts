@@ -1,13 +1,8 @@
 import tailwindcss from '@tailwindcss/vite'
 // https://nuxt.com/docs/api/configuration/nuxt-config
-// import oxlintPlugin from 'vite-plugin-oxlint'
-// import eslintPlugin from 'vite-plugin-eslint'
-
-import { env } from './server/utils/env'
 
 export default defineNuxtConfig({
   modules: [
-    // '@nuxt/ui',
     '@nuxt/image',
     '@nuxt/eslint',
     '@nuxt/fonts',
@@ -34,9 +29,6 @@ export default defineNuxtConfig({
   },
 
   css: ['./src/shared/assets/css/main.css'],
-  // components: {
-  //   dirs: [],
-  // },
 
   site: {
     url: 'https://biplane-design.com',
@@ -44,12 +36,10 @@ export default defineNuxtConfig({
     defaultLocale: 'ru',
   },
 
-  // ui: {
-  //   colorMode: false,
-  // },
-
+  // Build-time default for the address the server uses to call its own
+  // `/api/trpc`. Not validated at build: only runtime env is.
   runtimeConfig: {
-    BASE_URL: env.BASE_URL,
+    BASE_URL: process.env.BASE_URL ?? 'http://localhost:3000',
   },
 
   build: {
@@ -83,8 +73,6 @@ export default defineNuxtConfig({
 
   image: {
     format: ['avif', 'webp', 'png', 'jpg'],
-    ipx: {
-    },
   },
 
   robots: {
