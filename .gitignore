@@ -25,3 +25,5 @@ logs
 
 # My
 /server/db/data
+# Vercel build output
+.vercel
