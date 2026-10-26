@@ -13,11 +13,17 @@
 - Backend
   - `tRPC`
   - БД `libsql`
-  - Clean architecture
   - `drizzle` + `s3`
   - Сессии на куках
   - Регистрация администраторов сайта и управление аккаунтом
   - SEO: robost.txt, sitemap.yml, open-graph
+
+## Архитектура бэкенда
+
+- `server/db` — схема Drizzle и подключение к libsql.
+- `server/repositories` — по одному репозиторию на сущность: запросы к БД/S3
+  и готовые к отдаче DTO в одном месте.
+- `server/api/trpc` — tRPC-роутер: валидация входа и вызов репозитория.
 
 ## Локальная разработка
 

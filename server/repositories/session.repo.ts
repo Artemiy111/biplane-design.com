@@ -35,10 +35,14 @@ class SessionRepo {
       .from(sessions)
       .innerJoin(users, eq(sessions.userId, users.id))
       .where(eq(sessions.id, sessionId))
-    if (result.length < 1) {
+      .limit(1)
+
+    const found = result[0]
+    if (!found) {
       return { session: null, user: null }
     }
-    const { user, session } = result[0]
+
+    const { user, session } = found
     if (Date.now() >= session.expiresAt.getTime()) {
       await this.deleteSession(session.id)
       return { session: null, user: null }

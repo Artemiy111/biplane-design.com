@@ -1,4 +1,4 @@
-import { asSitemapUrl, defineSitemapEventHandler } from '#imports'
+import { asSitemapUrl, defineSitemapEventHandler } from '#sitemap/server'
 
 import { projectRepo } from '~~/server/repositories'
 
@@ -6,11 +6,10 @@ export default defineSitemapEventHandler(async () => {
   const projects = await projectRepo.getAll()
   const projectsPage = asSitemapUrl({
     loc: 'https://biplane-design.com/projects',
-    images: projects.filter(p => p.images.length).map(p => ({
-      loc: p.images[0].url,
-      title: p.images[0].alt,
-      caption: p.images[0].alt,
-    })),
+    images: projects.flatMap((p) => {
+      const image = p.images[0]
+      return image ? [{ loc: image.url, title: image.alt, caption: image.alt }] : []
+    }),
   })
   const urls = projects.map(p => asSitemapUrl({
     loc: `https://biplane-design.com/projects/${p.slug}`,

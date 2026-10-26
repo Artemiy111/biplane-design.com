@@ -30,8 +30,6 @@ export const groups = sqliteTable('groups', {
 
 export type GroupId = GroupDb['id']
 export type GroupDb = typeof groups.$inferSelect
-export type GroupDbCreate = Omit<GroupDb, 'id' | 'order'>
-export type GroupDbUpdate = Omit<GroupDb, 'id'>
 
 export const groupsRelations = relations(groups, ({ many }) => ({
   categories: many(categories),
@@ -53,8 +51,6 @@ export const categories = sqliteTable(
 export type CategoryId = CategoryDb['id']
 export type CategoryLayout = CategoryDb['layout']
 export type CategoryDb = typeof categories.$inferSelect
-export type CategoryDbCreate = Omit<CategoryDb, 'id' | 'order'>
-export type CategoryDbUpdate = Omit<CategoryDb, 'id' | 'groupId'>
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   group: one(groups, {
@@ -86,8 +82,6 @@ export const projects = sqliteTable(
 export type ProjectId = ProjectDb['id']
 export type ProjectStatus = ProjectDb['status']
 export type ProjectDb = typeof projects.$inferSelect
-export type ProjectDbCreate = typeof projects.$inferInsert
-export type ProjectDbUpdate = Omit<ProjectDb, 'id'>
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   category: one(categories, {
@@ -113,8 +107,6 @@ export const images = sqliteTable(
 export type ImageId = ImageDb['id']
 export type ImageFit = ImageDb['fit']
 export type ImageDb = typeof images.$inferSelect
-export type ImageDbCreate = Omit<typeof images.$inferInsert, 'order'>
-export type ImageDbUpdate = Omit<ImageDb, 'id' | 'projectId'>
 
 export const imageRelations = relations(images, ({ one }) => ({
   project: one(projects, {
@@ -123,7 +115,3 @@ export const imageRelations = relations(images, ({ one }) => ({
     relationName: 'project',
   }),
 }))
-
-export type GroupDbDeep = GroupDb & { categories: CategoryDbDeep[] }
-export type CategoryDbDeep = CategoryDb & { group: GroupDb, projects: ProjectDbDeep[] }
-export type ProjectDbDeep = ProjectDb & { images: ImageDb[] }

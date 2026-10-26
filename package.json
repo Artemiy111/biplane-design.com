@@ -12,14 +12,14 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "typecheck": "nuxt typecheck",
     "lint:commit": "commitlint --last",
     "lint:style": "stylelint '**/*.{css,vue}'",
     "lint:style:fix": "stylelint '**/*.{css,vue}' --fix",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:drop": "drizzle-kit drop",
-    "db:seed": "bun ./server/db/seed.ts"
+    "db:drop": "drizzle-kit drop"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1156.0",
@@ -76,6 +76,7 @@
     "stylelint-config-recommended-vue": "^2.0.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.72.0"
+    "typescript-eslint": "^8.72.0",
+    "vue-tsc": "^3.3.13"
   }
 }

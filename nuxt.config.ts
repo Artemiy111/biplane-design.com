@@ -28,7 +28,7 @@ export default defineNuxtConfig({
     },
   },
 
-  css: ['./src/shared/assets/css/main.css'],
+  css: ['~~/src/shared/assets/css/main.css'],
 
   site: {
     url: 'https://biplane-design.com',

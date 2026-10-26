@@ -6,7 +6,6 @@ import { FolderUp } from '@lucide/vue'
 import type { ImageDto } from '~~/server/types'
 
 import { cn } from '~~/src/shared/lib/utils'
-import { Input } from '~~/src/shared/ui/kit/input'
 
 const props = defineProps<{
   multiple?: boolean
@@ -35,15 +34,15 @@ function onDragleave(_e: DragEvent) {
 }
 
 function onDrop(e: DragEvent) {
-  if (!inputRef.value?.input)
+  if (!inputRef.value)
     return
-  inputRef.value.input.files = e.dataTransfer?.files || null
+  inputRef.value.files = e.dataTransfer?.files || null
   onChange()
   isDragging.value = false
 }
 
 function onChange() {
-  const inputFiles = [...inputRef.value?.input?.files || []]
+  const inputFiles = [...inputRef.value?.files ?? []]
   const oldFiles = new Set(files.value)
 
   const newFiles = inputFiles.filter(file => !oldFiles.has(file))
@@ -90,7 +89,7 @@ defineExpose({
         />
         <span>Загрузить изображения</span>
 
-        <Input
+        <input
           :id="id"
           ref="inputRef"
           accept=".avif,.webp,.png,.jpg,.jpeg"
@@ -98,6 +97,6 @@ defineExpose({
           :multiple="props.multiple"
           type="file"
           @change="onChange"
-        />
+        >
       </div></template></label>
 </template>

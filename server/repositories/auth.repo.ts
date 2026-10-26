@@ -3,7 +3,7 @@ import type { H3Event } from 'h3'
 import { TRPCError } from '@trpc/server'
 import { hash, verify } from 'argon2'
 
-import type { LoginDto } from '~~/src/shared/config/validation/auth'
+import type { LoginDto, RegisterDto } from '~~/src/shared/config/validation/auth'
 
 import { sessionRepo } from './session.repo'
 import { userRepo } from './user.repo'
@@ -27,7 +27,7 @@ export class AuthRepo {
     })
   }
 
-  async register(dto: LoginDto, event: H3Event) {
+  async register(dto: RegisterDto, event: H3Event) {
     const passwordHash = await hash(dto.password)
     const createdUser = await userRepo.create({
       username: dto.username,

@@ -45,6 +45,16 @@ updates:
           - minor
           - patch
 
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Moscow
+    commit-message:
+      prefix: "chore(deps)"
+
   - package-ecosystem: docker
     directory: "/"
     schedule:
