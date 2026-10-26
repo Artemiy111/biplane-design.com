@@ -42,10 +42,13 @@ function onKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <!-- eslint-disable vuejs-accessibility/no-static-element-interactions -->
+  <!-- Keyboard navigation on a region is intentional: the carousel owns focus
+       and handles arrow keys, which the a11y rule cannot see. -->
+  <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -->
   <div
     aria-roledescription="carousel"
     :class="cn('relative', props.class)"
+    data-slot="carousel"
     role="region"
     tabindex="0"
     @keydown="onKeyDown"
@@ -60,5 +63,4 @@ function onKeyDown(event: KeyboardEvent) {
       :scroll-prev
     />
   </div>
-  <!-- eslint-enable vuejs-accessibility/no-static-element-interactions -->
 </template>

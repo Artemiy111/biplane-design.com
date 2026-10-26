@@ -26,7 +26,9 @@ const props = withDefaults(defineProps<Props>(), {
     :as="as"
     :as-child="asChild"
     :class="cn(buttonVariants({ variant, size }), props.class)"
+    :data-size="size"
     data-slot="button"
+    :data-variant="variant"
   >
     <slot />
   </Primitive>

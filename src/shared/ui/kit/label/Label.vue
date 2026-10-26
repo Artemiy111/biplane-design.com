@@ -13,15 +13,17 @@ const delegatedProps = reactiveOmit(props, 'class')
 </script>
 
 <template>
+  <!-- The control is rendered through the slot, so the rule cannot see it. -->
   <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
   <Label
     v-bind="delegatedProps"
     :class="
       cn(
-        'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+        'flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50',
         props.class,
       )
     "
+    data-slot="label"
   >
     <slot />
   </Label>
