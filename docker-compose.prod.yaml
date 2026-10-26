@@ -1,0 +1,50 @@
+# Production-like stack: builds the same image CI publishes to GHCR and runs
+# it next to libsql, without the dev bind-mount and hot reload.
+#
+#   docker compose -f docker-compose.prod.yaml up -d --build
+#
+# The image is the build artifact that ships, so this is the closest local
+# check that "what runs in prod" actually works.
+name: biplane-design-prod
+
+services:
+  db-init:
+    extends:
+      file: docker-compose.yaml
+      service: db-init
+
+  sqld:
+    extends:
+      file: docker-compose.yaml
+      service: sqld
+
+  web:
+    build:
+      context: .
+    image: biplane-design:prod
+    init: true
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      # Internal address: SSR tRPC calls `${BASE_URL}/api/trpc` on itself.
+      BASE_URL: http://localhost:3000
+      DATABASE_URL: http://sqld:8080
+      DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-local-dev-token}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-local}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-local}
+      ENDPOINT_URL: ${ENDPOINT_URL:-http://127.0.0.1:9000}
+      REGION: ${REGION:-local}
+      BUCKET_NAME: ${BUCKET_NAME:-local}
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      sqld:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/robots.txt"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
