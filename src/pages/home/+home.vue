@@ -5,7 +5,7 @@ import SplitType from 'split-type'
 import { cn } from '~~/src/shared/lib/utils'
 import { buttonVariants } from '~~/src/shared/ui/kit/button'
 
-const title = 'Biplane-Design | Главная'
+const title = 'Главная'
 const description = 'Студия дизайна'
 useSeoMeta({ title, ogTitle: title, description, ogDescription: description })
 

@@ -11,18 +11,9 @@ WORKDIR /app
 # `nuxt-og-image`), which crash `nuxt build` in this image.
 RUN apk add --no-cache nodejs
 
-# `nuxt.config.ts` parses the whole env schema at build time, so the build
-# needs these values even though the placeholders below are never used.
-# The real runtime values are supplied by the deployment (see README).
-ENV BASE_URL=http://localhost:3000 \
-    DATABASE_URL=http://127.0.0.1:8080 \
-    DATABASE_AUTH_TOKEN=build \
-    AWS_ACCESS_KEY_ID=build \
-    AWS_SECRET_ACCESS_KEY=build \
-    ENDPOINT_URL=http://127.0.0.1:9000 \
-    REGION=build \
-    BUCKET_NAME=build \
-    NUXT_TELEMETRY_DISABLED=1
+# No runtime env is needed here: `nuxt.config.ts` no longer parses the env
+# schema, so builds do not depend on database or S3 credentials.
+ENV NUXT_TELEMETRY_DISABLED=1
 
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
