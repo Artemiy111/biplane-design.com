@@ -4,7 +4,7 @@ services:
   # One-time helper that seeds the libsql data directory from
   # server/db/data/seed/biplane-design.db on the first run.
   db-init:
-    image: alpine:3.22
+    image: alpine:3.24
     restart: "no"
     volumes:
       - ./server/db/data:/data
