@@ -2,7 +2,6 @@ import { hash } from 'argon2'
 import { eq } from 'drizzle-orm'
 
 import type { CreateUserDb, UserDb } from '../db/schema'
-import type { UserId } from '../types'
 
 import { db } from '../db'
 import { users } from '../db/schema'
@@ -13,15 +12,19 @@ class UserRepo {
   }
 
   async create(create: CreateUserDb): Promise<UserDb> {
-    return (await db.insert(users).values(create).returning())[0]
+    const [user] = await db.insert(users).values(create).returning()
+    if (!user) throw new Error('Could not create user')
+    return user
   }
 
-  async changePassword(userId: UserId, newPassword: string): Promise<UserDb> {
+  async changePassword(userId: UserDb['id'], newPassword: string): Promise<UserDb> {
     const passwordHash = await hash(newPassword)
 
-    return (await db.update(users).set({
+    const [user] = await db.update(users).set({
       passwordHash,
-    }).where(eq(users.id, userId)).returning())[0]
+    }).where(eq(users.id, userId)).returning()
+    if (!user) throw new Error(`Could not find user with id '${userId}'`)
+    return user
   }
 }
 

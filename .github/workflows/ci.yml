@@ -48,6 +48,9 @@ jobs:
       - name: ESLint
         run: bun run lint
 
+      - name: Typecheck
+        run: bun run typecheck
+
       - name: Stylelint
         run: bun run lint:style
 
