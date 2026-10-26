@@ -6,6 +6,11 @@ FROM oven/bun:1.4.4-alpine AS builder
 
 WORKDIR /app
 
+# The build runs on Node, not Bun: modern Nuxt modules use Node APIs that
+# Bun does not implement yet (`module.findPackageJSON`, for instance in
+# `nuxt-og-image`), which crash `nuxt build` in this image.
+RUN apk add --no-cache nodejs
+
 # `nuxt.config.ts` parses the whole env schema at build time, so the build
 # needs these values even though the placeholders below are never used.
 # The real runtime values are supplied by the deployment (see README).
@@ -28,7 +33,7 @@ COPY . .
 # could resolve statically, which leaves some packages broken (e.g. `ofetch`
 # inside `ipx` has no `dist/index.mjs`). Dropping it makes every import
 # resolve from the full `node_modules` copied next to `.output` below.
-RUN bun run build \
+RUN node ./node_modules/nuxt/bin/nuxt.mjs build \
  && rm -rf .output/server/node_modules
 
 # ---------- runtime ----------
