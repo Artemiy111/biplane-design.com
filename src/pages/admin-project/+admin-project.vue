@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GripVertical, Trash2 } from 'lucide-vue-next'
+import { GripVertical, Trash2 } from '@lucide/vue'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 
 import type { ImageFit } from '~~/server/db/schema'

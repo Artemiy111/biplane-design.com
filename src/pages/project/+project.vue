@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { LoaderCircle } from '@lucide/vue'
 import { useBreakpoints, useElementSize, watchOnce } from '@vueuse/core'
-import { LoaderCircle } from 'lucide-vue-next'
 
 import { breakpoints } from '~~/src/shared/config/breakpoints'
 import { cn } from '~~/src/shared/lib/utils'

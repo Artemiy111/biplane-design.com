@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue'
 
-import { FolderUp } from 'lucide-vue-next'
+import { FolderUp } from '@lucide/vue'
 
 import type { ImageDto } from '~~/server/types'
 

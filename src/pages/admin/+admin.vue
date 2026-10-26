@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { GripVertical, LoaderCircle, Pen, Trash2 } from '@lucide/vue'
 import { useBreakpoints, watchImmediate, watchOnce } from '@vueuse/core'
-import { GripVertical, LoaderCircle, Pen, Trash2 } from 'lucide-vue-next'
 import { vDraggable, type SortableEvent } from 'vue-draggable-plus'
 
 import type { GroupId } from '~~/server/db/schema'

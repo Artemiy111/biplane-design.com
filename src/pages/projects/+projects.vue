@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { LocationQuery } from 'vue-router'
 
+import { LoaderCircle } from '@lucide/vue'
 import { watchImmediate } from '@vueuse/core'
-import { LoaderCircle } from 'lucide-vue-next'
 import * as z from 'zod'
 
 import type { CategoryDto, GroupDto } from '~~/server/types'
