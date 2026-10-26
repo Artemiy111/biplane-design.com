@@ -41,6 +41,7 @@ export default defineNuxtConfig({
   site: {
     url: 'https://biplane-design.com',
     name: 'Biplane-Design',
+    defaultLocale: 'ru',
   },
 
   // ui: {
