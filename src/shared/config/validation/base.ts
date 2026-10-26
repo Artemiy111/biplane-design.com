@@ -5,6 +5,7 @@ const formatter = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short' })
 export const validationErrors = {
   required: 'Это обязательное поле',
   email: 'Неверный формат электронной почты',
+  invalidUrl: 'Неверный формат ссылки',
   minLength: (min: number) => `Длина должна быть не менее ${min}`,
   maxLength: (max: number) => `Длина должна быть не более ${max}`,
   pattern: 'Значение не соответствует шаблону',
