@@ -62,20 +62,20 @@
     "@commitlint/config-conventional": "^21.2.4",
     "@nuxt/eslint": "^1.17.0",
     "@nuxt/fonts": "^1.2.0",
-    "@nuxt/image": "^2.2.0",
+    "@nuxt/image": "^2.2.1",
     "@types/bun": "^1.4.4",
     "drizzle-kit": "^0.31.11",
-    "eslint": "^10.13.0",
-    "eslint-plugin-oxlint": "^1.89.0",
+    "eslint": "^10.14.0",
+    "eslint-plugin-oxlint": "^1.90.0",
     "eslint-plugin-perfectionist": "^5.13.0",
     "eslint-plugin-vuejs-accessibility": "^2.6.3",
-    "oxlint": "^1.89.0",
-    "shadcn-nuxt": "^2.8.2",
+    "oxlint": "^1.91.0",
+    "shadcn-nuxt": "^2.9.0",
     "stylelint": "^17.16.0",
     "stylelint-config-clean-order": "^10.0.0",
     "stylelint-config-recommended-vue": "^2.0.0",
-    "tailwindcss": "^4.3.3",
+    "tailwindcss": "^4.3.4",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.72.0"
+    "typescript-eslint": "^8.72.1"
   }
 }
