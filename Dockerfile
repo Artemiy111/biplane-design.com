@@ -2,7 +2,7 @@
 # check=skip=SecretsUsedInArgOrEnv
 
 # ---------- build ----------
-FROM oven/bun:1.4.4-alpine AS builder
+FROM oven/bun:1.4.5-alpine AS builder
 
 WORKDIR /app
 
@@ -28,7 +28,7 @@ RUN node ./node_modules/nuxt/bin/nuxt.mjs build \
  && rm -rf .output/server/node_modules
 
 # ---------- runtime ----------
-FROM oven/bun:1.4.4-alpine
+FROM oven/bun:1.4.5-alpine
 
 WORKDIR /app
 
